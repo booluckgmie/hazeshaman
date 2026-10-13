@@ -2,7 +2,7 @@
 
 Ready-to-post copy for **Hazeshaman**. Replace `{URL}` with your deployed link and refresh the
 snapshot numbers before posting (they come from `docs/howto/snapshot.json`, taken
-**13 Oct 2026, 9 PM MYT** from the hourly DOE API). Regenerate the images with `npm run guide`.
+**13 Oct 2026, 11 PM MYT** from the hourly DOE API). Regenerate the images with `npm run guide`.
 
 Images (all in `docs/howto/`):
 
@@ -11,7 +11,7 @@ Images (all in `docs/howto/`):
 | Link preview / X / LinkedIn single image | `social-card.png` (1200x630) |
 | Instagram / Facebook / Threads square | `social-square.png` (1080x1080) |
 | LinkedIn **document carousel** (upload as a document) | `hazeshaman-guide.pdf` (cover + 7 steps) |
-| Individual how-to images | `01-tour.png` ... `07-mobile.png` |
+| Individual how-to images | `01-tour.png` ... `09-mobile.png` |
 
 **Always keep the disclaimer:** these are model estimates, not an official decision.
 
@@ -31,7 +31,7 @@ Images (all in `docs/howto/`):
 > ⏰ the best time to announce - it depends on how costly a late call is
 > 🏫 the schools, students and teachers affected (MOE data via OpenDOSM)
 >
-> Snapshot, 13 Oct 9 PM: 26 of 68 stations above API 100. 12 flagged for tomorrow, about 1,237 schools expected to be affected (probability-weighted).
+> Snapshot, 13 Oct 11 PM: 27 of 68 stations above API 100. 13 flagged for tomorrow, in 5 states with about 3,200 schools - roughly 2,600 schools likely affected (closure chance × schools in each state).
 >
 > Model estimates - not an official decision. Swipe for a 7-step guide. Link in the comments 👇
 >
@@ -44,8 +44,8 @@ First comment: `Try it: {URL}  ·  How to use: {URL}/guide`
 ## X / Twitter (thread, each post under 280 characters)
 
 1. `Haze doesn't wait for the 5:45 PM school announcement. 🌫️ Public Malaysian API data shows only the last 24 h - no archive. So I rebuilt it - plus a live dashboard: Hazeshaman. {URL} [social-card.png]`
-2. `What it shows: ▸ the air now by state ▸ chance schools must close tomorrow (API>180, or >150 for 3 days) ▸ best time to announce ▸ schools, students and teachers affected [05-announcement-time.png]`
-3. `13 Oct, 9 PM: 26/68 stations above API 100; 12 flagged for tomorrow ≈ 1,237 schools expected affected. Model estimates only - confirm with official APIMS/KPM.`
+2. `What it shows: ▸ the air now by state ▸ chance schools must close tomorrow (API>180, or >150 for 3 days) ▸ best time to announce ▸ schools, students and teachers affected [06-announcement-time.png]`
+3. `13 Oct, 11 PM: 27/68 stations above API 100; 13 flagged for tomorrow, in 5 states with ~3,200 schools (≈2,600 likely affected). Model estimates only - confirm with official APIMS/KPM.`
 4. `7-step guide: {URL}/guide  ·  Built on DOE hourly API + MOE/OpenDOSM school data. #Malaysia #Haze #OpenData`
 
 ---
@@ -62,7 +62,7 @@ Malaysia's public air-quality data only keeps the last 24 hours, so I rebuilt th
 ✅ best time to announce
 ✅ schools, students and teachers affected
 
-13 Oct, 9 PM: 26 of 68 stations above API 100 • 12 flagged for tomorrow.
+13 Oct, 11 PM: 27 of 68 stations above API 100 • 13 flagged for tomorrow.
 Model estimate only - always follow official APIMS, MetMalaysia and KPM announcements.
 
 Link in bio / comments 👆
@@ -82,7 +82,7 @@ Hazeshaman memaparkan:
 ⏰ masa terbaik untuk membuat pengumuman
 🏫 bilangan sekolah, murid dan guru yang terjejas (data KPM melalui OpenDOSM)
 
-13 Okt, 9 malam: 26 daripada 68 stesen melebihi API 100 • 12 stesen berisiko untuk esok.
+13 Okt, 11 malam: 27 daripada 68 stesen melebihi API 100 • 13 stesen berisiko untuk esok.
 Ini anggaran model, bukan keputusan rasmi - rujuk sentiasa APIMS, MetMalaysia dan KPM.
 
 Pautan: {URL}
@@ -99,14 +99,16 @@ Pautan: {URL}
 
 | Image | Alt text |
 |---|---|
-| `social-card.png` / `social-square.png` | Haze dashboard card: Malaysia haze is "Unhealthy", highest API 175 at Pasir Gudang, 26 of 68 stations above 100, 12 flagged for closure risk tomorrow, about 1,237 schools expected affected. |
-| `01-tour.png` | Numbered tour of the Hazeshaman dashboard: live status badge, haze sky, state tiles, Live/What-if switch, station picker and national outlook. |
-| `02-haze-at-a-glance.png` | The haze panel: band name, four headline numbers, a colour scale of Malaysian API bands with markers, and one API tile per state. |
-| `03-national-outlook.png` | Table of states ranked by tomorrow's closure risk with schools at risk and expected schools affected. |
-| `04-station-detail.png` | One station: recommendation to close, probability ring, KPM trigger probabilities, schools/students/teachers impacted and best/base/worst scenarios. |
-| `05-announcement-time.png` | Bar chart of announcement times; the cheapest hour moves from 3 PM to 9 PM when the cost of delay is set to zero. |
-| `06-what-if.png` | What-if mode with sliders for hourly readings and a recomputed recommendation. |
-| `07-mobile.png` | Three phone screens: haze panel, national outlook and station recommendation. |
+| `social-card.png` / `social-square.png` | Haze dashboard card: Malaysia haze is "Unhealthy", highest API 175 at Pasir Gudang, 27 of 68 stations above 100, 13 flagged for closure risk tomorrow, about 2,600 schools likely affected. |
+| `01-tour.png` | Numbered tour of the Hazeshaman dashboard: live status badge, haze sky, state tiles, Live/What-if switch, state filter and national outlook. |
+| `02-state-filter.png` | The state filter: a dropdown on desktop, and on a phone a round button at the bottom-right that opens a bottom sheet listing Malaysia and each state with its highest API and status. |
+| `03-haze-at-a-glance.png` | The haze panel: band name, four headline numbers, a colour scale of Malaysian API bands with markers, and one API tile per state. |
+| `04-national-outlook.png` | Table of states ranked by tomorrow's closure risk, with the number of schools in each state and the schools likely affected. |
+| `05-station-detail.png` | One state and station: recommendation to close, probability ring, KPM trigger probabilities, state-level schools, students and teachers impacted, and best/base/worst scenarios. |
+| `06-data-check.png` | Data check panel: stations flagged, DOE against Open-Meteo on the same AQI scale with the expected range, A/B/C reliability grades and a second-opinion closure chance. |
+| `07-announcement-time.png` | Bar chart of announcement times; the cheapest hour moves from 3 PM to 9 PM when the cost of delay is set to zero. |
+| `08-what-if.png` | What-if mode with sliders for hourly readings and a recomputed recommendation. |
+| `09-mobile.png` | Three phone screens: haze panel, national outlook and station recommendation. |
 
 ## Posting checklist
 

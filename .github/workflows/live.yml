@@ -24,11 +24,15 @@ jobs:
       - run: pip install numpy pandas requests
       - name: Fetch DOE hourly API, roll the 120 h buffer and append to the permanent archive
         run: python -m hazeshaman.live --out docs/live.json --history-dir data/history
+      - name: Cross-check against Open-Meteo (independent source) and flag doubtful reports
+        continue-on-error: true            # a flaky second source must never block the DOE feed
+        run: python -m hazeshaman.crosscheck update
       - name: Commit if changed
         run: |
           git config user.name "hazeshaman-bot"
           git config user.email "actions@users.noreply.github.com"
           git add docs/live.json data/history
+          [ -f docs/xcheck.json ] && git add docs/xcheck.json || true     # absent if the cross-check step could not run
           if git diff --cached --quiet; then echo "no change"; exit 0; fi
           git commit -m "chore(live): APIMS hourly buffer $(date -u +%Y-%m-%dT%H:%MZ)"
           git pull --rebase --autostash

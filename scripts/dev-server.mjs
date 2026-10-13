@@ -8,7 +8,7 @@ import { extname, join, normalize } from 'node:path';
 const require = createRequire(import.meta.url);
 const root = new URL('..', import.meta.url).pathname;
 const cfg = JSON.parse(readFileSync(join(root, 'vercel.json'), 'utf8'));
-const handler = require('../api/live.js');
+const handlers = { '/api/live': require('../api/live.js'), '/api/xcheck': require('../api/xcheck.js') };
 const port = Number(process.argv[2] || process.env.PORT || 3000);
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml', '.css': 'text/css', '.md': 'text/plain' };
 
@@ -18,7 +18,7 @@ const withHeaders = (res, pathname) => rules.forEach((r) => r.re.test(pathname) 
 http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://x');
   withHeaders(res, url.pathname);
-  if (url.pathname === '/api/live') return handler(req, res);
+  if (handlers[url.pathname]) return handlers[url.pathname](req, res);
   let p = normalize(join(root, 'docs', url.pathname === '/' ? 'index.html' : url.pathname));
   if (!p.startsWith(join(root, 'docs'))) { res.statusCode = 403; return res.end(); }
   if (existsSync(p) && statSync(p).isDirectory()) p = join(p, 'index.html');

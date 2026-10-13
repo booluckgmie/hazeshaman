@@ -21,18 +21,26 @@ def day_flags(cube):
     return dm, np.nan_to_num(dm, nan=0.0) > 150
 
 
-def build(cube, days, H):
+def _streak(over):
+    S, D = over.shape
+    out, run = np.zeros((S, D)), np.zeros(S)
+    for d in range(D):
+        out[:, d] = np.minimum(run, 3)
+        run = np.where(over[:, d], run + 1, 0)
+    return out
+
+
+def build(cube, days, H, truth=None):
     """Return X[N,8], extras dict, targets dict, index arrays (s, d) for rows with full data.
 
     streak = consecutive prior days (up to 3) with daily mean > 150.
     """
     S, D, _ = cube.shape
     dm, over = day_flags(cube)
-    streak = np.zeros((S, D))
-    run = np.zeros(S)
-    for d in range(D):
-        streak[:, d] = np.minimum(run, 3)
-        run = np.where(over[:, d], run + 1, 0)
+    streak = _streak(over)
+    tc = cube if truth is None else truth                       # truth cube = what really happened (DOE); features may come from another source
+    tdm, tover = day_flags(tc)
+    tstreak = _streak(tover)
     L = np.log(np.maximum(cube, 1))
     now, am, noon = L[:, :, H], L[:, :, 8], L[:, :, 12]
     d3 = now - L[:, :, H - 3]
@@ -44,13 +52,13 @@ def build(cube, days, H):
     cos = np.broadcast_to(np.cos(ang), (S, D))
     X = np.stack([now, am, noon, d3, prev, streak, sin, cos], axis=2)
     nxt7 = np.full((S, D), np.nan)
-    nxt7[:, :-1] = cube[:, 1:, 7]
+    nxt7[:, :-1] = tc[:, 1:, 7]
     nxtmax = np.full((S, D), np.nan)
     with np.errstate(all="ignore"), warnings.catch_warnings():
         warnings.simplefilter("ignore", RuntimeWarning)
-        nxtmax[:, :-1] = np.where(np.sum(~np.isnan(cube[:, 1:, 6:15]), axis=2) >= 7, np.nanmax(cube[:, 1:, 6:15], axis=2), np.nan)
+        nxtmax[:, :-1] = np.where(np.sum(~np.isnan(tc[:, 1:, 6:15]), axis=2) >= 7, np.nanmax(tc[:, 1:, 6:15], axis=2), np.nan)
     nxtmean = np.full((S, D), np.nan)
-    nxtmean[:, :-1] = dm[:, 1:]
+    nxtmean[:, :-1] = tdm[:, 1:]
     avg3 = np.exp((now + am + noon) / 3)
     ok = ~(np.isnan(X).any(axis=2) | np.isnan(nxt7) | np.isnan(nxtmax) | np.isnan(nxtmean))
     s_idx, d_idx = np.where(ok)
@@ -59,7 +67,9 @@ def build(cube, days, H):
         "ymean150": (nxtmean > 150)[ok], "l7": np.log(np.maximum(nxt7, 1))[ok],
     }
     days_over = streak[ok] + (avg3[ok] > 150)
-    return X[ok], dict(days_over=days_over), T, s_idx, d_idx
+    tavg3 = np.exp((np.log(np.maximum(tc[:, :, H], 1)) + np.log(np.maximum(tc[:, :, 8], 1)) + np.log(np.maximum(tc[:, :, 12], 1))) / 3)
+    days_over_true = tstreak[ok] + (tavg3[ok] > 150)
+    return X[ok], dict(days_over=days_over, days_over_true=days_over_true), T, s_idx, d_idx
 
 
 def close_prob(p180, pmean150, days_over):
@@ -69,4 +79,5 @@ def close_prob(p180, pmean150, days_over):
 
 
 def close_truth(T, extras):
-    return T["y180"] | ((extras["days_over"] >= 2) & T["ymean150"])
+    """What actually happened (uses the DOE-based streak even when the model inputs come from another source)."""
+    return T["y180"] | ((extras.get("days_over_true", extras["days_over"]) >= 2) & T["ymean150"])

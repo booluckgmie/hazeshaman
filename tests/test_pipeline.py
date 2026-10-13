@@ -100,15 +100,14 @@ def test_live_buffer_rolls_and_ignores_future(tmp_path):
     assert 71 not in a                                    # 16:00 is in the future
 
 
-def test_school_mapping_covers_everything():
-    mp = pd.read_csv("data/district_station_map.csv")
-    w = mp.groupby(["state", "district"]).weight.sum()
-    assert np.allclose(w, 1.0)
-    cached = __import__("pathlib").Path("data/schools/schools_district.json")
-    if cached.exists():
-        by_area, meta = schools.build()
-        assert meta["unmapped"] == []
-        assert sum(v["schools"] for v in by_area.values()) == meta["total_schools"]
+def test_schools_are_attached_at_state_level():
+    from pathlib import Path
+    if not Path("data/schools/schools_district.json").exists():
+        pytest.skip("no cached school data")
+    by_state, meta = schools.build()
+    assert set(by_state) == set(__import__("hazeshaman.states", fromlist=["STATES"]).STATES)       # 16 canonical states
+    assert sum(v["schools"] for v in by_state.values()) == meta["total_schools"] == 10238          # reconciles with the national row
+    assert by_state["Johor"]["schools"] == 1195 and by_state["Johor"]["teachers"] > 40000
 
 
 def test_history_archive_is_idempotent_and_loadable(tmp_path):
@@ -120,3 +119,83 @@ def test_history_archive_is_idempotent_and_loadable(tmp_path):
     apims.append_history(df2.assign(api=77.0), tmp_path)                 # a revised value replaces the old one
     back = apims.load_history_dir(tmp_path, as_of)
     assert len(back) == 6 and (back["rank"] == 2).all() and 77.0 in back.api.values
+
+
+# ---------------- Open-Meteo cross-check ----------------
+from hazeshaman import crosscheck as cc  # noqa: E402
+
+
+def test_quantile_mapping_preserves_extremes_and_is_monotone():
+    rng = np.random.default_rng(0)
+    idx = pd.date_range("2024-01-01", periods=4000, freq="h")
+    a = pd.Series(np.exp(rng.normal(4.0, 0.5, len(idx))), index=idx)          # model AQI
+    y = pd.Series(0.6 * a.values + 5, index=idx)                               # station reads systematically lower
+    xk, yk = cc.fit_qm(a, y)
+    assert (np.diff(xk) > 0).all() and (np.diff(yk) >= 0).all()
+    mapped = cc.apply_qm(a.values, xk, yk)
+    assert abs(np.nanmean(mapped) - y.mean()) < 1.0                            # bias removed
+    assert abs(np.percentile(mapped, 99.5) - np.percentile(y, 99.5)) < 5        # tail kept (regression would shrink it)
+    assert cc.apply_qm(np.array([a.max() + 50]), xk, yk)[0] > yk[-1]           # extrapolates upwards, never clips
+
+
+def _series(n=120):
+    t = pd.date_range("2026-10-10", periods=n, freq="h")
+    e = np.full(n, 120.0)                                                       # independent source: steady "unhealthy"
+    return t, e, e * np.exp(-0.4), e * np.exp(0.4)
+
+
+def test_detects_frozen_spike_high_and_low_but_not_normal_wobble():
+    t, e, lo, hi = _series()
+    ok = np.linspace(116, 126, len(t)) + np.sin(np.arange(len(t)))
+    assert cc.detect(t, ok, e, lo, hi) == []                                    # normal agreement -> nothing
+    d = ok.copy(); d[10:36] = 117.0                                             # 26 identical hours
+    assert [x["type"] for x in cc.detect(t, d, e, lo, hi)] == ["frozen"]
+    d = ok.copy(); d[50] = 215                                                  # one-hour jump the other source does not share
+    assert "spike" in [x["type"] for x in cc.detect(t, d, e, lo, hi)]
+    d = ok.copy(); d[60:70] = 230                                               # sustained, far above the range, closure level
+    ev = [x for x in cc.detect(t, d, e, lo, hi) if x["type"] == "high"]
+    assert len(ev) == 1 and ev[0]["severity"] == "critical" and "closure" in ev[0]["msg"]
+    e1 = np.full(len(t), 70.0); d = np.full(len(t), 72.0); d[60:70] = 135       # unhealthy but below closure level, source says 70 -> warn
+    assert [x["severity"] for x in cc.detect(t, d, e1, e1 * .67, e1 * 1.5) if x["type"] == "high"] == ["warn"]
+    d = ok.copy(); d[80:90] = 30
+    assert [x["type"] for x in cc.detect(t, d, e, lo, hi) if x["type"] == "low"] == ["low"]
+    d = ok.copy(); d[60:62] = 230                                               # 2 h only: below the sustained-run threshold
+    assert not [x for x in cc.detect(t, d, e, lo, hi) if x["type"] == "high"]
+
+
+def test_low_readings_during_haze_are_critical_and_immaterial_mismatches_are_ignored():
+    t, e, lo, hi = _series()
+    e2 = np.full(len(t), 170.0); lo2, hi2 = e2 * np.exp(-0.4), e2 * np.exp(0.4)
+    d = np.linspace(168, 172, len(t)); d[40:52] = 70                            # independent source says hazardous-ish, DOE says fine
+    ev = [x for x in cc.detect(t, d, e2, lo2, hi2) if x["type"] == "low"]
+    assert len(ev) == 1 and ev[0]["severity"] == "critical" and "under-reporting during haze" in ev[0]["msg"]
+    e3 = np.full(len(t), 25.0); d3 = np.full(len(t), 60.0) + np.sin(np.arange(len(t)))
+    assert not [x for x in cc.detect(t, d3, e3, e3 * .6, e3 * 1.5) if x["type"] in ("high", "low")]   # Good vs Moderate: not a decision matter
+
+
+def test_frozen_needs_a_reason_when_short_but_a_full_day_always_counts():
+    t, e, lo, hi = _series()
+    base = np.linspace(116, 126, len(t))
+    d = base.copy(); d[10:24] = 117.0                                           # 14 h repeat, independent source flat -> benign plateau
+    assert not [x for x in cc.detect(t, d, e, lo, hi) if x["type"] == "frozen"]
+    e2 = e.copy(); e2[10:24] = np.linspace(90, 150, 14)                         # same repeat while the other source moved 60 points
+    assert [x["type"] for x in cc.detect(t, d, e2, e2 * .67, e2 * 1.5) if x["type"] == "frozen"] == ["frozen"]
+
+
+def test_update_writes_flags_and_series(tmp_path):
+    import json
+    n = 120; idx = pd.date_range("2026-10-08", periods=n, freq="h")
+    live = {"end": str(idx[-1])[:16].replace(" ", "T"), "hours": n,
+            "areas": {"Johor|Larkin": [int(v) for v in np.r_[np.full(n - 30, 70), np.full(30, 200)]]},   # 30 h at 200 vs a calm independent source
+            "stations": {"Johor|Larkin": {"lat": 1.5, "lon": 103.8, "label": "Larkin", "station_id": "CA33J"}}}
+    (tmp_path / "live.json").write_text(json.dumps(live))
+    xk = np.array([0., 100., 300.]); yk = np.array([0., 80., 90.])
+    st = dict(corr=.8, mae=10, within1=1.0, same_band=.8, corroborated_150=.5, n_150=10, first="2023-01-01", last="2026-10-01", events_per_year={}, q_lo=-.4, q_hi=.4, q_lo99=-.6, q_hi99=.6, grade="B")
+    cc.save_model(tmp_path / "m.json", {"Johor|Larkin": dict(model=(xk, yk), stats=st)})
+    om = pd.DataFrame({"datetime": pd.date_range(idx[0] - pd.Timedelta(days=2), idx[-1], freq="h")}); om["us_aqi"] = 80.0
+    d = cc.update(tmp_path / "live.json", tmp_path / "m.json", tmp_path / "x.json", om_frames={"Johor|Larkin": om})
+    s = d["stations"]["Johor|Larkin"]
+    assert len(s["om"]) == n and s["grade"] == "B"
+    fl = [f for f in d["flags"] if f["type"] == "high"]
+    assert fl and fl[0]["severity"] == "critical" and d["summary"]["critical"] == 1
+    assert json.loads((tmp_path / "x.json").read_text())["end"] == live["end"]

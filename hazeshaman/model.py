@@ -40,14 +40,14 @@ def _predict(res, Xd):
     return z
 
 
-def train_all(cube, days, area_state, n_states, test_from, progress=print):
+def train_all(cube, days, area_state, n_states, test_from, progress=print, truth=None, transfer=None):
     """area_state[a] = state index of area a. One model per hour in HOURS (state effect shared by areas)."""
     area_state = np.asarray(area_state)
     n_s = n_states
     nf = len(FEATURES)
-    models, backtest = {}, {}
+    models, backtest, transfer_bt = {}, {}, {}
     for H in HOURS:
-        X, ex, T, a_idx, d_idx = build(cube, days, H)
+        X, ex, T, a_idx, d_idx = build(cube, days, H, truth=truth)
         s_idx = area_state[a_idx]
         test = days[d_idx] >= np.datetime64(test_from)
         mu, sd = X[~test].mean(0), X[~test].std(0) + 1e-9
@@ -90,6 +90,19 @@ def train_all(cube, days, area_state, n_states, test_from, progress=print):
             if m.sum() >= 20:
                 rel.append(dict(p=float(pc[m].mean()), f=float(yc[m].mean()), n=int(m.sum())))
         backtest[H]["rel"] = rel
+        if transfer is not None:
+            # same trained model, inputs from another source (already on the DOE scale), judged against DOE truth on the hold-out
+            X2, ex2, T2, a2, d2 = build(transfer, days, H, truth=truth if truth is not None else cube)
+            t2 = days[d2] >= np.datetime64(test_from)
+            Xd2 = _design(X2, area_state[a2], n_s, mu, sd)
+            sg = lambda f, m: 1 / (1 + np.exp(-_predict(f, Xd2[m])))            # noqa: E731
+            pc2 = close_prob(sg(fitted_tr["y180"], t2), sg(fitted_tr["ymean150"], t2), ex2["days_over"][t2])
+            yc2 = close_truth(T2, ex2)[t2]
+            el2 = np.exp(X2[t2, 0]) > 100; b2 = float(yc2.mean())
+            m2 = dict(auc=float(roc_auc_score(yc2, pc2)), brier=float(brier_score_loss(yc2, pc2)), base=b2,
+                      bss=float(1 - brier_score_loss(yc2, pc2) / (b2 * (1 - b2) + 1e-12)),
+                      auc_elev=float(roc_auc_score(yc2[el2], pc2[el2])) if 0 < yc2[el2].sum() < el2.sum() else None)
+            transfer_bt[H] = dict(n=int(t2.sum()), pos=int(yc2.sum()), metrics=dict(close=m2))
         models[H] = dict(
             mu=[round(float(x), 5) for x in mu], sd=[round(float(x), 5) for x in sd],
             clf={k: _pack(v, nf) for k, v in fitted_all.items()},
@@ -97,4 +110,4 @@ def train_all(cube, days, area_state, n_states, test_from, progress=print):
         progress(f"H={H:02d} n_test={test.sum():6d} close_base={yc.mean():.4f} "
                  f"AUC(close)={metrics['close']['auc']:.3f} Brier={metrics['close']['brier']:.4f} "
                  f"AUC(y150)={metrics['y150']['auc']:.3f}")
-    return models, backtest
+    return models, backtest, (transfer_bt or None)

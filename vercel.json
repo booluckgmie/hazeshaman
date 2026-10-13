@@ -6,22 +6,77 @@
   "outputDirectory": "docs",
   "cleanUrls": true,
   "functions": {
-    "api/live.js": { "maxDuration": 10, "includeFiles": "docs/live.json" }
+    "api/live.js": {
+      "maxDuration": 10,
+      "includeFiles": "docs/live.json"
+    },
+    "api/xcheck.js": {
+      "maxDuration": 10,
+      "includeFiles": "docs/xcheck.json"
+    }
   },
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
-        { "key": "Content-Security-Policy", "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'none'; frame-ancestors 'self'" }
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "SAMEORIGIN"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'self'; form-action 'none'; frame-ancestors 'self'"
+        }
       ]
     },
-    { "source": "/live.json", "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }] },
-    { "source": "/model.js", "headers": [{ "key": "Cache-Control", "value": "public, max-age=600, stale-while-revalidate=3600" }] },
-    { "source": "/howto/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }] }
+    {
+      "source": "/live.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/xcheck.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
+      "source": "/model.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=600, stale-while-revalidate=3600"
+        }
+      ]
+    },
+    {
+      "source": "/howto/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
+        }
+      ]
+    }
   ],
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ':(exclude)docs/live.json' ':(exclude)data' ':(exclude)hazeshaman' ':(exclude)tests' ':(exclude)social' ':(exclude)README.md' ':(exclude)requirements.txt'"
+  "ignoreCommand": "[ -n \"$VERCEL_GIT_PREVIOUS_SHA\" ] && git diff --quiet \"$VERCEL_GIT_PREVIOUS_SHA\" HEAD -- . ':(exclude)docs/live.json' ':(exclude)docs/xcheck.json' ':(exclude)data' ':(exclude)hazeshaman' ':(exclude)tests' ':(exclude)social' ':(exclude)README.md' ':(exclude)requirements.txt'"
 }

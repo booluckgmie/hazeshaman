@@ -46,7 +46,8 @@ body{margin:0;min-height:100vh;color:var(--ink);font:15px/1.5 ui-sans-serif,syst
 @media (prefers-reduced-motion:reduce){.orbs i{animation:none}*{transition:none!important}}
 .wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:24px 16px 56px}
 header{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;margin-bottom:18px}
-h1{margin:0;font-size:26px;letter-spacing:-.02em;font-weight:750}
+h1{margin:0;font-size:30px;letter-spacing:-.02em;font-weight:780;line-height:1.1}
+.subh{font-size:19px;font-weight:650;letter-spacing:-.01em;margin-top:3px}
 h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
 .sub{color:var(--ink2);font-size:13px;margin-top:2px}
 .hdr-r{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
@@ -112,6 +113,50 @@ hr{border:0;border-top:1px solid var(--edge2);margin:16px 0 2px}
 .chip:hover{transform:translateY(-2px);background:var(--glass2)}
 .chip b{display:block;font-size:19px;font-variant-numeric:tabular-nums;line-height:1.1}
 .chip span{font-size:11px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+.fbar{display:flex;gap:10px 12px;align-items:center;flex-wrap:wrap;padding:10px 14px;border-radius:18px;margin-bottom:18px}
+@media (min-width:1001px){.fbar{position:sticky;top:10px;z-index:30}}
+.fbar .lab{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);font-weight:700}
+.fbar select{width:auto;min-width:210px;flex:1 1 210px;max-width:320px}
+.sbtn{display:inline-flex;align-items:center;justify-content:space-between;gap:10px;min-width:210px;padding:9px 14px;border-radius:14px;border:1px solid var(--edge);background:var(--field);color:var(--ink);font:inherit;font-weight:700;cursor:pointer;transition:.18s}
+.sbtn:hover{border-color:var(--accent)}
+.sdot{width:10px;height:10px;border-radius:50%;background:var(--c,var(--ink3));box-shadow:0 0 0 3px color-mix(in srgb,var(--c,var(--ink3)) 28%,transparent);flex:none}
+.sbtn span:nth-child(2){flex:1;text-align:left}
+.fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:50%;border:1px solid var(--edge);background:var(--grad);color:#1a1318;box-shadow:0 10px 30px rgba(0,0,0,.5);z-index:40;display:none;place-items:center;cursor:pointer;transition:transform .18s,opacity .18s}
+.fab:active{transform:scale(.94)}
+.fab[data-on="1"]::after{content:"";position:absolute;top:7px;right:7px;width:13px;height:13px;border-radius:50%;background:#fff;border:2.5px solid #1a1318}
+@media (max-width:1000px){.fab{display:grid}}
+body.sheet-open .fab{opacity:0;pointer-events:none}
+.sheetbk{position:fixed;inset:0;background:rgba(10,6,4,.55);z-index:50;opacity:0;visibility:hidden;transition:opacity .22s}
+.sheet{position:fixed;z-index:60;display:flex;flex-direction:column;visibility:hidden;opacity:0;
+  background:color-mix(in srgb,var(--bg1) 94%,transparent);border:1px solid var(--edge);box-shadow:0 -10px 50px rgba(0,0,0,.5);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
+@media (max-width:1000px){.sheet{left:0;right:0;bottom:0;max-height:80vh;border-radius:26px 26px 0 0;transform:translateY(100%);transition:transform .28s cubic-bezier(.2,.8,.2,1),opacity .2s,visibility .28s;padding-bottom:env(safe-area-inset-bottom)}
+  .sheet.open{transform:none}}
+@media (min-width:1001px){.sheet{width:360px;max-height:min(70vh,640px);border-radius:18px;box-shadow:var(--shadow);transform:translateY(-6px);transition:transform .16s,opacity .16s,visibility .16s}.sheet.open{transform:none}.sheetbk{background:transparent}}
+.sheet.open,.sheetbk.open{visibility:visible;opacity:1}
+.sheet-h{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 12px;border-bottom:1px solid var(--edge2);font-size:17px}
+.sheet-h button{border:0;background:transparent;color:var(--ink);cursor:pointer;padding:6px;border-radius:10px;display:grid}
+.sheet ul{list-style:none;margin:0;padding:6px 0 10px;overflow:auto;overscroll-behavior:contain}
+.sheet li{display:flex;align-items:center;gap:14px;padding:11px 18px;min-height:58px;cursor:pointer;border-left:4px solid transparent}
+.sheet li:hover,.sheet li:focus-visible{background:var(--glass2);outline:none}
+.sheet li[aria-selected=true]{background:color-mix(in srgb,var(--accent) 16%,transparent);border-left-color:var(--accent)}
+.sheet .api{flex:none;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:15px;font-variant-numeric:tabular-nums;color:#1a1318;background:var(--c,var(--ink3))}
+.sheet .nm{flex:1;min-width:0}.sheet .nm b{display:block;font-size:16px}.sheet .nm span{display:block;font-size:12px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sheet .tag{flex:none}
+body.sheet-open{overflow:hidden}
+.gr{display:inline-grid;place-items:center;min-width:22px;height:22px;padding:0 5px;border-radius:7px;font-size:12px;font-weight:800;color:#1a1318;background:var(--ink3);vertical-align:middle}
+.gr.gA{background:var(--ok)}.gr.gB{background:var(--b1)}.gr.gC{background:var(--bad)}
+.fchip{display:inline-flex;align-items:center;gap:3px;margin-left:6px;padding:1px 7px;border-radius:99px;font-size:11px;font-weight:700;color:var(--c,var(--warn));background:color-mix(in srgb,var(--c,var(--warn)) 16%,transparent);border:1px solid color-mix(in srgb,var(--c,var(--warn)) 45%,transparent);white-space:nowrap}
+.flist{display:grid;gap:8px;margin-top:14px}
+.frow{display:grid;grid-template-columns:auto 1fr auto;gap:4px 12px;align-items:start;padding:11px 14px;border-radius:14px;border:1px solid var(--edge2);border-left:4px solid var(--c);background:var(--glass);cursor:pointer;transition:.15s}
+.frow:hover{background:var(--glass2)}
+.frow .ti{font-weight:700}.frow .sub2{grid-column:2;color:var(--ink2);font-size:12.5px}.frow .when{font-size:12px;color:var(--ink2);text-align:right;white-space:nowrap}
+.frow .live{display:inline-block;margin-left:6px;padding:0 6px;border-radius:99px;font-size:10.5px;font-weight:800;letter-spacing:.06em;background:var(--c);color:#1a1318}
+.xcs{display:grid;grid-template-columns:1.7fr 1fr;gap:16px;align-items:start}
+@media (max-width:900px){.xcs{grid-template-columns:1fr}}
+.xfacts{display:grid;gap:8px}
+.xfacts .kpi b{font-size:21px}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:2px}
+.cmp .kpi.agree{border-color:var(--ok)}.cmp .kpi.differ{border-color:var(--warn)}
 .verdict{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;border-left:4px solid var(--vc,var(--ok))}
 .ring{width:124px;height:124px;position:relative}
 .ring svg{width:100%;height:100%;transform:rotate(-90deg)}
@@ -146,7 +191,7 @@ th,td{text-align:right;padding:7px 8px;border-bottom:1px solid var(--edge2);whit
 th:first-child,td:first-child{text-align:left}
 th:nth-child(3),td:nth-child(3){text-align:left}
 th{color:var(--ink2);font-weight:600;font-size:12px}
-@media (max-width:760px){#stTable th:nth-child(3),#stTable td:nth-child(3),#stTable th:nth-child(5),#stTable td:nth-child(5),#stTable th:nth-child(6),#stTable td:nth-child(6),#stTable th:nth-child(7),#stTable td:nth-child(7){display:none}}
+@media (max-width:760px){#stTable.nat th:nth-child(3),#stTable.nat td:nth-child(3),#stTable.nat th:nth-child(5),#stTable.nat td:nth-child(5),#stTable.nat th:nth-child(6),#stTable.nat td:nth-child(6),#stTable.stn th:nth-child(5),#stTable.stn td:nth-child(5){display:none}}
 tr.row{cursor:pointer;transition:background .15s}
 tr.row:hover td{background:var(--glass)}
 tr.sel td{background:color-mix(in srgb,var(--accent) 20%,transparent)}
@@ -171,7 +216,8 @@ footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
 <div class="wrap">
   <header>
     <div>
-      <h1><span>Hazeshaman</span> · School-status forecaster</h1>
+      <h1><span>Hazeshaman</span></h1>
+      <div class="subh">School-status forecaster</div>
       <div class="sub">Hourly DOE air-pollutant index by station → next-morning haze probability, best announcement time, and the schools, students and teachers affected.</div>
     </div>
     <div class="hdr-r">
@@ -182,6 +228,14 @@ footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
     </div>
   </header>
   <div id="banner" style="margin-bottom:14px"></div>
+
+  <nav class="glass fbar" id="fbar" aria-label="Filter">
+    <span class="lab">Showing</span>
+    <button class="sbtn" id="stateBtn" aria-haspopup="listbox" aria-expanded="false"><span class="sdot" id="stateDot"></span><span id="stateBtnTxt">Malaysia</span><svg width="14" height="14" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 7.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <label class="lab" for="area" style="margin:0">Station</label>
+    <select id="area" aria-label="Station"></select>
+  </nav>
+  <div id="xcBanner" style="margin:-6px 0 14px"></div>
 
   <section class="glass sky" id="sky" aria-live="polite">
     <div class="hz"></div><div class="hz b"></div><canvas id="parts"></canvas>
@@ -196,7 +250,7 @@ footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
   <path d="M884 220V56l14-34 14 34v164z"/><rect x="896" y="6" width="3" height="20"/>
   <rect x="936" y="98" width="42" height="122"/><rect x="984" y="126" width="46" height="94"/><rect x="1038" y="88" width="36" height="132"/><rect x="1080" y="116" width="48" height="104"/><rect x="1136" y="94" width="44" height="126"/></g></svg>
     <div class="sky-in">
-      <div class="sky-top"><span class="eyebrow">Malaysia · haze right now</span><span class="eyebrow" id="skyTime"></span></div>
+      <div class="sky-top"><span class="eyebrow" id="skyEy">Malaysia · haze right now</span><span class="eyebrow" id="skyTime"></span></div>
       <div><div class="bandname" id="bandName">—</div><div class="bandsub" id="bandSub"></div></div>
       <div class="skystats" id="skyStats"></div>
       <div class="scale" id="scale" role="img" aria-label="National API distribution on the Malaysian API scale"></div>
@@ -207,13 +261,10 @@ footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
 
   <div class="grid">
     <aside class="glass" aria-label="Controls">
-      <h2>View</h2>
+      <h2>Mode</h2>
       <div class="seg" role="group" aria-label="Mode">
         <button id="modeLive" aria-pressed="true">Live data</button><button id="modeWhat" aria-pressed="false">What-if</button>
       </div>
-      <label for="state">State</label><select id="state"></select>
-      <label for="area">Area / station</label><select id="area"></select>
-      <div class="note" id="areaNote"></div>
 
       <div class="lbl">Model hour <b id="hLbl"></b></div>
       <div class="pills" id="hours" role="group" aria-label="Model hour"></div>
@@ -244,10 +295,18 @@ footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
 
     <main class="stack">
       <section class="glass" id="overview">
-        <h2>National outlook for tomorrow morning <small id="ovSub"></small></h2>
+        <h2><span id="ovTitle">Malaysia</span> · outlook for tomorrow morning <small id="ovSub"></small></h2>
         <div class="hero" id="hero"></div>
         <div class="tablewrap" style="margin-top:16px"><table id="stTable"></table></div>
         <div class="note" id="ovNote"></div>
+      </section>
+
+      <section class="glass" id="xcPanel">
+        <h2>Data check · <span id="xcScope">Malaysia</span> <small>is every DOE report backed by an independent source?</small></h2>
+        <div class="hero" id="xcHero"></div>
+        <div class="flist" id="xcList"></div>
+        <div class="tablewrap" style="margin-top:14px"><div id="xcCmp"></div></div>
+        <div class="note" id="xcNote"></div>
       </section>
 
       <section class="glass verdict" id="verdict" aria-live="polite">
@@ -258,7 +317,13 @@ footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
 
       <section class="kpis" id="kpis"></section>
 
-      <section class="glass"><h2>Schools impacted · <span id="schTitle"></span></h2><div class="sch" id="sch"></div><div class="note" id="schNote"></div></section>
+      <section class="glass" id="xcStation">
+        <h2>Independent check · <span id="xcsName"></span> <small>DOE vs Open-Meteo, last 72 h</small></h2>
+        <div class="xcs"><div><svg class="chart" id="xcChart" viewBox="0 0 520 230"></svg><div class="legend" id="xcLeg"></div></div><div class="xfacts" id="xcFacts"></div></div>
+        <div class="note" id="xcsNote"></div>
+      </section>
+
+      <section class="glass" id="schPanel"><h2>Schools impacted · <span id="schTitle"></span></h2><div class="sch" id="sch"></div><div class="note" id="schNote"></div></section>
 
       <section class="glass">
         <h2>Three scenarios for tomorrow morning</h2>
@@ -285,6 +350,15 @@ footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
   <footer id="foot"></footer>
 </div>
 <div class="tip" id="tip"></div>
+<div class="sheetbk" id="sheetBk"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetT" aria-hidden="true">
+  <div class="sheet-h"><b id="sheetT">Filter by state</b><button id="sheetX" aria-label="Close">
+    <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg></button></div>
+  <ul id="sheetList" role="listbox" aria-label="State"></ul>
+</div>
+<button class="fab" id="fab" aria-label="Filter by state" aria-haspopup="dialog" data-on="0">
+  <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.1 7-11.2A7 7 0 0 0 5 9.8C5 14.9 12 21 12 21z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="9.8" r="2.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+</button>
 <script src="model.js"></script>
 <script>
 "use strict";
@@ -307,7 +381,7 @@ const store = { get(k){ try{return localStorage.getItem(k)}catch(e){return null}
 const AREA = Object.fromEntries(M.areas.map(a => [a.key, a]));
 const AH = M.announce_hours;
 
-const S = { mode: "what", state: null, area: null, H: 19, am: 80, noon: 90, a3: 90, now: 95, prev: 80, streak: 0,
+const S = { mode: "what", state: "", pick: null, area: null, H: 19, am: 80, noon: 90, a3: 90, now: 95, prev: 80, streak: 0,
   date: new Date().toISOString().slice(0,10), cfn: 8, lam: 5 };
 let LIVE = null, LIVE_ERR = null, LF = {};         // LF: per-area features derived from the live buffer
 
@@ -318,8 +392,8 @@ function features(s){
   return [Math.log(s.now), Math.log(s.am), Math.log(s.noon), Math.log(s.now) - Math.log(s.a3), Math.log(s.prev), s.streak, Math.sin(ang), Math.cos(ang)];
 }
 function lin(fit, z, si){ return fit.b + fit.w.reduce((a, w, i) => a + w * z[i], 0) + fit.state[si]; }
-function predict(s, state){
-  const m = M.models[s.H], si = M.states.indexOf(state);
+function predict(s, state, models = M.models){
+  const m = models[s.H], si = M.states.indexOf(state);
   const x = features(s), zr = x.map((v, i) => (v - m.mu[i]) / m.sd[i]);
   const z = zr.map(v => clamp(v, -4, 4));            // never extrapolate beyond ~4 SD of training data
   const P = {extrap: zr.some(v => Math.abs(v) > 4)};
@@ -360,30 +434,37 @@ function classify(P, thr){
 function mytNow(){ // Malaysia wall clock as a UTC-based ms value (naive), independent of the viewer's zone
   const p = new Date().toLocaleString("sv-SE", {timeZone: "Asia/Kuala_Lumpur"}); return Date.parse(p.replace(" ", "T") + "Z");
 }
+let XC = null, LFX = {}, RISKX = {};     // XC: Open-Meteo cross-check document; LFX: features from its DOE-scale series
+function deriveOne(k, vals, end, N, cap){
+  const T0 = end - (N - 1) * 36e5, day0 = Math.floor(end / 864e5) * 864e5;
+  // readings stamped after the current Malaysia hour are ignored (hours that have not been reached yet)
+  const val = (day, h) => { const t = day + h * 36e5; if (t > cap || t > end) return null; const i = (t - T0) / 36e5; return i >= 0 && i < N ? vals[i] : null; };
+  let H = new Date(end).getUTCHours(); while (H >= 0 && val(day0, H) == null) H--;      // latest reported hour today
+  const f = {key: k, ok: false};
+  if (!AREA[k]){ f.reason = "Station not in the trained model yet."; return f; }
+  if (H < 12){ f.reason = "Models start at 12:00 – waiting for noon readings."; return f; }
+  const near = h => { for (const d of [0,-1,1,-2,2]){ const v = val(day0, h + d); if (v != null) return v; } return null; };
+  const am = near(8), noon = near(12), now = val(day0, H), a3 = near(H - 3);
+  const dm = day => { const v = Array.from({length: 24}, (_, h) => val(day, h)).filter(x => x != null); return v.length >= 18 ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+  let prev = dm(day0 - 864e5), approx = false;
+  if (prev == null){ const v = Array.from({length: 24}, (_, h) => val(day0 - 864e5, h)).filter(x => x != null); if (v.length >= 6){ prev = v.reduce((a, b) => a + b, 0) / v.length; approx = true; } }
+  let streak = 0; for (let d = 1; d <= 3; d++){ const m = dm(day0 - d * 864e5); if (m != null && m > 150) streak++; else break; }
+  if ([am, noon, now, a3, prev].some(v => v == null)){ f.reason = "Not enough readings in the last 24-48 h."; return f; }
+  Object.assign(f, {ok: true, approx, H, am, noon, now, a3, prev: Math.round(prev), streak, date: new Date(day0).toISOString().slice(0, 10)});
+  f.series = Array.from({length: H + 1}, (_, h) => [h, val(day0, h)]).filter(p => p[1] != null);
+  f.last24 = Array.from({length: 24}, (_, i) => { const t = end - (23 - i) * 36e5, hh = new Date(t).getUTCHours(); return [hh, val(Math.floor(t / 864e5) * 864e5, hh)]; });
+  return f;
+}
+const capNow = () => Math.floor(mytNow() / 36e5) * 36e5;
 function deriveLive(){
   LF = {}; if (!LIVE) return;
-  const end = Date.parse(LIVE.end + ":00Z"), N = LIVE.hours, cap = Math.floor(mytNow() / 36e5) * 36e5;
-  const T0 = end - (N - 1) * 36e5;
-  const day0 = Math.floor(end / 864e5) * 864e5;
-  for (const [k, vals] of Object.entries(LIVE.areas)){
-    // readings stamped after the current Malaysia hour are ignored (hours that have not been reached yet)
-    const val = (day, h) => { const t = day + h * 36e5; if (t > cap || t > end) return null; const i = (t - T0) / 36e5; return i >= 0 && i < N ? vals[i] : null; };
-    let H = new Date(end).getUTCHours(); while (H >= 0 && val(day0, H) == null) H--;      // latest reported hour today
-    const f = {key: k, ok: false};
-    if (!AREA[k]){ f.reason = "Station not in the trained model yet."; LF[k] = f; continue; }
-    if (H < 12){ f.reason = "Models start at 12:00 – waiting for noon readings."; LF[k] = f; continue; }
-    const near = h => { for (const d of [0,-1,1,-2,2]){ const v = val(day0, h + d); if (v != null) return v; } return null; };
-    const am = near(8), noon = near(12), now = val(day0, H), a3 = near(H - 3);
-    const dm = day => { const v = Array.from({length: 24}, (_, h) => val(day, h)).filter(x => x != null); return v.length >= 18 ? v.reduce((a, b) => a + b, 0) / v.length : null; };
-    let prev = dm(day0 - 864e5), approx = false;
-    if (prev == null){ const v = Array.from({length: 24}, (_, h) => val(day0 - 864e5, h)).filter(x => x != null); if (v.length >= 6){ prev = v.reduce((a, b) => a + b, 0) / v.length; approx = true; } }
-    let streak = 0; for (let d = 1; d <= 3; d++){ const m = dm(day0 - d * 864e5); if (m != null && m > 150) streak++; else break; }
-    if ([am, noon, now, a3, prev].some(v => v == null)){ f.reason = "Not enough readings in the last 24-48 h."; LF[k] = f; continue; }
-    Object.assign(f, {ok: true, approx, H, am, noon, now, a3, prev: Math.round(prev), streak, date: new Date(day0).toISOString().slice(0, 10)});
-    f.series = Array.from({length: H + 1}, (_, h) => [h, val(day0, h)]).filter(p => p[1] != null);
-    f.last24 = Array.from({length: 24}, (_, i) => { const t = end - (23 - i) * 36e5, hh = new Date(t).getUTCHours(); return [hh, val(Math.floor(t / 864e5) * 864e5, hh)]; });
-    LF[k] = f;
-  }
+  const end = Date.parse(LIVE.end + ":00Z"), N = LIVE.hours, cap = capNow();
+  for (const [k, vals] of Object.entries(LIVE.areas)) LF[k] = deriveOne(k, vals, end, N, cap);
+}
+function deriveXc(){
+  LFX = {}; if (!XC) return;
+  const end = Date.parse(XC.end + ":00Z"), N = XC.hours, cap = capNow();
+  for (const [k, st] of Object.entries(XC.stations)) LFX[k] = deriveOne(k, st.om, end, N, cap);
 }
 function liveStatus(){
   if (!LIVE) return {c: "var(--bad)", t: "Live feed unavailable", age: null, level: "none"};
@@ -404,55 +485,164 @@ const tip = $("tip");
 function showTip(ev, html){ tip.innerHTML = html; tip.style.opacity = 1;
   const x = Math.min(ev.clientX + 14, innerWidth - tip.offsetWidth - 8); tip.style.left = x + "px"; tip.style.top = (ev.clientY + 14) + "px"; }
 function hideTip(){ tip.style.opacity = 0; }
-const areasOf = st => M.areas.filter(a => a.state === st);
+const isActive = a => !LIVE || !!LIVE.areas[a.key];          // retired stations stay in the model (history) but are not listed
+const areasOf = st => M.areas.filter(a => isActive(a) && (!st || a.state === st));
+const SCH = M.schools_by_state || {};
+const sch = st => SCH[st] || {schools: 0, students: 0, teachers: 0, ipta: 0, post_secondary: 0};
 const curFeat = () => S.mode === "live" ? LF[S.area] : null;
+let RISK = {}, ST = {};      // RISK: per station {P, thr, c}; ST: per state summary (rebuilt every render)
 
 function applyLiveToInputs(){
   const f = curFeat(); if (!f || !f.ok) return;
   Object.assign(S, {H: f.H, am: f.am, noon: f.noon, a3: f.a3, now: f.now, prev: f.prev, streak: f.streak, date: f.date});
 }
-function pickDefaultArea(){
-  let best = null, bp = -1;   // most expected schools affected; ties (e.g. all zero) fall back to highest closure risk
+const FL_LABEL = {high: "Unconfirmed high reading", low: "Possible under-reporting", frozen: "Repeated / stuck value", spike: "Sudden jump", stale: "No recent reading"};
+const xcEnd = () => XC ? Date.parse(XC.end + ":00Z") : 0;
+const liveEndMs = () => LIVE ? Date.parse(LIVE.end + ":00Z") : 0;
+const isLiveFlag = f => Date.parse(f.end + ":00Z") >= Math.max(xcEnd(), liveEndMs()) - 5 * 36e5;       // still going on in the last ~5 hours
+const flagsFor = (st, onlyLive) => (XC ? XC.flags : []).filter(f => (!st || f.state === st) && AREA[f.key] && isActive(AREA[f.key]) && (!onlyLive || isLiveFlag(f)));
+const gradeOf = k => XC && XC.stations[k] ? XC.stations[k].grade : null;
+const gradeTag = k => { const g = gradeOf(k), x = XC && XC.stations[k]; return g ? `<span class="gr g${g}" title="Reliability against Open-Meteo: ${g === "A" ? "agrees closely" : g === "B" ? "usable" : "verify before acting"} (correlation ${x.stats.corr}, typical error ${x.stats.mae} pts)">${g}</span>` : ""; };
+const fmtT = t => { const d = new Date(t + ":00Z"); return `${d.getUTCDate()} ${MON[d.getUTCMonth()]} ${String(d.getUTCHours()).padStart(2, "0")}:00`; };
+function flagChip(list){
+  if (!list.length) return "";
+  const crit = list.some(f => f.severity === "critical");
+  return `<span class="fchip" style="--c:${crit ? "var(--bad)" : "var(--warn)"}" title="${list.map(f => `${f.name}: ${FL_LABEL[f.type]}`).join("; ").replace(/"/g, "'")}">⚠ ${list.length}</span>`;
+}
+function computeRisk(T){
+  RISK = {}; RISKX = {};
+  if (!LIVE) return;
+  if (XC) for (const a of M.areas){ const f = LFX[a.key]; if (!f || !f.ok) continue;          // same model, inputs from the independent source
+    RISKX[a.key] = {P: predict(Object.assign({}, S, f), a.state)}; }
   for (const a of M.areas){ const f = LF[a.key]; if (!f || !f.ok) continue;
-    const P = predict(Object.assign({}, S, f), a.state), sc = P.close * a.schools + P.close * 1e-3; if (sc > bp){ bp = sc; best = a.key; } }
-  return best || (AREA["WP Kuala Lumpur|Cheras"] ? "WP Kuala Lumpur|Cheras" : M.areas[0].key);
+    const P = predict(Object.assign({}, S, f), a.state), thr = triggerFor(T, f.H); RISK[a.key] = {P, thr, c: classify(P, thr)}; }
 }
-function fillAreaSelect(){
-  const sel = $("area"); sel.innerHTML = "";
-  areasOf(S.state).forEach(a => sel.add(new Option(a.name, a.key)));
-  if (!AREA[S.area] || AREA[S.area].state !== S.state) S.area = sel.options[0].value; sel.value = S.area;
+function stateSummary(){
+  ST = {};
+  for (const st of M.states){
+    const rows = areasOf(st).map(a => ({a, v: LIVE ? latestApi(a.key) : null, r: RISK[a.key]}));
+    const s = {st, n: rows.length, nd: rows.filter(x => !x.r).length, risk: 0, watch: 0, maxP: -1, maxA: null, p150: 0, apiMax: null, apiA: null, rows};
+    for (const x of rows){
+      if (x.v != null && (s.apiMax == null || x.v > s.apiMax)){ s.apiMax = x.v; s.apiA = x.a.name; }
+      if (!x.r) continue;
+      if (x.r.c === "close") s.risk++; else if (x.r.c === "watch") s.watch++;
+      s.p150 = Math.max(s.p150, x.r.P.y150);
+      if (x.r.P.close > s.maxP){ s.maxP = x.r.P.close; s.maxA = x.a.name; }
+    }
+    s.c = s.maxP < 0 ? "none" : s.risk ? "close" : s.watch ? "watch" : "ok";
+    s.flags = flagsFor(st, true);
+    ST[st] = s;
+  }
 }
+/* impact is counted at STATE level (the DOE feed carries a state per station): a state is "at risk" when its highest-risk station is */
+function scopeTotals(){
+  const t = {risk: 0, have: 0, nodata: 0, statesRisk: 0, schoolsRisk: 0, studentsRisk: 0, teachersRisk: 0, expS: 0, expStu: 0, expTea: 0, schools: 0, students: 0, teachers: 0, ipta: 0, maxP: 0, maxA: null};
+  for (const st of (S.state ? [S.state] : M.states)){
+    const s = ST[st], c = sch(st);
+    t.schools += c.schools; t.students += c.students; t.teachers += c.teachers; t.ipta += c.ipta;
+    t.have += s.n - s.nd; t.nodata += s.nd; t.risk += s.risk;
+    if (s.maxP < 0) continue;
+    t.expS += s.maxP * c.schools; t.expStu += s.maxP * c.students; t.expTea += s.maxP * c.teachers;
+    if (s.risk){ t.statesRisk++; t.schoolsRisk += c.schools; t.studentsRisk += c.students; t.teachersRisk += c.teachers; }
+    if (s.maxP > t.maxP){ t.maxP = s.maxP; t.maxA = `${s.maxA}, ${st}`; }
+  }
+  return t;
+}
+function resolveArea(){
+  if (S.pick && AREA[S.pick] && (!S.state || AREA[S.pick].state === S.state)) return S.pick;
+  let best = null;
+  for (const a of areasOf(S.state)){ const r = RISK[a.key]; if (r && (!best || r.P.close > best.P.close)) best = {a, P: r.P}; }
+  if (best) return best.a.key;
+  const list = areasOf(S.state); return (list.find(a => a.key === "WP Kuala Lumpur|Cheras") || list[0]).key;
+}
+function selectState(st){
+  S.state = st || ""; S.pick = null; closeSheet();
+  try{ history.replaceState(null, "", S.state ? "#" + encodeURIComponent(S.state) : location.pathname + location.search); }catch(e){}
+  render();
+}
+function selectStation(key){ S.pick = key; S.state = AREA[key].state; render(); }
 function savePrefs(){ store.set("hs.prefs", JSON.stringify({cfn: S.cfn, lam: S.lam})); }
 
+/* ---- state filter: dropdown on desktop, bottom sheet opened from the round button on phones ---- */
+let sheetOpen = false;
+const isDesk = () => matchMedia("(min-width:1001px)").matches;
+function buildSheet(){
+  const all = M.states.map(st => ST[st]), apis = all.map(s => s.apiMax).filter(v => v != null);
+    const wAll = all.filter(s => s.apiMax != null).sort((x, y) => y.apiMax - x.apiMax)[0];
+  const items = [{k: "", name: "Malaysia", api: wAll ? wAll.apiMax : null, sub: LIVE ? `${all.reduce((n, s) => n + s.n - s.nd, 0)} stations · ${all.filter(s => s.risk).length} states at risk` : "all states", c: all.some(s => s.risk) ? "close" : all.some(s => s.c === "watch") ? "watch" : LIVE ? "ok" : "none"}]
+    .concat(M.states.map(st => { const s = ST[st]; return {k: st, name: st, api: s.apiMax, sub: (s.apiMax != null ? `highest ${s.apiMax} · ${s.apiA}` : "no live reading") + (s.flags.length ? ` · ⚠ ${s.flags.length} flagged` : ""), c: s.c}; }));
+  $("sheetList").innerHTML = items.map(it => `<li role="option" tabindex="${it.k === S.state ? 0 : -1}" data-k="${it.k}" aria-selected="${it.k === S.state}" style="--c:${it.api != null ? band(it.api)[2] : "var(--ink3)"}">
+    <span class="api">${it.api ?? "–"}</span><span class="nm"><b>${it.name}</b><span>${it.sub}</span></span><span class="tag" style="--c:${STAT[it.c][0]}">${STAT[it.c][1]}</span></li>`).join("");
+}
+function openSheet(from){
+  buildSheet(); sheetOpen = true;
+  const sh = $("sheet");
+  if (isDesk()){ const r = $("stateBtn").getBoundingClientRect(); sh.style.left = Math.max(8, Math.min(r.left, innerWidth - 368)) + "px"; sh.style.top = (r.bottom + 8) + "px"; }
+  else { sh.style.left = sh.style.top = ""; }
+  sh.classList.add("open"); $("sheetBk").classList.add("open"); sh.setAttribute("aria-hidden", "false");
+  document.body.classList.add("sheet-open"); $("stateBtn").setAttribute("aria-expanded", "true");
+  sh.dataset.from = from || "";
+  (sh.querySelector('[aria-selected="true"]') || sh.querySelector("li")).focus({preventScroll: false});
+}
+function closeSheet(){
+  if (!sheetOpen) return; sheetOpen = false;
+  $("sheet").classList.remove("open"); $("sheetBk").classList.remove("open"); $("sheet").setAttribute("aria-hidden", "true");
+  document.body.classList.remove("sheet-open"); $("stateBtn").setAttribute("aria-expanded", "false");
+  const back = $("sheet").dataset.from === "fab" ? $("fab") : $("stateBtn"); try{ back.focus({preventScroll: true}); }catch(e){}
+}
+function sheetKeys(e){
+  if (!sheetOpen) return;
+  const opts = [...$("sheetList").querySelectorAll("li")], i = opts.indexOf(document.activeElement);
+  if (e.key === "Escape"){ e.preventDefault(); closeSheet(); }
+  else if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Home" || e.key === "End"){
+    e.preventDefault(); const n = e.key === "Home" ? 0 : e.key === "End" ? opts.length - 1 : clamp(i + (e.key === "ArrowDown" ? 1 : -1), 0, opts.length - 1);
+    opts.forEach(o => o.tabIndex = -1); opts[n].tabIndex = 0; opts[n].focus();
+  } else if ((e.key === "Enter" || e.key === " ") && i >= 0){ e.preventDefault(); selectState(opts[i].dataset.k); }
+  else if (e.key === "Tab"){ const f = [$("sheetX"), ...opts.filter(o => o.tabIndex === 0)]; const j = f.indexOf(document.activeElement);
+    const n = e.shiftKey ? (j <= 0 ? f.length - 1 : j - 1) : (j === f.length - 1 ? 0 : j + 1); e.preventDefault(); f[n].focus(); }
+}
+
 function buildControls(){
-  const st = $("state"); M.states.forEach(s => st.add(new Option(s, s)));
   const hs = $("hours");
   M.hours.forEach(H => { const b = document.createElement("button"); b.className = "pill" + (AH.includes(H) ? " cand" : ""); b.type = "button"; b.dataset.h = H; b.textContent = hl(H); hs.appendChild(b); });
   const sk = $("streak");
   [0,1,2,3].forEach(n => { const b = document.createElement("button"); b.className = "pill"; b.type = "button"; b.dataset.n = n; b.textContent = n === 3 ? "3+" : n; sk.appendChild(b); });
   const saved = JSON.parse(store.get("hs.prefs") || "null"); if (saved){ S.cfn = saved.cfn ?? S.cfn; S.lam = saved.lam ?? S.lam; }
   $("cfn").value = S.cfn; $("lam").value = S.lam;
-  st.onchange = () => { S.state = st.value; fillAreaSelect(); onAreaChange(); };
-  $("area").onchange = e => { S.area = e.target.value; onAreaChange(); };
+  $("area").onchange = e => { S.pick = e.target.value || null; render(); };
   hs.onclick = e => { const b = e.target.closest("button"); if (b && S.mode === "what"){ S.H = +b.dataset.h; render(); } };
   sk.onclick = e => { const b = e.target.closest("button"); if (b && S.mode === "what"){ S.streak = +b.dataset.n; render(); } };
   for (const k of ["am","noon","a3","now","prev"]){ const inp = $(k); inp.value = S[k]; inp.oninput = () => { S[k] = +inp.value; render(); }; }
   for (const k of ["cfn","lam"]){ const inp = $(k); inp.oninput = () => { S[k] = +inp.value; savePrefs(); render(); }; }
   $("modeLive").onclick = () => setMode("live"); $("modeWhat").onclick = () => setMode("what");
+  $("stateBtn").onclick = () => sheetOpen ? closeSheet() : openSheet("btn");
+  $("fab").onclick = () => openSheet("fab");
+  $("sheetX").onclick = closeSheet; $("sheetBk").onclick = closeSheet;
+  $("sheetList").onclick = e => { const li = e.target.closest("li"); if (li) selectState(li.dataset.k); };
+  document.addEventListener("keydown", sheetKeys);
+  let wasDesk = isDesk();       // mobile browsers fire resize while the address bar collapses: only react when the layout mode flips
+  addEventListener("resize", () => {
+    const d = isDesk(); if (!sheetOpen){ wasDesk = d; return; }
+    if (d !== wasDesk){ wasDesk = d; closeSheet(); return; }
+    if (d){ const r = $("stateBtn").getBoundingClientRect(); $("sheet").style.left = Math.max(8, Math.min(r.left, innerWidth - 368)) + "px"; $("sheet").style.top = (r.bottom + 8) + "px"; }
+  });
   $("themeBtn").onclick = () => { const r = document.documentElement; const dark = (r.dataset.theme || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")) === "dark";
     r.dataset.theme = dark ? "light" : "dark"; store.set("hs.theme", r.dataset.theme); render(); };
   const th = store.get("hs.theme"); if (th) document.documentElement.dataset.theme = th;
+  const h = decodeURIComponent((location.hash || "").slice(1)); if (M.states.includes(h)) S.state = h;      // shareable link: /#Johor
 }
-function onAreaChange(){ const f = LF[S.area]; if (S.mode === "live" && !(f && f.ok) && LIVE) { /* stay live: panel shows 'waiting' */ } applyLiveToInputs(); render(); }
 function setMode(m){
   if (m === "live" && !LIVE) return;
-  S.mode = m; if (m === "live") applyLiveToInputs(); render();
+  S.mode = m; render();
 }
 
 /* ------------------------------ render ------------------------------ */
 function render(){
-  const area = AREA[S.area], f = curFeat(), live = S.mode === "live";
-  const stt = liveStatus(), T = timingCosts();
+  const live = S.mode === "live", stt = liveStatus(), T = timingCosts();
+  computeRisk(T); stateSummary();
+  S.area = resolveArea();
+  if (live) applyLiveToInputs();
+  const area = AREA[S.area], f = curFeat();
   $("liveBadge").innerHTML = `<i class="dot ${stt.level === "fresh" ? "pulse" : ""}" style="--c:${stt.c}"></i>${stt.t}`;
   $("liveBadge").title = LIVE ? `Source: ${LIVE.via || "live.json"}${LIVE.source ? " (" + LIVE.source + ")" : ""}` : "";
   $("banner").innerHTML = LIVE_ERR ? `<div class="banner" style="--c:var(--warn)">Live feed not loaded (${LIVE_ERR}). Showing What-if mode; the live view needs <code>live.json</code> served over http(s).</div>`
@@ -461,7 +651,19 @@ function render(){
   $("modeLive").setAttribute("aria-pressed", live); $("modeWhat").setAttribute("aria-pressed", !live);
   $("modeLive").disabled = !LIVE;
   document.querySelectorAll("#am,#noon,#a3,#now,#prev").forEach(i => i.disabled = live);
-  $("state").value = S.state; $("area").value = S.area;
+
+  // filter bar / floating button
+  const wst = S.state ? ST[S.state] : null, wAll = Object.values(ST).filter(s => s.apiMax != null).sort((x, y) => y.apiMax - x.apiMax)[0], wScope = wst || wAll;
+  $("stateBtnTxt").textContent = S.state || "Malaysia";
+  $("stateDot").style.setProperty("--c", wScope && wScope.apiMax != null ? band(wScope.apiMax)[2] : "var(--ink3)");
+  $("fab").dataset.on = S.state ? "1" : "0"; $("fab").title = `Filter by state (showing ${S.state || "Malaysia"})`;
+  const sel = $("area");
+  if (S.state){
+    sel.innerHTML = `<option value="">Highest risk (auto)</option>` + areasOf(S.state).map(a => `<option value="${a.key}">${a.name}${RISK[a.key] ? " · " + pct(RISK[a.key].P.close) : ""}</option>`).join("");
+    sel.value = S.pick || ""; sel.disabled = false;
+  } else { sel.innerHTML = `<option>All stations · open a state to choose</option>`; sel.disabled = true; }
+  if (sheetOpen) buildSheet();
+
   $("hLbl").textContent = hl(S.H);
   $("nowLbl").firstChild.textContent = `API at ${hl(S.H)} `; $("a3Lbl").firstChild.textContent = `API at ${hl(S.H - 3)} `;
   const fmt = {amV:S.am,noonV:S.noon,a3V:S.a3,nowV:S.now,prevV:S.prev}; for (const k in fmt) $(k).textContent = fmt[k];
@@ -470,8 +672,7 @@ function render(){
   document.querySelectorAll("#hours .pill").forEach(b => { b.setAttribute("aria-pressed", +b.dataset.h === S.H); b.disabled = live; });
   document.querySelectorAll("#streak .pill").forEach(b => { b.setAttribute("aria-pressed", +b.dataset.n === S.streak); b.disabled = live; });
   $("hourNote").textContent = live ? "Live mode follows the latest reported hour. Outlined hours are candidate announcement times." : "What-if: edit any reading below.";
-  $("inputNote").textContent = live ? (f && f.ok ? `From the DOE live buffer for ${area.name}.${f.approx ? " Yesterday's mean is approximate (partial history)." : ""}` : (f && f.reason) || "") : "";
-  $("areaNote").textContent = area.schools ? `${fmtN(area.schools)} schools · ${fmtN(area.students)} students · ${fmtN(area.teachers)} teachers (${area.districts.join(", ")})` : "No district is mapped to this station (its surroundings are counted under neighbouring stations).";
+  $("inputNote").textContent = live ? (f && f.ok ? `Readings for ${area.name} from the DOE live buffer.${f.approx ? " Yesterday's mean is approximate (partial history)." : ""}` : (f && f.reason) || "") : `Editing ${area.name}, ${area.state}.`;
 
   const P = predict(S, area.state), thr = triggerFor(T, S.H);
   const ok = !live || !!(f && f.ok);
@@ -483,28 +684,34 @@ function render(){
   else v = {c:"var(--ok)", t:"Recommendation", h:"Open as normal", p:`Closure risk ${pct(P.close)}; 7 AM API expected around ${Math.round(P.q[1])} (80% range ${Math.round(P.q[0])}–${Math.round(P.q[2])}).`};
   if (ok && area.days < 365) v.p += ` ⚠ Only ${area.days} days of history for this station – wider uncertainty than the headline suggests.`;
   if (ok && P.extrap) v.p += " ⚠ Inputs are outside the range seen in training – indicative only.";
+  const act = flagsFor("", true).filter(f => f.key === S.area);
+  if (ok && act.length) v.p += ` ⚠ Data check: ${act[0].msg}.`;
   $("verdict").style.setProperty("--vc", v.c); $("vt").textContent = `${area.name} · ${area.state} · ${v.t}`; $("vh").textContent = v.h; $("vp").textContent = v.p;
   $("ringV").textContent = !ok ? "–" : P.close < .01 ? "<1%" : P.close > .99 ? ">99%" : Math.round(P.close * 100) + "%";
   $("ringArc").style.strokeDashoffset = ok ? 314 * (1 - clamp(P.close, 0, 1)) : 314;
 
-  const eS = ok ? P.close * area.schools : 0, eStu = ok ? P.close * area.students : 0;
   const K = [["7 AM API > 100", P.y100, "unhealthy"], ["7 AM API > 150", P.y150, "very unhealthy"], ["API > 180 in school hours", P.y180, "closure trigger"], ["Streak rule", P.daysOver >= 2 ? P.ymean150 : 0, P.daysOver >= 2 ? "tomorrow mean > 150" : "needs ≥2 prior days > 150"]];
   $("kpis").innerHTML = K.map(k => `<div class="kpi"><span>${k[0]}</span><b>${ok ? pct(k[1]) : "–"}</b><em>${k[2]}</em></div>`).join("");
-  $("schTitle").textContent = area.name;
-  const stT = area.teachers ? (area.students / area.teachers).toFixed(1) : "–";
-  $("sch").innerHTML = [["Schools in area", fmtN(area.schools), `govt primary + secondary${area.tertiary ? ` · +${area.tertiary} public universities` : ""}`],
-      ["Students", fmtN(area.students), `${fmtN(area.teachers)} teachers · ${stT} pupils per teacher`],
-      ["Expected affected", ok ? fmtN(eS) : "–", ok ? `${fmtN(eStu)} students · ${fmtN(P.close * area.teachers)} teachers` : "waiting for readings"],
-      ["If closed", fmtN(area.schools), `${fmtN(area.students)} students · ${fmtN(area.teachers)} teachers`]]
-    .map(k => `<div class="kpi"><span>${k[0]}</span><b>${k[1]}</b><em>${k[2]}</em></div>`).join("");
-  $("schNote").textContent = M.meta.schools ? `Source: ${M.meta.schools.source}, ${M.meta.schools.year.slice(0,4)} (${M.meta.schools.scope}). Districts are assigned to their nearest DOE station (data/district_station_map.csv) – an approximation.` : "School data unavailable in this build.";
+
+  // schools impacted: STATE level, shown once a state is chosen
+  $("schPanel").style.display = S.state ? "" : "none";
+  if (S.state){
+    const c = sch(S.state), ps = live && ST[S.state].maxP >= 0 ? ST[S.state].maxP : P.close, who = live && ST[S.state].maxA ? ST[S.state].maxA : area.name;
+    $("schTitle").textContent = S.state;
+    $("sch").innerHTML = [[`Schools in ${S.state}`, fmtN(c.schools), `govt primary + secondary${c.ipta ? ` · +${c.ipta} public universit${c.ipta > 1 ? "ies" : "y"}` : ""}`],
+        ["Students and teachers", fmtN(c.students), `${fmtN(c.teachers)} teachers · ${c.teachers ? (c.students / c.teachers).toFixed(1) : "–"} pupils per teacher`],
+        ["If schools close", fmtN(c.schools), `schools · ${fmtN(c.students)} students · ${fmtN(c.teachers)} teachers affected`],
+        ["Likely affected tomorrow", ok ? fmtN(ps * c.schools) : "–", ok ? `${pct(ps)} closure chance × ${fmtN(c.schools)} schools` : "waiting for readings"]]
+      .map(k => `<div class="kpi"><span>${k[0]}</span><b>${k[1]}</b><em>${k[2]}</em></div>`).join("");
+    $("schNote").textContent = `Closure chance is the state's highest-risk station (${who}${live ? "" : ", editable here"}). "Likely affected tomorrow" = that chance × the number of schools in ${S.state}; "If schools close" is the full count affected when a state-wide closure is ordered. ${M.meta.schools ? `School counts are ${M.meta.schools.level}-level totals from ${M.meta.schools.source.replace("data.gov.my / OpenDOSM catalogue: ", "OpenDOSM/data.gov.my: ")} (${M.meta.schools.year.slice(0, 4)}; ${M.meta.schools.scope}).` : ""}`;
+  }
 
   const lead = ["best","base","worst"].reduce((a, k) => P[k] > P[a] ? k : a, "best");
   $("scen").innerHTML = ["best","base","worst"].map(k => `<div class="sc ${ok && k === lead ? "lead" : ""}" style="--c:${SCN[k].c}"><h3>${SCN[k].name}</h3><div class="p">${ok ? pct(P[k]) : "–"}</div><p>${SCN[k].txt}</p></div>`).join("");
   $("stack").innerHTML = ok ? ["best","base","worst"].map(k => `<i style="width:${P[k] * 100}%;background:${SCN[k].c}"></i>`).join("") : "";
   $("stackLeg").innerHTML = ok ? ["best","base","worst"].map(k => `<span><i style="background:${SCN[k].c}"></i>${SCN[k].name.split(" ·")[0]} ${pct(P[k])}</span>`).join("") : "";
 
-  const tot = drawOverview(T); drawSky(tot); drawTrend(P, f, ok); drawTiming(T); drawTable(T); drawClim(area); drawSpark(f);
+  const tot = scopeTotals(); drawSky(tot); drawOverview(tot); drawXcPanel(); drawXcStation(P, thr, ok); drawTrend(P, f, ok); drawTiming(T); drawTable(T); drawClim(area); drawSpark(f);
   $("timingNote").textContent = T.bestH ? `★ ${hl(T.bestH)} minimises total expected cost at your preferences (missed closure = ${S.cfn}× needless closure; each hour later = ${S.lam}% of baseline). Click a bar to explore that hour in What-if.` : "No closure events in the hold-out period; timing cannot be ranked.";
   $("trendNote").textContent = ok ? `Dashed fan = model's 10–90% range for tomorrow's 7 AM reading (median ${Math.round(P.q[1])}).` : "";
 }
@@ -517,9 +724,10 @@ const isDark = () => (document.documentElement.dataset.theme || (matchMedia("(pr
 let HAZE = 0;
 function latestApi(k){ const v = LIVE.areas[k]; if (!v) return null; for (let i = v.length - 1; i >= 0; i--) if (v[i] != null) return v[i]; return null; }
 function drawSky(tot){
-  const sky = $("sky");
-  if (!LIVE){ $("bandName").textContent = "No live data"; $("bandSub").textContent = "The haze view needs live.json (serve over http/s)."; $("skyStats").innerHTML = ""; $("scale").innerHTML = ""; $("chips").innerHTML = ""; HAZE = 0; sky.style.setProperty("--haze", 0); return; }
-  const rows = M.areas.map(a => ({a, v: latestApi(a.key)})).filter(r => r.v != null).sort((x, y) => y.v - x.v);
+  const sky = $("sky"), scope = S.state || "Malaysia";
+  $("skyEy").textContent = `${scope} · haze right now`;
+  const rows = LIVE ? areasOf(S.state).map(a => ({a, v: latestApi(a.key)})).filter(r => r.v != null).sort((x, y) => y.v - x.v) : [];
+  if (!LIVE || !rows.length){ $("bandName").textContent = "No live data"; $("bandSub").textContent = LIVE ? `No station in ${scope} has reported yet.` : "The haze view needs live.json (serve over http/s)."; $("skyStats").innerHTML = ""; $("scale").innerHTML = ""; $("scaleLab").innerHTML = ""; $("chips").innerHTML = ""; HAZE = 0; sky.style.setProperty("--haze", 0); return; }
   const n = rows.length, vals = rows.map(r => r.v), mean = vals.reduce((x, y) => x + y, 0) / n;
   const top = rows.slice(0, Math.max(1, Math.ceil(n * .25))), intensity = top.reduce((x, r) => x + r.v, 0) / top.length;
   HAZE = clamp((intensity - 40) / 200, 0, 1);
@@ -530,17 +738,17 @@ function drawSky(tot){
   $("skyTime").textContent = `${LIVE.end.slice(0, 10)} · ${LIVE.end.slice(11, 16)} MYT · ${n} stations`;
   $("bandName").textContent = b[1].toUpperCase();
   const sts = new Set(rows.filter(r => r.v > 100).map(r => r.a.state));
-  $("bandSub").textContent = ge100 ? `Worst: ${w.a.name}, ${w.a.state} at API ${w.v}. ${ge100} station${ge100 > 1 ? "s" : ""} above 100 across ${sts.size} state${sts.size > 1 ? "s" : ""}.` : `Highest reading: ${w.a.name}, ${w.a.state} at API ${w.v}. No station is above 100.`;
-  const tomorrow = tot ? `${tot.risk} / ${tot.areas - tot.nodata}` : "–";
-  $("skyStats").innerHTML = [["Highest API", w.v, `${w.a.name}`], ["National mean", Math.round(mean), `median ${Math.round(vals.slice().sort((x, y) => x - y)[n >> 1])}`], ["Stations > 100", `${ge100} / ${n}`, `${ge150} above 150`], ["Tomorrow: closure risk", tomorrow, tot ? `${fmtN(tot.schoolsRisk)} schools · ${fmtN(tot.teachersRisk)} teachers` : ""]]
+  $("bandSub").textContent = ge100 ? `Worst: ${w.a.name}${S.state ? "" : ", " + w.a.state} at API ${w.v}. ${ge100} station${ge100 > 1 ? "s" : ""} above 100${S.state ? "" : ` across ${sts.size} state${sts.size > 1 ? "s" : ""}`}.` : `Highest reading: ${w.a.name}${S.state ? "" : ", " + w.a.state} at API ${w.v}. No station is above 100.`;
+  $("skyStats").innerHTML = [["Highest API", w.v, `${w.a.name}`], [S.state ? "Mean API" : "National mean", Math.round(mean), `median ${Math.round(vals.slice().sort((x, y) => x - y)[n >> 1])}`], ["Stations > 100", `${ge100} / ${n}`, `${ge150} above 150`], ["Tomorrow: closure risk", `${tot.risk} / ${tot.have}`, `${fmtN(tot.schoolsRisk)} schools · ${fmtN(tot.teachersRisk)} teachers in ${S.state ? "this state" : "states at risk"}`]]
     .map(k => `<div class="kpi"><span>${k[0]}</span><b>${k[1]}</b><em>${k[2]}</em></div>`).join("");
   const X = v => clamp(v, 0, 340) / 340 * 100;
   let acc = 0; $("scale").innerHTML = BANDS.map(bd => { const hi = Math.min(bd[0], 340), wd = X(hi) - acc; acc = X(hi); return `<i style="width:${wd}%;background:${bd[2]}"></i>`; }).join("")
     + `<div class="mark t" style="left:${X(mean)}%"><span>mean ${Math.round(mean)}</span></div><div class="mark" style="left:${X(w.v)}%;background:${b[2]}"><span>${w.a.name} ${w.v}</span></div>`;
   $("scaleLab").innerHTML = [0, 50, 100, 200, 300].map(v => `<span style="left:${X(v)}%">${v}${v === 300 ? "+" : ""}</span>`).join("");
-  const byS = {}; rows.forEach(r => { (byS[r.a.state] = byS[r.a.state] || []).push(r); });
-  $("chips").innerHTML = Object.entries(byS).map(([st, rs]) => ({st, r: rs[0]})).sort((x, y) => y.r.v - x.r.v).map(({st, r}) => `<div class="chip" data-s="${st}" style="--c:${band(r.v)[2]}" title="${band(r.v)[1]}"><b>${r.v}</b><span>${st}</span></div>`).join("");
-  $("chips").querySelectorAll(".chip").forEach(c => c.onclick = () => { S.state = c.dataset.s; fillAreaSelect(); onAreaChange(); });
+  const tiles = S.state ? rows.map(r => ({k: r.a.key, name: r.a.name, v: r.v, sel: r.a.key === S.area}))
+    : M.states.map(st => ({k: st, name: st, v: ST[st].apiMax, sel: false})).filter(t => t.v != null).sort((x, y) => y.v - x.v);
+  $("chips").innerHTML = tiles.map(t => `<div class="chip" data-k="${t.k}" style="--c:${band(t.v)[2]};${t.sel ? "outline:2px solid var(--accent)" : ""}" title="${band(t.v)[1]}"><b>${t.v}</b><span>${t.name}</span></div>`).join("");
+  $("chips").querySelectorAll(".chip").forEach(c => c.onclick = () => S.state ? selectStation(c.dataset.k) : selectState(c.dataset.k));
   startParticles();
 }
 /* drifting haze particles: density follows regional intensity; static when reduced motion is requested */
@@ -562,39 +770,120 @@ function startParticles(){
   if (!startParticles.bound){ startParticles.bound = 1; addEventListener("resize", () => { clearTimeout(startParticles.t); startParticles.t = setTimeout(startParticles, 200); }); }
 }
 
-function drawOverview(T){
-  const tot = {areas: 0, risk: 0, schoolsRisk: 0, studentsRisk: 0, teachersRisk: 0, expS: 0, expStu: 0, expTea: 0, schools: 0, students: 0, teachers: 0, tertiary: 0, nodata: 0, maxP: 0, maxA: null}, byState = {};
-  for (const a of M.areas){
-    const f = LF[a.key], b = byState[a.state] || (byState[a.state] = {state: a.state, n: 0, nd: 0, risk: 0, watch: 0, schools: 0, schRisk: 0, exp: 0, maxP: -1, maxA: null, p150: 0});
-    b.n++; b.schools += a.schools; tot.areas++; tot.schools += a.schools; tot.students += a.students; tot.teachers += a.teachers; tot.tertiary += a.tertiary;
-    if (!LIVE || !f || !f.ok){ b.nd++; tot.nodata++; continue; }
-    const P = predict(Object.assign({}, S, f), a.state), thr = triggerFor(T, f.H), c = classify(P, thr);
-    if (c === "close"){ b.risk++; b.schRisk += a.schools; tot.risk++; tot.schoolsRisk += a.schools; tot.studentsRisk += a.students; tot.teachersRisk += a.teachers; }
-    if (c === "watch") b.watch++;
-    b.exp += P.close * a.schools; tot.expS += P.close * a.schools; tot.expStu += P.close * a.students; tot.expTea += P.close * a.teachers;
-    b.p150 = Math.max(b.p150, P.y150);
-    if (P.close > b.maxP){ b.maxP = P.close; b.maxA = a.name; }
-    if (P.close > tot.maxP){ tot.maxP = P.close; tot.maxA = `${a.name}, ${a.state}`; }
+function drawOverview(tot){
+  const scope = S.state || "Malaysia", c = S.state ? sch(S.state) : {schools: tot.schools, students: tot.students, teachers: tot.teachers, ipta: tot.ipta};
+  $("ovTitle").textContent = scope;
+  $("ovSub").textContent = LIVE ? `${tot.have}/${tot.have + tot.nodata} stations reporting · latest hour ${LIVE.end.slice(11, 16)} MYT` : "live feed unavailable";
+  let Hk, head, body;
+  if (!S.state){
+    Hk = [["Stations at closure risk", `${tot.risk} / ${tot.have}`, tot.maxA ? `highest: ${tot.maxA} (${pct(tot.maxP)})` : "no data"],
+          ["Schools in states at risk", fmtN(tot.schoolsRisk), `${tot.statesRisk} of ${M.states.length} states · ${fmtN(tot.studentsRisk)} students · ${fmtN(tot.teachersRisk)} teachers`],
+          ["Schools likely affected", fmtN(tot.expS), `closure chance × schools, state by state · ${fmtN(tot.expStu)} students`],
+          ["# schools monitored", fmtN(c.schools), `${fmtN(c.students)} students · ${fmtN(c.teachers)} teachers · ${fmtN(c.ipta)} public universities`]];
+    head = `<thead><tr><th>State</th><th>Status</th><th>Top station</th><th>Closure</th><th>7AM&gt;150</th><th>Stns</th><th># schools in area</th></tr></thead>`;
+    body = Object.values(ST).sort((x, y) => y.maxP - x.maxP || x.st.localeCompare(y.st)).map(b => {
+      const nd = b.maxP < 0, [col, lab] = STAT[b.c];
+      return `<tr class="row" data-k="${b.st}"><td>${b.st}</td><td><span class="tag" style="--c:${col}">${lab}</span>${flagChip(b.flags)}</td><td>${b.maxA || "–"}</td>
+        <td>${nd ? "–" : pct(b.maxP)}<span class="mini" style="--c:${col}"><i style="width:${Math.max(0, b.maxP) * 100}%"></i></span></td><td>${nd ? "–" : pct(b.p150)}</td>
+        <td>${nd ? "–" : b.risk + " / " + (b.n - b.nd)}</td><td>${fmtN(sch(b.st).schools)}</td></tr>`; }).join("");
+  } else {
+    Hk = [["Stations at closure risk", `${tot.risk} / ${tot.have}`, tot.maxA ? `highest: ${tot.maxA.split(",")[0]} (${pct(tot.maxP)})` : "no data"],
+          [`# schools in ${S.state}`, fmtN(c.schools), `${fmtN(c.students)} students · ${fmtN(c.teachers)} teachers${c.ipta ? ` · ${c.ipta} public universit${c.ipta > 1 ? "ies" : "y"}` : ""}`],
+          ["State closure chance", tot.maxP > 0 || tot.have ? pct(tot.maxP) : "–", "highest-risk station in the state"],
+          ["Schools likely affected", fmtN(tot.expS), `${pct(tot.maxP)} × ${fmtN(c.schools)} schools`]];
+    head = `<thead><tr><th>Station</th><th>Status</th><th>API now</th><th>Closure</th><th>7AM&gt;150</th><th>Data check</th></tr></thead>`;
+    body = ST[S.state].rows.slice().sort((x, y) => (y.r ? y.r.P.close : -1) - (x.r ? x.r.P.close : -1)).map(x => {
+      const cl = x.r ? x.r.c : "none", [col, lab] = STAT[cl];
+      return `<tr class="row ${x.a.key === S.area ? "sel" : ""}" data-k="${x.a.key}"><td>${x.a.name}</td><td><span class="tag" style="--c:${col}">${lab}</span></td>
+        <td>${x.v ?? "–"}</td><td>${x.r ? pct(x.r.P.close) : "–"}<span class="mini" style="--c:${col}"><i style="width:${x.r ? x.r.P.close * 100 : 0}%"></i></span></td><td>${x.r ? pct(x.r.P.y150) : "–"}</td>
+        <td>${gradeTag(x.a.key)}${flagChip(flagsFor(S.state, true).filter(f => f.key === x.a.key))}</td></tr>`; }).join("");
   }
-  const have = tot.areas - tot.nodata;
-  $("ovSub").textContent = LIVE ? `${have}/${tot.areas} stations reporting · latest hour ${LIVE.end.slice(11, 16)} MYT` : "live feed unavailable";
-  const Hk = [["Stations at closure risk", `${tot.risk} / ${have}`, tot.maxA ? `highest: ${tot.maxA} (${pct(tot.maxP)})` : "no data"],
-             ["Schools in those areas", fmtN(tot.schoolsRisk), `${fmtN(tot.studentsRisk)} students · ${fmtN(tot.teachersRisk)} teachers (${(tot.studentsRisk / tot.students * 100).toFixed(1)}% of pupils)`],
-             ["Expected schools affected", fmtN(tot.expS), `${fmtN(tot.expStu)} students · ${fmtN(tot.expTea)} teachers · prob.-weighted`],
-             ["Monitored nationally", fmtN(tot.schools), `${fmtN(tot.students)} students · ${fmtN(tot.teachers)} teachers · ${fmtN(tot.tertiary)} public universities`]];
   $("hero").innerHTML = Hk.map((k, i) => `<div class="kpi"><span>${k[0]}</span><b style="${i === 0 && tot.risk ? "color:var(--bad)" : ""}">${k[1]}</b><em>${k[2]}</em></div>`).join("");
-  const order = Object.values(byState).sort((x, y) => y.maxP - x.maxP || x.state.localeCompare(y.state));
-  const head = `<thead><tr><th>State</th><th>Status</th><th>Top station</th><th>Closure</th><th>7AM&gt;150</th><th>Stns</th><th>Schools at risk</th><th>Exp. schools</th></tr></thead>`;
-  const body = order.map(b => {
-    const nd = b.maxP < 0, c = nd ? "none" : b.risk ? "close" : b.watch ? "watch" : "ok", [col, lab] = STAT[c];
-    return `<tr class="row ${b.state === S.state ? "sel" : ""}" data-s="${b.state}"><td>${b.state}</td><td><span class="tag" style="--c:${col}">${lab}</span></td><td>${b.maxA || "–"}</td>
-      <td>${nd ? "–" : pct(b.maxP)}<span class="mini" style="--c:${col}"><i style="width:${Math.max(0, b.maxP) * 100}%"></i></span></td><td>${nd ? "–" : pct(b.p150)}</td>
-      <td>${nd ? "–" : b.risk + " / " + (b.n - b.nd)}</td><td>${nd ? "–" : fmtN(b.schRisk)}</td><td>${nd ? "–" : fmtN(b.exp)}</td></tr>`; }).join("");
+  $("stTable").className = S.state ? "stn" : "nat";
   $("stTable").innerHTML = head + `<tbody>${body}</tbody>`;
-  $("stTable").querySelectorAll("tr.row").forEach(r => r.onclick = () => { S.state = r.dataset.s; fillAreaSelect(); onAreaChange(); });
-  $("ovNote").textContent = "Click a state to open its stations. 'Stns' = stations at risk / reporting. Status uses the cost-optimal closure trigger for the latest hour; 'Expected' weights each station's schools by its closure probability.";
+  $("stTable").querySelectorAll("tr.row").forEach(r => r.onclick = () => S.state ? selectStation(r.dataset.k) : selectState(r.dataset.k));
+  $("ovNote").textContent = S.state ? "Click a station to open it below. Closure = chance that the next-day closure triggers are met at that station."
+    : "Click a state to open its stations. A state's closure chance is its highest-risk station; 'Stns' = stations at risk / reporting; '# schools in area' = government primary + secondary schools in the state; 'Schools likely affected' = closure chance × those schools, summed over states.";
   $("overview").style.display = LIVE ? "" : "none";
-  return tot;
+}
+
+function drawXcPanel(){
+  const panel = $("xcPanel"), banner = $("xcBanner");
+  if (!XC){ panel.style.display = "none"; banner.innerHTML = ""; return; }
+  panel.style.display = "";
+  const scope = S.state || "Malaysia"; $("xcScope").textContent = scope;
+  const keys = Object.keys(XC.stations).filter(k => AREA[k] && isActive(AREA[k]) && (!S.state || AREA[k].state === S.state));
+  const all = flagsFor(S.state, false), live = all.filter(isLiveFlag), crit = all.filter(f => f.severity === "critical"), critLive = live.filter(f => f.severity === "critical");
+  const g = {A: 0, B: 0, C: 0}; keys.forEach(k => { const x = gradeOf(k); if (g[x] != null) g[x]++; });
+  const corr = keys.map(k => XC.stations[k].stats.corr).sort((a, b) => a - b), w1 = keys.map(k => XC.stations[k].stats.within1).sort((a, b) => a - b);
+  const med = a => a.length ? a[a.length >> 1] : null, flagged = new Set(all.map(f => f.key)).size;
+  $("xcHero").innerHTML = [
+    ["Stations flagged (last 5 days)", `${flagged} / ${keys.length}`, `${all.length} report${all.length === 1 ? "" : "s"} · ${crit.length} critical · ${live.length} still active`],
+    ["Closure-level readings unconfirmed", `${all.filter(f => f.type === "high" && f.severity === "critical").length}`, "DOE ≥ 150 that Open-Meteo does not support"],
+    ["Possible under-reporting in haze", `${all.filter(f => f.type === "low" && f.severity === "critical").length}`, "Open-Meteo ≥ 150 while DOE < 100"],
+    ["Reliability A · B · C", `${g.A} · ${g.B} · ${g.C}`, `median correlation ${med(corr) != null ? med(corr).toFixed(2) : "–"} · ${med(w1) != null ? (med(w1) * 100).toFixed(1) : "–"}% within one band`]]
+    .map((k, i) => `<div class="kpi"><span>${k[0]}</span><b style="${i === 0 && flagged ? "color:var(--warn)" : ""}">${k[1]}</b><em>${k[2]}</em></div>`).join("");
+  const show = S.xcAll ? all : all.slice(0, 8);
+  $("xcList").innerHTML = (all.length ? show.slice().sort((a, b) => (b.severity === "critical") - (a.severity === "critical") || b.end.localeCompare(a.end)).map(f => {
+    const c = f.severity === "critical" ? "var(--bad)" : "var(--warn)";
+    return `<div class="frow" data-k="${f.key}" style="--c:${c}" tabindex="0" role="button">
+      <span class="gr g${gradeOf(f.key) || ""}">${gradeOf(f.key) || "?"}</span>
+      <div><div class="ti">${f.name} · ${f.state} — ${FL_LABEL[f.type]}${isLiveFlag(f) ? `<span class="live">ACTIVE</span>` : ""}</div><div class="sub2">${f.msg}</div></div>
+      <div class="when">${fmtT(f.start)} → ${fmtT(f.end).slice(-5)}<br>${f.hours} h${f.om != null ? ` · DOE ${f.doe} vs ≈${f.om}` : ""}</div></div>`; }).join("")
+    + (all.length > 8 ? `<button class="btn" id="xcMore" style="margin-top:2px">${S.xcAll ? "Show fewer" : `Show all ${all.length} flagged reports`}</button>` : "")
+    : `<div class="frow" style="--c:var(--ok);cursor:default"><span></span><div><div class="ti">No flagged reports in ${scope}</div><div class="sub2">Every station in scope is consistent with the independent source over the last 5 days.</div></div></div>`);
+  $("xcList").querySelectorAll(".frow[data-k]").forEach(r => { r.onclick = () => selectStation(r.dataset.k); r.onkeydown = e => { if (e.key === "Enter") selectStation(r.dataset.k); }; });
+  const more = $("xcMore"); if (more) more.onclick = () => { S.xcAll = !S.xcAll; drawXcPanel(); };
+  // alert banner: closure-level readings that are not corroborated, still active
+  banner.innerHTML = critLive.length ? `<div class="banner" style="--c:var(--bad)">⚠ <b>${critLive.length} unconfirmed closure-level report${critLive.length > 1 ? "s" : ""}</b> in ${scope}: ${[...new Set(critLive.map(f => `${f.name}${S.state ? "" : " (" + f.state + ")"}`))].slice(0, 4).join(", ")}. The independent source does not back ${critLive.length > 1 ? "them" : "it"} – verify before acting. See <b>Data check</b> below.</div>` : "";
+  // how good is the independent source on its own?
+  const bo = M.backtest_om;
+  $("xcCmp").innerHTML = bo ? `<table><thead><tr><th>Next-day closure forecast, skill vs base rate</th>${AH.map(H => `<th>${hl(H)}</th>`).join("")}</tr></thead><tbody>
+    <tr><td>From the DOE feed</td>${AH.map(H => `<td>${(M.backtest[H].metrics.close.bss * 100).toFixed(0)}%</td>`).join("")}</tr>
+    <tr><td>From Open-Meteo alone</td>${AH.map(H => `<td>${bo[H] ? (bo[H].metrics.close.bss * 100).toFixed(0) + "%" : "–"}</td>`).join("")}</tr></tbody></table>` : "";
+  $("xcNote").innerHTML = `<b>How to read this.</b> Open-Meteo (Copernicus CAMS atmospheric model, ~25 km grid) is an independent estimate of the same air. Its 24-hour mean US AQI is mapped to each station's own DOE scale, and the range DOE normally falls in is measured from history. A flag means a <i>sustained, decision-relevant</i> gap (≥ 4 h, DOE at/over 100 or Open-Meteo at/over 100), a repeated value for a day, or a one-hour jump the other source does not share. <b>"Unconfirmed" is not "wrong"</b>: a model cannot see a single chimney or refinery, so local sources look unconfirmed. Grade C stations should be verified before closing schools. Contains modified Copernicus Atmosphere Monitoring Service information, via <a href="https://open-meteo.com/" style="color:inherit">Open-Meteo.com</a> (CC BY 4.0).`;
+}
+function drawXcStation(P, thr, ok){
+  const sec = $("xcStation"), k = S.area, x = XC && XC.stations[k];
+  if (!x || !LIVE){ sec.style.display = "none"; return; }
+  sec.style.display = ""; $("xcsName").textContent = `${AREA[k].name}, ${AREA[k].state}`;
+  const N = 72, lEnd = liveEndMs(), xEnd = xcEnd(), vals = LIVE.areas[k], nL = LIVE.hours, nX = XC.hours;
+  const pts = [];
+  for (let j = N - 1; j >= 0; j--){
+    const t = lEnd - j * 36e5, iL = nL - 1 - j, iX = nX - 1 - Math.round((xEnd - t) / 36e5);
+    pts.push({t, d: vals[iL] ?? null, e: iX >= 0 && iX < nX ? x.om[iX] : null, lo: iX >= 0 && iX < nX ? x.lo[iX] : null, hi: iX >= 0 && iX < nX ? x.hi[iX] : null});
+  }
+  const svg = $("xcChart"); svg.innerHTML = "";
+  const W = 520, Hh = 230, L = 36, R = 10, Tp = 10, B = 34, mx = Math.max(160, ...pts.map(p => Math.max(p.d ?? 0, p.hi ?? 0, p.e ?? 0))) * 1.06;
+  const xs = i => L + i / (N - 1) * (W - L - R), ys = v => Tp + (1 - v / mx) * (Hh - Tp - B);
+  [100, 150, 180].forEach(v => { if (v < mx){ el("line", {x1:L, x2:W-R, y1:ys(v), y2:ys(v), stroke: v === 100 ? "var(--warn)" : "var(--bad)", "stroke-dasharray":"3 4", opacity:.45}, svg); el("text", {x:L-6, y:ys(v)+4, "text-anchor":"end"}, svg, v); } });
+  for (let i = 0; i < N; i += 12){ el("text", {x:xs(i), y:Hh-12, "text-anchor":"middle"}, svg, `${new Date(pts[i].t).getUTCDate()} ${MON[new Date(pts[i].t).getUTCMonth()]} ${String(new Date(pts[i].t).getUTCHours()).padStart(2, "0")}h`); }
+  // flagged periods
+  XC.flags.filter(f => f.key === k).forEach(f => {
+    const a = Date.parse(f.start + ":00Z"), b = Date.parse(f.end + ":00Z");
+    const i0 = clamp(Math.round((a - pts[0].t) / 36e5), 0, N - 1), i1 = clamp(Math.round((b - pts[0].t) / 36e5), 0, N - 1);
+    if (b < pts[0].t) return;
+    const r = el("rect", {x: xs(i0) - 2, y: Tp, width: Math.max(4, xs(i1) - xs(i0) + 4), height: Hh - Tp - B, fill: f.severity === "critical" ? "var(--bad)" : "var(--warn)", opacity: .16}, svg);
+    r.onmousemove = ev => showTip(ev, `<b>${FL_LABEL[f.type]}</b><br>${f.msg}`); r.onmouseleave = hideTip;
+  });
+  const ok2 = pts.map((p, i) => ({...p, i})).filter(p => p.lo != null && p.hi != null);
+  if (ok2.length > 1) el("path", {d: "M" + ok2.map(p => `${xs(p.i)},${ys(p.hi)}`).join(" L") + " L" + ok2.slice().reverse().map(p => `${xs(p.i)},${ys(p.lo)}`).join(" L") + " Z", fill: "var(--accent2)", opacity: .17}, svg);
+  const line = (key, col, w, dash) => { const q = pts.map((p, i) => ({v: p[key], i})).filter(p => p.v != null); if (q.length > 1) el("path", {d: q.map((p, j) => (j ? "L" : "M") + xs(p.i) + "," + ys(p.v)).join(" "), stroke: col, "stroke-width": w, fill: "none", "stroke-linejoin": "round", "stroke-dasharray": dash || ""}, svg); };
+  line("e", "var(--accent2)", 2, "5 4"); line("d", "var(--accent)", 2.6);
+  const hit = el("rect", {x: L, y: Tp, width: W - L - R, height: Hh - Tp - B, fill: "transparent"}, svg);
+  hit.onmousemove = ev => { const r = svg.getBoundingClientRect(), i = clamp(Math.round((ev.clientX - r.left) / r.width * W - L) / (W - L - R) * (N - 1), 0, N - 1) | 0, p = pts[Math.round(i)];
+    showTip(ev, `<b>${fmtT(new Date(p.t).toISOString().slice(0, 16))}</b><br>DOE ${p.d ?? "–"}<br>Open-Meteo ≈ ${p.e ?? "–"}${p.lo != null ? ` (range ${p.lo}–${p.hi})` : ""}`); };
+  hit.onmouseleave = hideTip;
+  $("xcLeg").innerHTML = `<span><i style="background:var(--accent)"></i>DOE API</span><span><i style="background:var(--accent2)"></i>Open-Meteo on the DOE scale</span><span><i style="background:var(--accent2);opacity:.35"></i>expected range (95%)</span><span><i style="background:var(--bad);opacity:.4"></i>flagged period</span>`;
+  const st = x.stats, pd = RISK[k] ? RISK[k].P.close : null, po = RISKX[k] ? RISKX[k].P.close : null, thr2 = RISK[k] ? RISK[k].thr : 0.5;
+  const sameSide = pd != null && po != null ? (pd >= thr2) === (po >= thr2) : null;
+  $("xcFacts").innerHTML = `
+    <div class="kpi"><span>Reliability vs Open-Meteo</span><b>${gradeTag(k)} ${x.grade === "A" ? "Agrees closely" : x.grade === "B" ? "Usable" : "Verify before acting"}</b><em>correlation ${st.corr} · typical gap ${st.mae} pts · same band ${(st.same_band * 100).toFixed(0)}% · within one band ${(st.within1 * 100).toFixed(1)}%</em></div>
+    <div class="kpi"><span>High readings corroborated</span><b>${st.n_150 >= 20 ? (st.corroborated_150 * 100).toFixed(0) + "%" : "n/a"}</b><em>${st.n_150 >= 20 ? `of ${fmtN(st.n_150)} hours with DOE ≥ 150, Open-Meteo also ≥ 100` : "too few high readings to judge"}</em></div>
+    <div class="cmp"><div class="kpi ${sameSide === true ? "agree" : sameSide === false ? "differ" : ""}"><span>Closure chance · DOE feed</span><b>${pd != null ? pct(pd) : "–"}</b><em>${pd != null ? "trigger " + pct(thr2) : ""}</em></div>
+    <div class="kpi ${sameSide === true ? "agree" : sameSide === false ? "differ" : ""}"><span>Closure chance · Open-Meteo only</span><b>${po != null ? pct(po) : "–"}</b><em>${sameSide === null ? "second opinion unavailable" : sameSide ? "same side of the trigger" : "sources disagree – verify"}</em></div></div>`;
+  const myFlags = flagsFor("", false).filter(f => f.key === k);
+  $("xcsNote").textContent = myFlags.length ? `${myFlags.length} flagged report${myFlags.length > 1 ? "s" : ""} for this station in the last 5 days (shaded). ${myFlags.slice(-1)[0].msg}.` : "No flagged reports for this station in the last 5 days.";
 }
 
 function drawTrend(P, f, ok){
@@ -687,10 +976,18 @@ async function fetchLive(){
   }
   throw err;
 }
+async function fetchXc(){
+  for (const u of ["api/xcheck", "xcheck.json"]){
+    try{ const r = await fetch(u + "?t=" + Date.now(), {cache: "no-store"}); if (!r.ok) continue; const j = await r.json(); if (j && j.stations && j.end) return j; }catch(e){ /* try next */ }
+  }
+  return null;
+}
 async function loadLive(){
+  const xp = fetchXc();
   try{ LIVE = await fetchLive(); LIVE_ERR = null; }
   catch(e){ if (!LIVE) LIVE_ERR = e.message || "network error"; }
-  deriveLive();
+  const x = await xp; if (x) XC = x;
+  deriveLive(); deriveXc();
   if (S.mode === "live") applyLiveToInputs();
   render();
 }
@@ -699,13 +996,10 @@ async function loadLive(){
 $("dataBadge").textContent = `Model: ${M.meta.start} → ${M.meta.end} · ${M.areas.length} stations · ${M.states.length} states`;
 if (M.meta.synthetic){ const b = document.createElement("span"); b.className = "badge demo"; b.textContent = "⚠ SYNTHETIC DEMO DATA – not for real decisions"; $("dataBadge").before(b); }
 const dq = Object.entries(M.meta.quality || {}).map(([k, v]) => `${k}: ${Object.entries(v).filter(([, n]) => n).map(([a, n]) => `${fmtN(n)} ${a.replace(/_/g, " ")}`).join(", ") || "clean"}`).join(" · ");
-$("foot").innerHTML = `<b>How it works.</b> For every station and each hour from 12:00 to 23:00, logistic models learn P(7 AM API &gt; 100 / &gt; 150), P(API &gt; 180 during school hours tomorrow) and P(tomorrow's mean &gt; 150) from today's 8 AM, noon, 3-hour trend and latest readings, yesterday's mean, the over-150 streak and season, plus a state effect. Closure risk = P(&gt;180) + remaining × [streak ≥ 2] × P(mean &gt; 150), mirroring KPM's triggers (API &gt; 180, or &gt; 150 for three days). The live view recomputes every station whenever a new hourly DOE report lands (the page re-checks every 5 minutes). Readings stamped after the current Malaysia hour, non-numeric flags and values outside 1–500 are discarded before use. The best announcement time minimises backtested wrong-call cost plus the lateness penalty you set. Schools: government primary + secondary schools and enrolment from data.gov.my (OpenDOSM catalogue), by district, assigned to the nearest station. ${dq ? "<br>Data quality at build — " + dq + "." : ""} Stations with short history (Sabah, Sarawak, Kelantan and Labuan have DOE data only from Sep 2023) carry wider uncertainty. Decision support only: confirm with the official APIMS reading and MetMalaysia forecast. Built ${M.meta.built}.`;
+$("foot").innerHTML = `<b>How it works.</b> For every station and each hour from 12:00 to 23:00, logistic models learn P(7 AM API &gt; 100 / &gt; 150), P(API &gt; 180 during school hours tomorrow) and P(tomorrow's mean &gt; 150) from today's 8 AM, noon, 3-hour trend and latest readings, yesterday's mean, the over-150 streak and season, plus a state effect. Closure risk = P(&gt;180) + remaining × [streak ≥ 2] × P(mean &gt; 150), mirroring KPM's triggers (API &gt; 180, or &gt; 150 for three days). The live view recomputes every station whenever a new hourly DOE report lands (the page re-checks every 5 minutes). Readings stamped after the current Malaysia hour, non-numeric flags and values outside 1–500 are discarded before use. The best announcement time minimises backtested wrong-call cost plus the lateness penalty you set. Schools: government primary + secondary schools, students and teachers by state from data.gov.my (OpenDOSM catalogue); every DOE station carries its state, so impact is counted state by state. ${dq ? "<br>Data quality at build — " + dq + "." : ""} Stations with short history (Sabah, Sarawak, Kelantan and Labuan have DOE data only from Sep 2023) carry wider uncertainty. Decision support only: confirm with the official APIMS reading and MetMalaysia forecast. Built ${M.meta.built}.`;
 buildControls();
-S.state = AREA["WP Kuala Lumpur|Cheras"] ? "WP Kuala Lumpur" : M.states[0];
-fillAreaSelect(); render();
-loadLive().then(() => {
-  if (LIVE){ S.area = pickDefaultArea(); S.state = AREA[S.area].state; fillAreaSelect(); S.mode = "live"; applyLiveToInputs(); render(); }
-});
+render();
+loadLive().then(() => { if (LIVE){ S.mode = "live"; render(); } });
 setInterval(loadLive, 5 * 60 * 1000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) loadLive(); });
 </script>
