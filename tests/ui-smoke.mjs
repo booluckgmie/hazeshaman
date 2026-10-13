@@ -12,7 +12,7 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); 
 { const p = await b.newPage({ viewport: { width: 1200, height: 900 } }); const bad = [];
   p.on('response', r => r.status() >= 400 && bad.push(r.status() + ' ' + r.url()));
   await p.goto(`${BASE}/guide`); await p.evaluate(() => document.querySelectorAll('img').forEach(i => i.loading = 'eager')); await p.waitForTimeout(1500);
-  ok(await p.evaluate(() => [...document.images].length === 8 && [...document.images].every(i => i.complete && i.naturalWidth > 0)), 'guide: 8 images load'); ok(bad.length === 0, 'guide: no 4xx ' + bad.join()); await p.close(); }
+  ok(await p.evaluate(() => [...document.images].length === 9 && [...document.images].every(i => i.complete && i.naturalWidth > 0)), 'guide: 9 images load'); ok(bad.length === 0, 'guide: no 4xx ' + bad.join()); await p.close(); }
 // 2) filter behaviour (desktop): keyboard, deep link, scoping
 { const p = await b.newPage({ viewport: { width: 1400, height: 1000 } }); const errs = []; p.on('pageerror', e => errs.push(String(e)));
   await p.goto(`${BASE}/#Selangor`); await p.waitForSelector('#bandName:not(:empty)'); await p.waitForTimeout(1500);
