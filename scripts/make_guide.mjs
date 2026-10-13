@@ -170,7 +170,35 @@ await compose('05-station-detail.png', 'Step 5 · One station', 'Recommendation,
   '<b>Three scenarios</b> – best (improving), base (unstable), worst (closure). The framed one is the most likely.'], stamp);
 await clearAnn();
 
-/* ---------- 6. announcement time: default view, then change the preference ---------- */
+/* ---------- 6. data check: is every DOE report backed by an independent source? ---------- */
+await page.evaluate(() => selectState('')); await page.waitForTimeout(600);
+await injectAnn([{ sel: '#xcHero', n: 1, pos: 'tl' }, { sel: '#xcList .frow:nth-child(1)', n: 2, pos: 'tl' }, { sel: '#xcCmp', n: 3, pos: 'tl' }]);
+const xcA = await page.screenshot({ clip: pad(await bbox(['#xcPanel'])), fullPage: true });
+await clearAnn();
+const flagKey = await page.evaluate(() => (XC.flags.find(f => f.type === 'frozen') || XC.flags.find(f => f.severity === 'critical') || XC.flags[0] || {}).key);
+if (flagKey) await page.evaluate((k) => selectStation(k), flagKey);
+await page.waitForTimeout(700);
+await injectAnn([{ sel: '#xcChart', n: 4, pos: 'tl' }, { sel: '#xcFacts .kpi:first-child', n: 5, pos: 'tl' }, { sel: '#xcFacts .cmp', n: 6, pos: 'tl' }]);
+const xcB = await page.screenshot({ clip: pad(await bbox(['#xcStation'])), fullPage: true });
+await clearAnn(); await page.evaluate(() => selectState('')); await page.waitForTimeout(400);
+{
+  const p = await ctx.newPage(); await p.setViewportSize({ width: 1400, height: 400 });
+  const img = (b) => `data:image/png;base64,${b.toString('base64')}`;
+  await p.setContent(`<style>${legendCss}.mid{padding:14px 26px;background:#2a1c14;color:#ffd9ad;font-weight:650;border-top:1px solid #ffffff22;border-bottom:1px solid #ffffff22}</style>
+   <div class="t"><i>Step 6 · Data check</i><b>Is every DOE report backed by an independent source?</b></div>
+   <img src="${img(xcA)}"><div class="mid">Open any flagged station: DOE against Open-Meteo on the same scale, plus a second-opinion closure chance:</div><img src="${img(xcB)}">
+   <div class="lg">${[
+     '<b>Summary</b> – stations flagged in the last 5 days, closure-level readings the independent source does not support, possible under-reporting during haze, and how many stations are reliability A / B / C.',
+     '<b>Flagged report</b> – what happened, where and when. ACTIVE = still going on. Click to open the station. “Unconfirmed” is not “wrong”: a 25 km model cannot see a single local source.',
+     '<b>Open-Meteo alone as a forecaster</b> – skill of the next-day closure forecast built only from the independent source, next to the DOE feed. It is weaker, which is why it is a second opinion, not a replacement.',
+     '<b>Chart</b> – DOE (orange) against Open-Meteo mapped to the DOE scale (blue dashed) with the range DOE normally falls in. Red shading = flagged hours.',
+     '<b>Reliability grade</b> – A agrees closely · B usable · C verify before acting (large typical gap, poor band agreement, or high readings rarely corroborated).',
+     '<b>Second opinion</b> – closure chance from the DOE feed vs from Open-Meteo alone. Green frame = same side of the trigger; amber = they disagree, so verify.'].map((l, i) => `<div><span>${i + 1}</span><p style="margin:0">${l}</p></div>`).join('')}</div>
+   <div class="ft"><span>Hazeshaman · haze early-warning for Malaysian schools · Open-Meteo / CAMS, CC BY 4.0</span><span>${stamp}</span></div>`);
+  await p.waitForTimeout(250); await p.screenshot({ path: join(OUT, '06-data-check.png'), fullPage: true }); await p.close(); console.log('wrote 06-data-check.png');
+}
+
+/* ---------- 7. announcement time: default view, then change the preference ---------- */
 await page.evaluate(() => document.querySelector('#timing').scrollIntoView({ block: 'center' }));
 await injectAnn([{ sel: '#trend', n: 1, pos: 'tl' }, { sel: '#timing', n: 2, pos: 'tl' }]);
 const rowShot = await page.screenshot({ clip: pad(await bbox(['#trend', '#timing', '#timingNote'])), fullPage: true });
@@ -189,7 +217,7 @@ await clearAnn();
   const p = await ctx.newPage(); await p.setViewportSize({ width: 1400, height: 400 });
   const img = (b) => `data:image/png;base64,${b.toString('base64')}`;
   await p.setContent(`<style>${legendCss}.row2{display:grid;grid-template-columns:1fr 1.15fr;gap:0;background:#1f1714;align-items:center}.row2 img{width:100%}.mid{padding:16px 26px;background:#2a1c14;color:#ffd9ad;font-weight:650;border-top:1px solid #ffffff22;border-bottom:1px solid #ffffff22}</style>
-   <div class="t"><i>Step 6 · When to announce</i><b>The best announcement time reacts to your preferences</b></div>
+   <div class="t"><i>Step 7 · When to announce</i><b>The best announcement time reacts to your preferences</b></div>
    <img src="${img(rowShot)}">
    <div class="mid">Now drag “Cost of each hour later” from 5% to 0% (delay is free) – the ★ moves from the earliest hour to the latest:</div>
    <div class="row2"><img src="${img(prefShot)}"><img src="${img(afterShot)}"></div>
@@ -199,11 +227,11 @@ await clearAnn();
      '<b>Decision preferences</b> (left panel) – how bad a missed closure is, and what each hour of lateness costs.',
      '<b>Result</b> – with free delay the ★ moves to 9 PM because later hours forecast better; with costly delay the earliest hour wins.'].map((l, i) => `<div><span>${i + 1}</span><p style="margin:0">${l}</p></div>`).join('')}</div>
    <div class="ft"><span>Hazeshaman · haze early-warning for Malaysian schools</span><span>${stamp}</span></div>`);
-  await p.waitForTimeout(200); await p.screenshot({ path: join(OUT, '06-announcement-time.png'), fullPage: true }); await p.close(); console.log('wrote 06-announcement-time.png');
+  await p.waitForTimeout(200); await p.screenshot({ path: join(OUT, '07-announcement-time.png'), fullPage: true }); await p.close(); console.log('wrote 07-announcement-time.png');
 }
 await page.evaluate(() => { const l = document.getElementById('lam'); l.value = 5; l.dispatchEvent(new Event('input')); });
 
-/* ---------- 7. what-if ---------- */
+/* ---------- 8. what-if ---------- */
 await page.evaluate(() => scrollTo(0, 0));
 await page.click('#modeWhat');
 await page.evaluate(() => { for (const [k, v] of [['am', 105], ['noon', 120], ['a3', 135], ['now', 150]]) { const i = document.getElementById(k); i.value = v; i.dispatchEvent(new Event('input')); } });
@@ -212,7 +240,7 @@ await page.evaluate(() => { for (const id of ['sky', 'overview']) document.getEl
 await page.waitForTimeout(500);
 await injectAnn([{ sel: '.seg', n: 1, pos: 'tl' }, { sel: '#hours', n: 2, pos: 'tl' }, { sel: '#am', n: 3, pos: 'tl' }, { sel: '#streak', n: 4, pos: 'tl' }, { sel: '#verdict', n: 5, pos: 'tl' }]);
 shot = await page.screenshot({ clip: pad(await bbox(['aside', '#verdict', '#kpis']), 26), fullPage: true });
-await compose('07-what-if.png', 'Step 7 · Try your own numbers', 'What-if mode', shot, [
+await compose('08-what-if.png', 'Step 8 · Try your own numbers', 'What-if mode', shot, [
   '<b>What-if</b> – switch here; sliders unlock. Switch back to Live data at any time.',
   '<b>Model hour</b> – pick the hour you would decide at (outlined = candidate announcement times).',
   '<b>Readings</b> – set API at 8 AM, noon, three hours earlier and now, plus yesterday’s mean.',
@@ -222,7 +250,7 @@ await clearAnn();
 await page.evaluate(() => { for (const id of ['sky', 'overview']) document.getElementById(id).style.display = ''; });
 await page.click('#modeLive');
 
-/* ---------- 8. mobile ---------- */
+/* ---------- 9. mobile ---------- */
 await mob.goto(BASE + '/'); await mob.addStyleTag({ content: 'body{background-attachment:scroll!important}' }); await mob.waitForSelector('#bandName:not(:empty)'); await mob.waitForTimeout(1500);
 const shots = [];
 for (const sel of ['#sky', '#overview', '#verdict']) {
@@ -232,10 +260,10 @@ for (const sel of ['#sky', '#overview', '#verdict']) {
 {
   const p = await ctx.newPage(); await p.setViewportSize({ width: 1400, height: 400 });
   await p.setContent(`<style>${legendCss}.ph{display:flex;gap:30px;justify-content:center;align-items:flex-start;padding:28px;background:#1f1714}.ph div{width:300px}.ph img{border-radius:22px;border:1px solid #ffffff33;box-shadow:0 12px 40px #0008}.ph p{text-align:center;color:#d8c9bf;margin:10px 0 0}</style>
-   <div class="t"><i>Step 8 · On your phone</i><b>Same dashboard, stacked for small screens</b></div>
+   <div class="t"><i>Step 9 · On your phone</i><b>Same dashboard, stacked for small screens</b></div>
    <div class="ph">${['Haze right now', 'National outlook', 'Station recommendation'].map((t, i) => `<div><img src="data:image/png;base64,${shots[i].toString('base64')}"><p>${t}</p></div>`).join('')}</div>
    <div class="ft"><span>Hazeshaman · haze early-warning for Malaysian schools</span><span>${stamp}</span></div>`);
-  await p.waitForTimeout(200); await p.screenshot({ path: join(OUT, '08-mobile.png'), fullPage: true }); await p.close(); console.log('wrote 08-mobile.png');
+  await p.waitForTimeout(200); await p.screenshot({ path: join(OUT, '09-mobile.png'), fullPage: true }); await p.close(); console.log('wrote 09-mobile.png');
 }
 
 /* ---------- 8. social cards (numbers read from the live dashboard) ---------- */

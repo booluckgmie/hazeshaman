@@ -22,6 +22,24 @@ from .states import STATES
 from .synth import generate
 
 
+def om_cube(cube, days, areas, xcheck_model, om_cache):
+    """Open-Meteo expressed on the DOE scale (quantile-mapped 24 h US AQI), shaped like the DOE cube [area, day, hour]."""
+    from . import crosscheck as cc
+    mp = cc.load_model(xcheck_model)
+    out = np.full_like(cube, np.nan)
+    for i, k in enumerate(areas):
+        path = cc._key_path(om_cache, k)
+        if k not in mp or not path.exists():
+            continue
+        om = pd.read_csv(path, parse_dates=["datetime"]).set_index("datetime")
+        e = cc.apply_qm(cc.aqi24(om).values, *mp[k]["model"])
+        di = (om.index.floor("D") - days[0]).days.values
+        ok = (di >= 0) & (di < len(days)) & ~np.isnan(e)
+        out[i, di[ok], om.index.hour.values[ok]] = e[ok]
+    print(f"Open-Meteo second source: {int(np.isfinite(out).any(axis=(1, 2)).sum())} stations with a series")
+    return out
+
+
 def refresh_schools(out):
     """Re-export state-level school data into an already trained model.js (no retraining)."""
     p = Path(out)
@@ -43,6 +61,8 @@ def main(argv=None):
     ap.add_argument("--raw", default=None)
     ap.add_argument("--synthetic", action="store_true")
     ap.add_argument("--no-live", action="store_true")
+    ap.add_argument("--xcheck-model", help="data/xcheck_model.json: also train the Open-Meteo-only second-opinion models")
+    ap.add_argument("--om-cache", default="data/openmeteo")
     ap.add_argument("--test-from", default=None, help="hold-out start (default: last 25%% of days)")
     ap.add_argument("--out", default="docs/model.js")
     ap.add_argument("--refresh-schools", action="store_true",
@@ -81,7 +101,8 @@ def main(argv=None):
     test_from = a.test_from or str(days[int(len(days) * 0.75)].date())
     print(f"{len(areas)} areas / {len(states)} states, {len(days)} days "
           f"({days[0].date()} -> {days[-1].date()}), hold-out from {test_from}")
-    models, backtest = train_all(cube, days, area_state, len(states), test_from)
+    cube_om = om_cube(cube, days, areas, a.xcheck_model, a.om_cache) if a.xcheck_model else None
+    models, backtest, backtest_om = train_all(cube, days, area_state, len(states), test_from, transfer=cube_om)
 
     dm = daily_mean(cube)
     month = days.month.values
@@ -110,6 +131,8 @@ def main(argv=None):
     payload = dict(meta=meta, states=states, areas=area_meta, hours=HOURS, announce_hours=ANNOUNCE_HOURS,
                    models={str(k): v for k, v in models.items()}, backtest={str(k): v for k, v in backtest.items()},
                    climatology=clim, schools_by_state=by_state)
+    if backtest_om:        # the same model fed with Open-Meteo inputs, scored on the same hold-out (no extra coefficients needed)
+        payload["backtest_om"] = {str(k): v for k, v in backtest_om.items()}
     out = Path(a.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text("window.HAZE_MODEL=" + json.dumps(payload, separators=(",", ":")) + ";\n")

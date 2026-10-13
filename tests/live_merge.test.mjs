@@ -68,3 +68,24 @@ test('handler: DOE + buffer -> merged json with cache headers; DOE down -> buffe
     assert.equal(r.headers['x-live-source'].startsWith('bundled'), true);
   } finally { globalThis.fetch = realFetch; }
 });
+
+test('xcheck handler: serves the cross-check document with cache headers, 404 when absent', async () => {
+  const xh = require('../api/xcheck.js');
+  const realFetch = globalThis.fetch;
+  const call = async () => {
+    const out = { headers: {} };
+    const res = { setHeader: (k, v) => { out.headers[k.toLowerCase()] = v; }, end: (b) => { out.body = b; }, statusCode: 0 };
+    await xh({ method: 'GET' }, res); out.status = res.statusCode; return out;
+  };
+  try {
+    delete process.env.XCHECK_BASE_URL; delete process.env.VERCEL_GIT_REPO_OWNER;
+    globalThis.fetch = async () => { throw new Error('offline'); };
+    const r = await call();                                   // falls back to docs/xcheck.json when it exists, else 404
+    if (r.status === 200) { assert.match(r.headers['cache-control'], /s-maxage=300/); assert.ok(JSON.parse(r.body).stations); }
+    else assert.equal(r.status, 404);
+    process.env.XCHECK_BASE_URL = 'https://example.invalid/x.json';
+    globalThis.fetch = async () => ({ ok: true, json: async () => ({ stations: { a: 1 }, flags: [] }) });
+    const r2 = await call();
+    assert.equal(r2.status, 200); assert.equal(r2.headers['x-xcheck-source'], 'github');
+  } finally { globalThis.fetch = realFetch; delete process.env.XCHECK_BASE_URL; }
+});

@@ -11,7 +11,7 @@ Images (all in `docs/howto/`):
 | Link preview / X / LinkedIn single image | `social-card.png` (1200x630) |
 | Instagram / Facebook / Threads square | `social-square.png` (1080x1080) |
 | LinkedIn **document carousel** (upload as a document) | `hazeshaman-guide.pdf` (cover + 7 steps) |
-| Individual how-to images | `01-tour.png` ... `08-mobile.png` |
+| Individual how-to images | `01-tour.png` ... `09-mobile.png` |
 
 **Always keep the disclaimer:** these are model estimates, not an official decision.
 
@@ -105,9 +105,10 @@ Pautan: {URL}
 | `03-haze-at-a-glance.png` | The haze panel: band name, four headline numbers, a colour scale of Malaysian API bands with markers, and one API tile per state. |
 | `04-national-outlook.png` | Table of states ranked by tomorrow's closure risk, with the number of schools in each state and the schools likely affected. |
 | `05-station-detail.png` | One state and station: recommendation to close, probability ring, KPM trigger probabilities, state-level schools, students and teachers impacted, and best/base/worst scenarios. |
-| `06-announcement-time.png` | Bar chart of announcement times; the cheapest hour moves from 3 PM to 9 PM when the cost of delay is set to zero. |
-| `07-what-if.png` | What-if mode with sliders for hourly readings and a recomputed recommendation. |
-| `08-mobile.png` | Three phone screens: haze panel, national outlook and station recommendation. |
+| `06-data-check.png` | Data check panel: stations flagged, DOE against Open-Meteo on the same AQI scale with the expected range, A/B/C reliability grades and a second-opinion closure chance. |
+| `07-announcement-time.png` | Bar chart of announcement times; the cheapest hour moves from 3 PM to 9 PM when the cost of delay is set to zero. |
+| `08-what-if.png` | What-if mode with sliders for hourly readings and a recomputed recommendation. |
+| `09-mobile.png` | Three phone screens: haze panel, national outlook and station recommendation. |
 
 ## Posting checklist
 

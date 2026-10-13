@@ -9,6 +9,10 @@
     "api/live.js": {
       "maxDuration": 10,
       "includeFiles": "docs/live.json"
+    },
+    "api/xcheck.js": {
+      "maxDuration": 10,
+      "includeFiles": "docs/xcheck.json"
     }
   },
   "headers": [
@@ -47,6 +51,15 @@
       ]
     },
     {
+      "source": "/xcheck.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    },
+    {
       "source": "/model.js",
       "headers": [
         {
@@ -65,5 +78,5 @@
       ]
     }
   ],
-  "ignoreCommand": "[ -n \"$VERCEL_GIT_PREVIOUS_SHA\" ] && git diff --quiet \"$VERCEL_GIT_PREVIOUS_SHA\" HEAD -- . ':(exclude)docs/live.json' ':(exclude)data' ':(exclude)hazeshaman' ':(exclude)tests' ':(exclude)social' ':(exclude)README.md' ':(exclude)requirements.txt'"
+  "ignoreCommand": "[ -n \"$VERCEL_GIT_PREVIOUS_SHA\" ] && git diff --quiet \"$VERCEL_GIT_PREVIOUS_SHA\" HEAD -- . ':(exclude)docs/live.json' ':(exclude)docs/xcheck.json' ':(exclude)data' ':(exclude)hazeshaman' ':(exclude)tests' ':(exclude)social' ':(exclude)README.md' ':(exclude)requirements.txt'"
 }

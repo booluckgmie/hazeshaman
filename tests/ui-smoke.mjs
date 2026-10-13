@@ -43,4 +43,19 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); 
 { const p = await b.newPage({ viewport: { width: 1400, height: 1000 } }); await p.goto(`${BASE}/#Johor`); await p.waitForSelector('#bandName:not(:empty)'); await p.waitForTimeout(1500);
   await p.click('#modeWhat'); await p.evaluate(() => { const i = document.getElementById('now'); i.value = 60; i.dispatchEvent(new Event('input')); }); await p.waitForTimeout(300);
   const txt = await p.textContent('#sch'); ok(/Likely affected tomorrow/.test(txt) && /If schools close/.test(txt), 'what-if: schools cards use the new labels'); await p.close(); }
+// 5) cross-check panels (Open-Meteo): flags, grades, second opinion, banner
+{ const p = await b.newPage({ viewport: { width: 1400, height: 1200 } }); const errs = []; p.on('pageerror', e => errs.push(String(e)));
+  const reqs = []; p.on('response', r => reqs.push(r.status() + ' ' + new URL(r.url()).pathname));
+  await p.goto(`${BASE}/`); await p.waitForSelector('#bandName:not(:empty)'); await p.waitForTimeout(2000);
+  ok(reqs.some(r => /200 \/api\/xcheck/.test(r)), 'cross-check data loads from /api/xcheck');
+  ok(await p.isVisible('#xcPanel'), 'Data check panel is visible');
+  const hero = await p.textContent('#xcHero'); ok(/Reliability A · B · C/.test(hero) && /Stations flagged/.test(hero), 'Data check summary cards present');
+  ok((await p.evaluate(() => document.querySelectorAll('#xcList .frow').length)) >= 0 && /How to read this/.test(await p.textContent('#xcNote')), 'flag list + explanation render');
+  await p.click('#stateBtn'); await p.click('#sheetList li[data-k="Johor"]'); await p.waitForTimeout(600);
+  ok(await p.isVisible('#xcStation'), 'station card visible once a state is chosen');
+  ok((await p.evaluate(() => document.querySelectorAll('#xcChart path').length)) >= 2, 'DOE vs Open-Meteo chart draws lines');
+  const facts = await p.textContent('#xcFacts'); ok(/Closure chance · DOE feed/.test(facts) && /Open-Meteo only/.test(facts), 'second-opinion closure chances shown');
+  ok(await p.evaluate(() => [...document.querySelectorAll('#stTable td .gr')].length > 0), 'station table shows reliability grades');
+  const cmp = await p.textContent('#xcCmp'); ok(/Open-Meteo alone/.test(cmp), 'independent-source skill comparison shown');
+  ok(errs.length === 0, 'no page errors ' + errs.join()); await p.close(); }
 await b.close(); console.log(fails ? `${fails} FAILED` : 'ALL PASSED'); process.exit(fails ? 1 : 0);
