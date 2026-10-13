@@ -199,3 +199,16 @@ def test_update_writes_flags_and_series(tmp_path):
     fl = [f for f in d["flags"] if f["type"] == "high"]
     assert fl and fl[0]["severity"] == "critical" and d["summary"]["critical"] == 1
     assert json.loads((tmp_path / "x.json").read_text())["end"] == live["end"]
+
+
+def test_closures_csv_is_valid_and_exports(tmp_path):
+    from hazeshaman import closures
+    rows = closures.load("data/closures.csv")
+    assert len(rows) > 30
+    assert all(r["source_url"].startswith("https://") for r in rows)
+    assert {r["verified"] for r in rows} <= {"read", "summary"}
+    out = tmp_path / "c.json"
+    assert closures.export("data/closures.csv", str(out)) == len(rows)
+    import json
+    d = json.loads(out.read_text())
+    assert d["n"] == len(rows) and d["first"] <= d["last"]

@@ -201,6 +201,17 @@ One feed is a single point of failure, especially for Sabah and Sarawak (history
 
 Files: `hazeshaman/openmeteo.py`, `hazeshaman/crosscheck.py`, `data/xcheck_model.json`, `docs/xcheck.json` (refreshed hourly by the workflow), `api/xcheck.js`. Refit: `python -m hazeshaman.openmeteo --cache data/openmeteo` then `python -m hazeshaman.crosscheck fit`; update: `python -m hazeshaman.crosscheck update`; rebuild the model with `--xcheck-model data/xcheck_model.json` to refresh the second-opinion skill. Contains modified Copernicus Atmosphere Monitoring Service information, via Open-Meteo.com.
 
+## 5c. School closures on record (news and announcements)
+
+`data/closures.csv` lists the dates and areas where schools closed or switched to home-based learning (PdPR), taken from news reports
+and education-department announcements, one row per date and area: `date, state, area, action (closed|planned), pdpr (yes|no|unstated),
+schools, students, basis (effective|announced), verified (read|summary), source_title, source_url, note`. `python -m hazeshaman.closures`
+validates the file and writes `docs/closures.json`, which the dashboard's **School closures on record** panel reads (it follows the state filter).
+
+* `verified = read` means the source page was opened and the dates checked; `summary` means the row came from a news-search summary - open the link before relying on it.
+* It is **not** a complete history. It currently covers 28 Sep 2015, 17-23 Sep 2019, Sarawak in Aug-Sep 2026 and the Johor / Klang Valley / Melaka / Negeri Sembilan / Pahang / Sabah closures of 8-16 Oct 2026. Add rows as announcements are found.
+* It records what was announced, not what the model predicts, so it can also be used to back-test the closure trigger later.
+
 ## 6. Run it
 
 ```bash

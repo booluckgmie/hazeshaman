@@ -22,7 +22,7 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); 
   const hdr = await p.evaluate(() => [...document.querySelectorAll('#stTable th')].map(t => t.textContent)); ok(hdr[0] === 'Station', 'state view lists stations: ' + hdr.join('|'));
   await p.keyboard.press('Tab'); await p.click('#stateBtn'); await p.waitForTimeout(300);
   ok(await p.evaluate(() => document.getElementById('sheet').classList.contains('open')), 'dropdown opens');
-  await p.keyboard.press('Home'); await p.keyboard.press('ArrowDown'); await p.keyboard.press('ArrowDown');
+  await p.waitForTimeout(250); await p.keyboard.press('Home'); await p.keyboard.press('ArrowDown'); await p.keyboard.press('ArrowDown');
   const want = await p.evaluate(() => document.activeElement.dataset.k); await p.keyboard.press('Enter'); await p.waitForTimeout(500);
   const t = await p.textContent('#stateBtnTxt'); ok(t === want && want, 'keyboard selection picked the focused state -> ' + t);
   await p.click('#stateBtn'); await p.keyboard.press('Escape'); await p.waitForTimeout(300);
@@ -44,6 +44,14 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); 
 { const p = await b.newPage({ viewport: { width: 1400, height: 1000 } }); await p.goto(`${BASE}/#Johor`); await p.waitForSelector('#bandName:not(:empty)'); await p.waitForTimeout(1500);
   await p.click('#modeWhat'); await p.evaluate(() => { const i = document.getElementById('now'); i.value = 60; i.dispatchEvent(new Event('input')); }); await p.waitForTimeout(300);
   const txt = await p.textContent('#sch'); ok(/Likely affected tomorrow/.test(txt) && /If schools close/.test(txt), 'what-if: schools cards use the new labels'); await p.close(); }
+// 5b) closures on record (news / announcements)
+{ const p = await b.newPage({ viewport: { width: 1400, height: 1200 } }); const errs = []; p.on('pageerror', e => errs.push(String(e)));
+  await p.goto(`${BASE}/`); await p.waitForSelector('#bandName:not(:empty)'); await p.waitForTimeout(2000);
+  ok((await p.evaluate(() => getComputedStyle(document.getElementById('closPanel')).display)) !== 'none' && (await p.textContent('#closList')).includes('Johor'), 'closures panel lists Johor for Malaysia');
+  await p.evaluate(() => selectState('Sarawak')); await p.waitForTimeout(800);
+  const lst = await p.textContent('#closList'); ok(/Serian/.test(lst) && !/Selangor ·/.test(lst), 'closures panel follows the state filter (Sarawak)');
+  ok(await p.evaluate(() => [...document.querySelectorAll('#closList a')].every(a => a.href.startsWith('https://') && a.rel.includes('noopener'))), 'closure source links are safe https links');
+  ok(errs.length === 0, 'closures: no page errors ' + errs.join()); await p.close(); }
 // 5) cross-check panels (Open-Meteo): flags, grades, second opinion, banner
 { const p = await b.newPage({ viewport: { width: 1400, height: 1200 } }); const errs = []; p.on('pageerror', e => errs.push(String(e)));
   const reqs = []; p.on('response', r => reqs.push(r.status() + ' ' + new URL(r.url()).pathname));
