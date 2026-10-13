@@ -4,3 +4,4 @@ data/synthetic/
 data/raw/*.csv
 !data/raw/.gitkeep
 .venv/
+data/schools/*.json

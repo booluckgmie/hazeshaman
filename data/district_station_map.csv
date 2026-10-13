@@ -1,0 +1,152 @@
+state,district,station,weight
+"Johor","Batu Pahat","Batu Pahat",1
+"Johor","Johor Bahru","Larkin",1
+"Johor","Kluang","Kluang",1
+"Johor","Kota Tinggi","Kota Tinggi",1
+"Johor","Kulai","Larkin",1
+"Johor","Mersing","Kota Tinggi",1
+"Johor","Muar","Tangkak",1
+"Johor","Pontian","Batu Pahat",1
+"Johor","Segamat","Segamat",1
+"Johor","Tangkak","Tangkak",1
+"Kedah","Baling","Sungai Petani",1
+"Kedah","Bandar Baharu","Kulim Hi-Tech",1
+"Kedah","Kota Setar","Alor Setar",1
+"Kedah","Kuala Muda","Sungai Petani",1
+"Kedah","Kubang Pasu","Alor Setar",1
+"Kedah","Kulim","Kulim Hi-Tech",1
+"Kedah","Langkawi","Langkawi",1
+"Kedah","Padang Terap","Alor Setar",1
+"Kedah","Pendang","Alor Setar",1
+"Kedah","Pokok Sena","Alor Setar",1
+"Kedah","Sik","Sungai Petani",1
+"Kedah","Yan","Alor Setar",1
+"Kelantan","Bachok","Kota Bharu",1
+"Kelantan","Gua Musang","Tanah Merah",1
+"Kelantan","Jeli","Tanah Merah",1
+"Kelantan","Kecil Lojing","Tanah Merah",1
+"Kelantan","Kota Bharu","Kota Bharu",1
+"Kelantan","Kuala Krai","Tanah Merah",1
+"Kelantan","Machang","Tanah Merah",1
+"Kelantan","Pasir Mas","Kota Bharu",1
+"Kelantan","Pasir Puteh","Kota Bharu",1
+"Kelantan","Tanah Merah","Tanah Merah",1
+"Kelantan","Tumpat","Kota Bharu",1
+"Melaka","Alor Gajah","Alor Gajah",1
+"Melaka","Jasin","Bukit Rambai",1
+"Melaka","Melaka Tengah","Bandaraya Melaka",1
+"Negeri Sembilan","Jelebu","Seremban",1
+"Negeri Sembilan","Jempol","Seremban",1
+"Negeri Sembilan","Kuala Pilah","Seremban",1
+"Negeri Sembilan","Port Dickson","Port Dickson",1
+"Negeri Sembilan","Rembau","Seremban",1
+"Negeri Sembilan","Seremban","Seremban",1
+"Negeri Sembilan","Tampin","Seremban",1
+"Pahang","Bentong","Temerloh",1
+"Pahang","Bera","Temerloh",1
+"Pahang","Cameron Highlands","Jerantut",1
+"Pahang","Jerantut","Jerantut",1
+"Pahang","Kuala Lipis","Jerantut",1
+"Pahang","Kuantan","Indera Mahkota Kuantan",1
+"Pahang","Maran","Temerloh",1
+"Pahang","Pekan","Balok Baru Kuantan",1
+"Pahang","Raub","Temerloh",1
+"Pahang","Rompin","Rompin",1
+"Pahang","Temerloh","Temerloh",1
+"Perak","Bagan Datuk","Seri Manjung",1
+"Perak","Batang Padang","Tanjung Malim",1
+"Perak","Hilir Perak","Seri Manjung",1
+"Perak","Hulu Perak","Taiping",1
+"Perak","Kampar","Pegoh Ipoh",1
+"Perak","Kerian","Taiping",1
+"Perak","Kinta","Tasek Ipoh",1
+"Perak","Kuala Kangsar","Taiping",1
+"Perak","Larut Matang & Selama","Taiping",1
+"Perak","Manjung (Dinding)","Seri Manjung",1
+"Perak","Muallim","Tanjung Malim",1
+"Perak","Perak Tengah","Pegoh Ipoh",1
+"Perlis","Perlis","Kangar",1
+"Pulau Pinang","Barat Daya","Balik Pulau",1
+"Pulau Pinang","Seberang Perai Selatan","Seberang Perai",1
+"Pulau Pinang","Seberang Perai Tengah","Seberang Perai",1
+"Pulau Pinang","Seberang Perai Utara","Seberang Jaya",1
+"Pulau Pinang","Timur Laut","Minden",1
+"Sabah","Beaufort","Kimanis",1
+"Sabah","Beluran","Sandakan",1
+"Sabah","Keningau","Keningau",1
+"Sabah","Kinabatangan","Sandakan",1
+"Sabah","Kota Belud","Kota Kinabalu",1
+"Sabah","Kota Kinabalu","Kota Kinabalu",1
+"Sabah","Kota Marudu","Kota Kinabalu",1
+"Sabah","Kuala Penyu","Kimanis",1
+"Sabah","Kudat","Kota Kinabalu",1
+"Sabah","Kunak","Tawau",1
+"Sabah","Lahad Datu","Tawau",1
+"Sabah","Nabawan","Keningau",1
+"Sabah","Papar","Kimanis",1
+"Sabah","Penampang","Kota Kinabalu",1
+"Sabah","Pitas","Kota Kinabalu",1
+"Sabah","Putatan","Kota Kinabalu",1
+"Sabah","Ranau","Kota Kinabalu",1
+"Sabah","Sandakan","Sandakan",1
+"Sabah","Semporna","Tawau",1
+"Sabah","Sipitang","Kimanis",1
+"Sabah","Tambunan","Keningau",1
+"Sabah","Tawau","Tawau",1
+"Sabah","Telupid","Sandakan",1
+"Sabah","Tenom","Keningau",1
+"Sabah","Tongod","Sandakan",1
+"Sabah","Tuaran","Kota Kinabalu",1
+"Sarawak","Asajaya","Samarahan",1
+"Sarawak","Bau","Kuching",1
+"Sarawak","Belaga","Kapit",1
+"Sarawak","Betong","Sri Aman",1
+"Sarawak","Bintulu","Bintulu",1
+"Sarawak","Dalat","Mukah",1
+"Sarawak","Daro","Mukah",1
+"Sarawak","Julau","Sarikei",1
+"Sarawak","Kabong","Sri Aman",1
+"Sarawak","Kanowit","Sibu",1
+"Sarawak","Kapit","Kapit",1
+"Sarawak","Kuching","Kuching",1
+"Sarawak","Lawas","Limbang",1
+"Sarawak","Limbang","Limbang",1
+"Sarawak","Lubok Antu","Sri Aman",1
+"Sarawak","Lundu","Kuching",1
+"Sarawak","Maradong","Sarikei",1
+"Sarawak","Marudi","Miri",1
+"Sarawak","Miri","Miri",1
+"Sarawak","Mukah","Mukah",1
+"Sarawak","Pusa","Sri Aman",1
+"Sarawak","Samarahan","Samarahan",1
+"Sarawak","Saratok","Sri Aman",1
+"Sarawak","Sarikei","Sarikei",1
+"Sarawak","Sebauh","Bintulu",1
+"Sarawak","Serian","IPD Serian",1
+"Sarawak","Sibu","Sibu",1
+"Sarawak","Simunjan","Samarahan",1
+"Sarawak","Song","Kapit",1
+"Sarawak","Sri Aman","Sri Aman",1
+"Sarawak","Subis","Miri",1
+"Sarawak","Tatau","Bintulu",1
+"Selangor","Gombak","Petaling Jaya",1
+"Selangor","Klang","Klang",1
+"Selangor","Kuala Langat","Banting",1
+"Selangor","Kuala Selangor","Kuala Selangor",1
+"Selangor","Petaling","Shah Alam",1
+"Selangor","Sabak Bernam","Kuala Selangor",1
+"Selangor","Sepang","Banting",1
+"Selangor","Ulu Langat","Petaling Jaya",1
+"Selangor","Ulu Selangor","Kuala Selangor",1
+"Terengganu","Besut","Besut",1
+"Terengganu","Dungun","Paka",1
+"Terengganu","Hulu Terengganu","Kuala Terengganu",1
+"Terengganu","Kemaman","Kemaman",1
+"Terengganu","Kuala Nerus","Kuala Terengganu",1
+"Terengganu","Kuala Terengganu","Kuala Terengganu",1
+"Terengganu","Marang","Kuala Terengganu",1
+"Terengganu","Setiu","Besut",1
+"W.P. Kuala Lumpur","W.P. Kuala Lumpur","Batu Muda",0.5
+"W.P. Kuala Lumpur","W.P. Kuala Lumpur","Cheras",0.5
+"W.P. Labuan","W.P. Labuan","Labuan",1
+"W.P. Putrajaya","W.P. Putrajaya","Putrajaya",1

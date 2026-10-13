@@ -3,7 +3,7 @@ import numpy as np
 from sklearn.linear_model import LogisticRegression, Ridge
 from sklearn.metrics import brier_score_loss, roc_auc_score
 
-from .features import ANNOUNCE_HOURS, FEATURES, build, close_prob, close_truth
+from .features import FEATURES, HOURS, build, close_prob, close_truth
 
 CLASSIFIERS = ["y100", "y150", "y180", "ymean150"]
 THRESH = [round(t, 2) for t in np.arange(0.05, 0.96, 0.05)]
@@ -40,13 +40,15 @@ def _predict(res, Xd):
     return z
 
 
-def train_all(cube, days, states, test_from, progress=print):
-    n_s = len(states)
+def train_all(cube, days, area_state, n_states, test_from, progress=print):
+    """area_state[a] = state index of area a. One model per hour in HOURS (state effect shared by areas)."""
+    area_state = np.asarray(area_state)
+    n_s = n_states
     nf = len(FEATURES)
-    day_year = days.year.values
     models, backtest = {}, {}
-    for H in ANNOUNCE_HOURS:
-        X, ex, T, s_idx, d_idx = build(cube, days, H)
+    for H in HOURS:
+        X, ex, T, a_idx, d_idx = build(cube, days, H)
+        s_idx = area_state[a_idx]
         test = days[d_idx] >= np.datetime64(test_from)
         mu, sd = X[~test].mean(0), X[~test].std(0) + 1e-9
         Xd = _design(X, s_idx, n_s, mu, sd)
@@ -70,8 +72,12 @@ def train_all(cube, days, states, test_from, progress=print):
             p, y = prob(fitted_tr[name], test), T[name][test]
             metrics[name] = dict(
                 auc=float(roc_auc_score(y, p)), brier=float(brier_score_loss(y, p)), base=float(y.mean()))
-        metrics["close"] = dict(auc=float(roc_auc_score(yc, pc)), brier=float(brier_score_loss(yc, pc)),
-                                base=float(yc.mean()))
+        elev = np.exp(X[test, 0]) > 100                 # only days that are already unhealthy at hour H
+        b = float(yc.mean())
+        metrics["close"] = dict(auc=float(roc_auc_score(yc, pc)), brier=float(brier_score_loss(yc, pc)), base=b,
+                                bss=float(1 - brier_score_loss(yc, pc) / (b * (1 - b) + 1e-12)),
+                                auc_elev=float(roc_auc_score(yc[elev], pc[elev])) if 0 < yc[elev].sum() < elev.sum() else None,
+                                n_elev=int(elev.sum()), pos_elev=int(yc[elev].sum()))
         rmse = float(np.sqrt(np.mean((T["l7"][test] - _predict(reg_tr, Xd[test])) ** 2)))
         metrics["l7_rmse"] = rmse
         grid = [dict(t=t, fn=int(((pc < t) & yc).sum()), fp=int(((pc >= t) & ~yc).sum())) for t in THRESH]

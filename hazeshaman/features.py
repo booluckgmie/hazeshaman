@@ -1,16 +1,27 @@
 """Feature engineering at an announcement hour, plus the three target events."""
+import warnings
+
 import numpy as np
 
 FEATURES = ["l_now", "l_am", "l_noon", "d3", "l_prev", "streak", "sin_doy", "cos_doy"]
-ANNOUNCE_HOURS = [15, 16, 17, 18, 19, 20, 21]   # readings available up to HH:00 same day
+HOURS = list(range(12, 24))            # model available once the HH:00 reading is in (noon..23:00)
+ANNOUNCE_HOURS = [15, 16, 17, 18, 19, 20, 21]   # candidate announcement times compared in the backtest
+
+
+def daily_mean(cube, min_hours=18):
+    """Daily mean, NaN when fewer than `min_hours` readings exist (partial days are not trusted)."""
+    n = np.sum(~np.isnan(cube), axis=2)
+    with np.errstate(all="ignore"), warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+        return np.where(n >= min_hours, np.nanmean(cube, axis=2), np.nan)
 
 
 def day_flags(cube):
-    dm = cube.mean(axis=2)                       # [S, D]
-    return dm, dm > 150
+    dm = daily_mean(cube)                        # [S, D]
+    return dm, np.nan_to_num(dm, nan=0.0) > 150
 
 
-def build(cube, days, H, rows=None):
+def build(cube, days, H):
     """Return X[N,8], extras dict, targets dict, index arrays (s, d) for rows with full data.
 
     streak = consecutive prior days (up to 3) with daily mean > 150.
@@ -35,7 +46,9 @@ def build(cube, days, H, rows=None):
     nxt7 = np.full((S, D), np.nan)
     nxt7[:, :-1] = cube[:, 1:, 7]
     nxtmax = np.full((S, D), np.nan)
-    nxtmax[:, :-1] = cube[:, 1:, 6:15].max(axis=2)
+    with np.errstate(all="ignore"), warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+        nxtmax[:, :-1] = np.where(np.sum(~np.isnan(cube[:, 1:, 6:15]), axis=2) >= 7, np.nanmax(cube[:, 1:, 6:15], axis=2), np.nan)
     nxtmean = np.full((S, D), np.nan)
     nxtmean[:, :-1] = dm[:, 1:]
     avg3 = np.exp((now + am + noon) / 3)

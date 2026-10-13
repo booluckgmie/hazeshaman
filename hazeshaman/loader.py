@@ -10,7 +10,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from .states import STATES, normalise_state
+from .states import normalise_state
 
 _VAL = ("api", "ipu", "value", "index", "nilai")
 _STATE = ("state", "negeri")
@@ -56,17 +56,22 @@ def load_dir(path) -> pd.DataFrame:
 
 
 def to_cube(df: pd.DataFrame):
-    """-> (days DatetimeIndex, states list, cube[S, D, 24] with NaN gaps filled <=3h)."""
+    """-> (days DatetimeIndex, areas list, cube[A, D, 24]; NaN gaps <=3h interpolated).
+
+    An 'area' column ("State|Station") is used when present, otherwise the state is the area.
+    """
     df = df.copy()
-    if (df.datetime.dt.hour.nunique() < 12):
+    if "area" not in df:
+        df["area"] = df["state"]
+    if df.datetime.dt.hour.nunique() < 12:
         raise ValueError("data looks daily/sparse; hourly readings (>=12 distinct hours) are required")
     df["day"] = df.datetime.dt.floor("D")
     df["hour"] = df.datetime.dt.hour
     days = pd.date_range(df.day.min(), df.day.max(), freq="D")
-    states = [s for s in STATES if s in set(df.state)]
-    cube = np.full((len(states), len(days), 24), np.nan)
-    si = {s: i for i, s in enumerate(states)}
+    areas = sorted(df.area.unique())
+    cube = np.full((len(areas), len(days), 24), np.nan)
+    ai = {a: i for i, a in enumerate(areas)}
     di = {d: i for i, d in enumerate(days)}
-    cube[df.state.map(si).values, df.day.map(di).values, df.hour.values] = df.api.values
-    flat = pd.DataFrame(cube.reshape(len(states), -1).T).interpolate(limit=3, limit_area="inside")
-    return days, states, flat.values.T.reshape(cube.shape)
+    cube[df.area.map(ai).values, df.day.map(di).values, df.hour.values] = df.api.values
+    flat = pd.DataFrame(cube.reshape(len(areas), -1).T).interpolate(limit=3, limit_area="inside")
+    return days, areas, flat.values.T.reshape(cube.shape)

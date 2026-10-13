@@ -4,33 +4,33 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hazeshaman</title>
-<meta name="description" content="Probabilistic next-day school status and best announcement time from Malaysian API (IPU) trends.">
+<meta name="description" content="Live probabilistic next-day school status, best announcement time and schools impacted, from DOE hourly API (IPU) by station and state.">
 <style>
 :root{
   --bg1:#0a0f24;--bg2:#141036;--ink:#eef1ff;--ink2:#a9b0d6;--ink3:#7c84ae;
-  --glass:rgba(255,255,255,.07);--glass2:rgba(255,255,255,.11);--edge:rgba(255,255,255,.16);--edge2:rgba(255,255,255,.07);
+  --glass:rgba(255,255,255,.07);--glass2:rgba(255,255,255,.11);--edge:rgba(255,255,255,.16);--edge2:rgba(255,255,255,.08);
   --shadow:0 10px 40px rgba(2,4,20,.45);--accent:#8b7bff;--accent2:#22d3ee;
   --ok:#34d399;--warn:#fbbf24;--bad:#fb7185;--grid:rgba(255,255,255,.10);
   --orb1:#6d4cff;--orb2:#0ea5c6;--orb3:#e0489b;--field:rgba(8,12,34,.55);
 }
 :root[data-theme="light"]{
   --bg1:#e8ecff;--bg2:#f6efff;--ink:#141a3a;--ink2:#46507e;--ink3:#69729c;
-  --glass:rgba(255,255,255,.55);--glass2:rgba(255,255,255,.75);--edge:rgba(255,255,255,.9);--edge2:rgba(80,90,160,.12);
+  --glass:rgba(255,255,255,.55);--glass2:rgba(255,255,255,.78);--edge:rgba(255,255,255,.9);--edge2:rgba(80,90,160,.14);
   --shadow:0 10px 36px rgba(70,80,160,.18);--accent:#5b46e5;--accent2:#0891b2;
-  --ok:#0f9f6e;--warn:#b7791f;--bad:#dc2650;--grid:rgba(20,26,58,.12);
-  --orb1:#a99bff;--orb2:#7dd3fc;--orb3:#f9a8d4;--field:rgba(255,255,255,.7);
+  --ok:#0f9f6e;--warn:#a96a0a;--bad:#d1203f;--grid:rgba(20,26,58,.12);
+  --orb1:#a99bff;--orb2:#7dd3fc;--orb3:#f9a8d4;--field:rgba(255,255,255,.75);
 }
 @media (prefers-color-scheme: light){
   :root:not([data-theme]){
     --bg1:#e8ecff;--bg2:#f6efff;--ink:#141a3a;--ink2:#46507e;--ink3:#69729c;
-    --glass:rgba(255,255,255,.55);--glass2:rgba(255,255,255,.75);--edge:rgba(255,255,255,.9);--edge2:rgba(80,90,160,.12);
+    --glass:rgba(255,255,255,.55);--glass2:rgba(255,255,255,.78);--edge:rgba(255,255,255,.9);--edge2:rgba(80,90,160,.14);
     --shadow:0 10px 36px rgba(70,80,160,.18);--accent:#5b46e5;--accent2:#0891b2;
-    --ok:#0f9f6e;--warn:#b7791f;--bad:#dc2650;--grid:rgba(20,26,58,.12);
-    --orb1:#a99bff;--orb2:#7dd3fc;--orb3:#f9a8d4;--field:rgba(255,255,255,.7);
+    --ok:#0f9f6e;--warn:#a96a0a;--bad:#d1203f;--grid:rgba(20,26,58,.12);
+    --orb1:#a99bff;--orb2:#7dd3fc;--orb3:#f9a8d4;--field:rgba(255,255,255,.75);
   }
 }
 *{box-sizing:border-box}
-html{color-scheme:dark light}
+html{color-scheme:dark light;background:var(--bg1)}
 body{margin:0;min-height:100vh;color:var(--ink);font:15px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   background:linear-gradient(160deg,var(--bg1),var(--bg2));background-attachment:fixed;-webkit-font-smoothing:antialiased}
 .orbs{position:fixed;inset:0;overflow:hidden;z-index:0;pointer-events:none}
@@ -40,76 +40,95 @@ body{margin:0;min-height:100vh;color:var(--ink);font:15px/1.5 ui-sans-serif,syst
 .orbs i:nth-child(3){width:34vmax;height:34vmax;background:var(--orb3);left:25vw;bottom:-18vmax;animation-delay:-13s;opacity:.4}
 @keyframes float{50%{transform:translate(4vmax,-3vmax) scale(1.08)}}
 @media (prefers-reduced-motion:reduce){.orbs i{animation:none}*{transition:none!important}}
-.wrap{position:relative;z-index:1;max-width:1240px;margin:0 auto;padding:24px 16px 56px}
-header{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;margin-bottom:20px}
+.wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:24px 16px 56px}
+header{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;margin-bottom:18px}
 h1{margin:0;font-size:26px;letter-spacing:-.02em;font-weight:750}
 h1 span{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
 .sub{color:var(--ink2);font-size:13px;margin-top:2px}
-.hdr-r{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.badge{font-size:12px;padding:5px 11px;border-radius:99px;border:1px solid var(--edge);background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:var(--ink2)}
+.hdr-r{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.badge{font:inherit;font-size:12px;padding:5px 11px;border-radius:99px;border:1px solid var(--edge);background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:var(--ink2);display:inline-flex;gap:6px;align-items:center}
 .badge.demo{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 55%,transparent);font-weight:650}
-.glass{background:var(--glass);border:1px solid var(--edge);border-top-color:var(--edge);box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.12);
-  backdrop-filter:blur(22px) saturate(150%);-webkit-backdrop-filter:blur(22px) saturate(150%);border-radius:22px;padding:20px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--c,var(--ok));box-shadow:0 0 0 3px color-mix(in srgb,var(--c,var(--ok)) 25%,transparent)}
+.dot.pulse{animation:pulse 2s infinite}@keyframes pulse{50%{box-shadow:0 0 0 6px transparent}}
+.glass{background:var(--glass);border:1px solid var(--edge);box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.12);
+  backdrop-filter:blur(22px) saturate(150%);-webkit-backdrop-filter:blur(22px) saturate(150%);border-radius:22px;padding:20px;min-width:0}
 @supports not (backdrop-filter:blur(1px)){.glass{background:var(--glass2)}}
-.grid{display:grid;grid-template-columns:minmax(290px,350px) 1fr;gap:18px;align-items:start}
-.stack{display:grid;gap:18px}
+.grid{display:grid;grid-template-columns:minmax(280px,330px) 1fr;gap:18px;align-items:start}
+.stack{display:grid;gap:18px;min-width:0}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-@media (max-width:980px){.grid,.row2{grid-template-columns:1fr}.grid>main{order:-1}}
-h2{margin:0 0 12px;font-size:13px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink2);font-weight:650}
-label,.lbl{display:block;font-size:13px;color:var(--ink2);margin:14px 0 6px}
+@media (max-width:1000px){.grid,.row2{grid-template-columns:1fr}.grid>main{order:-1}}
+h2{margin:0 0 12px;font-size:12.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink2);font-weight:650}
+h2 small{text-transform:none;letter-spacing:0;font-weight:400;color:var(--ink3);margin-left:6px}
+label,.lbl{display:block;font-size:13px;color:var(--ink2);margin:13px 0 5px}
 .lbl b{color:var(--ink);float:right;font-variant-numeric:tabular-nums}
-select,input[type=date],input[type=number]{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--edge);background:var(--field);color:var(--ink);font:inherit}
+select{width:100%;padding:9px 12px;border-radius:12px;border:1px solid var(--edge);background:var(--field);color:var(--ink);font:inherit}
 select:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid var(--accent2);outline-offset:2px}
-input[type=range]{width:100%;accent-color:var(--accent);height:28px;margin:0}
+input[type=range]{width:100%;accent-color:var(--accent);height:26px;margin:0}
+input[type=range]:disabled{opacity:.55}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:14px;background:var(--field);border:1px solid var(--edge2)}
+.seg button{border:0;border-radius:10px;padding:8px;background:transparent;color:var(--ink2);font:inherit;cursor:pointer;transition:.18s}
+.seg button:disabled{opacity:.45;cursor:default}
+.seg button[aria-pressed=true]{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 6px 16px color-mix(in srgb,var(--accent) 40%,transparent)}
 .pills{display:flex;flex-wrap:wrap;gap:6px}
-.pill{border:1px solid var(--edge);background:var(--field);color:var(--ink2);padding:7px 10px;border-radius:12px;font:inherit;font-size:13px;cursor:pointer;transition:.18s;font-variant-numeric:tabular-nums}
-.pill:hover{color:var(--ink);transform:translateY(-1px)}
-.pill[aria-pressed=true]{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent;box-shadow:0 6px 18px color-mix(in srgb,var(--accent) 40%,transparent)}
-.pill small{display:block;font-size:10px;opacity:.75;margin-top:-1px}
-.btn{width:100%;margin-top:14px;padding:10px;border-radius:12px;border:1px solid var(--edge2);background:var(--field);color:var(--ink);font:inherit;cursor:pointer;transition:.18s}
-.btn:hover{background:var(--glass2);transform:translateY(-1px)}
-.note{font-size:12px;color:var(--ink3);margin-top:10px}
-hr{border:0;border-top:1px solid var(--edge2);margin:18px 0 4px}
-/* verdict */
+.pill{border:1px solid var(--edge2);background:var(--field);color:var(--ink2);padding:6px 9px;border-radius:11px;font:inherit;font-size:12.5px;cursor:pointer;transition:.18s;font-variant-numeric:tabular-nums}
+.pill:hover:not(:disabled){color:var(--ink);transform:translateY(-1px)}
+.pill:disabled{cursor:default}
+.pill:disabled:not([aria-pressed=true]){opacity:.5}
+.pill[aria-pressed=true]{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent}
+.pill.cand{border-color:var(--edge)}
+.note{font-size:12px;color:var(--ink3);margin-top:9px}
+hr{border:0;border-top:1px solid var(--edge2);margin:16px 0 2px}
 .verdict{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;border-left:4px solid var(--vc,var(--ok))}
-.ring{width:132px;height:132px;position:relative}
+.ring{width:124px;height:124px;position:relative}
 .ring svg{width:100%;height:100%;transform:rotate(-90deg)}
 .ring .c{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
-.ring .c b{font-size:26px;line-height:1;font-variant-numeric:tabular-nums}
+.ring .c b{font-size:25px;line-height:1;font-variant-numeric:tabular-nums}
 .ring .c span{font-size:11px;color:var(--ink2);margin-top:4px}
 .vt{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--vc,var(--ok));font-weight:700}
-.vh{font-size:26px;font-weight:760;letter-spacing:-.02em;margin:2px 0 6px}
+.vh{font-size:25px;font-weight:760;letter-spacing:-.02em;margin:2px 0 6px;line-height:1.2}
 .vp{color:var(--ink2);font-size:14px;margin:0}
 @media (max-width:560px){.verdict{grid-template-columns:1fr;justify-items:start}}
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-@media (max-width:700px){.kpis{grid-template-columns:repeat(2,1fr)}}
-.kpi{padding:12px 14px;border-radius:16px;background:var(--glass);border:1px solid var(--edge2)}
+@media (max-width:760px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{padding:12px 14px;border-radius:16px;background:var(--glass);border:1px solid var(--edge2);min-width:0}
 .kpi span{font-size:12px;color:var(--ink2)}
-.kpi b{display:block;font-size:24px;font-variant-numeric:tabular-nums;margin-top:2px}
+.kpi b{display:block;font-size:24px;font-variant-numeric:tabular-nums;margin-top:2px;white-space:nowrap}
 .kpi em{font-style:normal;font-size:11px;color:var(--ink3)}
 .scen{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-@media (max-width:700px){.scen{grid-template-columns:1fr}}
-.sc{padding:14px;border-radius:16px;border:1px solid var(--edge2);background:var(--glass);position:relative;overflow:hidden;transition:.25s}
+@media (max-width:760px){.scen{grid-template-columns:1fr}}
+.sc{padding:14px;border-radius:16px;border:1px solid var(--edge2);background:var(--glass);transition:.25s}
 .sc.lead{border-color:var(--c);box-shadow:0 0 0 1px var(--c) inset,0 8px 26px color-mix(in srgb,var(--c) 25%,transparent)}
 .sc h3{margin:0;font-size:13px;color:var(--c);font-weight:700}
-.sc .p{font-size:30px;font-weight:760;font-variant-numeric:tabular-nums;margin:2px 0}
+.sc .p{font-size:28px;font-weight:760;font-variant-numeric:tabular-nums;margin:2px 0}
 .sc p{margin:0;font-size:12.5px;color:var(--ink2)}
 .bar{height:10px;border-radius:99px;overflow:hidden;display:flex;background:var(--grid);margin:14px 0 4px}
 .bar i{display:block;height:100%;transition:width .45s cubic-bezier(.2,.8,.2,1)}
 svg text{fill:var(--ink2);font:11px ui-sans-serif,system-ui,sans-serif}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink2);margin-top:6px}
 .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.tablewrap{overflow-x:auto;margin:0 -6px;padding:0 6px}
 table{width:100%;border-collapse:collapse;font-size:13px;font-variant-numeric:tabular-nums}
-th,td{text-align:right;padding:6px 8px;border-bottom:1px solid var(--edge2)}
+th,td{text-align:right;padding:7px 8px;border-bottom:1px solid var(--edge2);white-space:nowrap}
 th:first-child,td:first-child{text-align:left}
+th:nth-child(3),td:nth-child(3){text-align:left}
 th{color:var(--ink2);font-weight:600;font-size:12px}
-tr.sel td{background:color-mix(in srgb,var(--accent) 18%,transparent)}
+tr.row{cursor:pointer;transition:background .15s}
+tr.row:hover td{background:var(--glass)}
+tr.sel td{background:color-mix(in srgb,var(--accent) 20%,transparent)}
 tr.best td:first-child::after{content:" ★";color:var(--warn)}
+.tag{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11.5px;font-weight:650;color:var(--c);background:color-mix(in srgb,var(--c) 16%,transparent);border:1px solid color-mix(in srgb,var(--c) 40%,transparent)}
+.mini{display:inline-block;width:34px;height:6px;border-radius:9px;background:var(--grid);vertical-align:middle;margin-left:6px;overflow:hidden}
+.mini i{display:block;height:100%;background:var(--c)}
 .chart{width:100%;height:auto;display:block}
 .chart .hit{cursor:pointer}
+.hero{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media (max-width:760px){.hero{grid-template-columns:repeat(2,1fr)}}
+.hero .kpi b{font-size:28px}
+.sch{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media (max-width:760px){.sch{grid-template-columns:1fr}}
+.banner{padding:10px 14px;border-radius:14px;font-size:13px;border:1px solid color-mix(in srgb,var(--c) 50%,transparent);background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--ink)}
 footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
-.tip{position:fixed;pointer-events:none;z-index:9;padding:6px 10px;border-radius:10px;font-size:12px;background:var(--field);border:1px solid var(--edge);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;transition:opacity .12s}
-.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.tip{position:fixed;pointer-events:none;z-index:9;padding:6px 10px;border-radius:10px;font-size:12px;background:var(--field);border:1px solid var(--edge);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;transition:opacity .12s;max-width:260px}
 </style>
 </head>
 <body>
@@ -118,50 +137,61 @@ footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
   <header>
     <div>
       <h1><span>Hazeshaman</span> · School-status forecaster</h1>
-      <div class="sub">Next-morning haze probability from today's API (IPU) trend, per state, with a cost-optimal announcement time.</div>
+      <div class="sub">Hourly DOE API by station → next-morning haze probability, best announcement time and schools impacted.</div>
     </div>
     <div class="hdr-r">
+      <span class="badge" id="liveBadge"></span>
       <span class="badge" id="dataBadge"></span>
       <button class="badge" id="themeBtn" aria-label="Toggle light and dark theme" style="cursor:pointer">◐ Theme</button>
     </div>
   </header>
+  <div id="banner" style="margin-bottom:14px"></div>
 
   <div class="grid">
-    <aside class="glass" aria-label="Inputs">
-      <h2>Scenario inputs</h2>
-      <label for="state" style="margin-top:0">State</label>
-      <select id="state"></select>
-      <label for="date">Date of decision</label>
-      <input type="date" id="date">
+    <aside class="glass" aria-label="Controls">
+      <h2>View</h2>
+      <div class="seg" role="group" aria-label="Mode">
+        <button id="modeLive" aria-pressed="true">Live data</button><button id="modeWhat" aria-pressed="false">What-if</button>
+      </div>
+      <label for="state">State</label><select id="state"></select>
+      <label for="area">Area / station</label><select id="area"></select>
+      <div class="note" id="areaNote"></div>
 
-      <div class="lbl">Announcement time <b id="hLbl"></b></div>
-      <div class="pills" id="hours" role="group" aria-label="Announcement time"></div>
+      <div class="lbl">Model hour <b id="hLbl"></b></div>
+      <div class="pills" id="hours" role="group" aria-label="Model hour"></div>
+      <div class="note" id="hourNote"></div>
 
       <hr>
       <div class="lbl">API at 8 AM <b id="amV"></b></div>
-      <input type="range" id="am" min="10" max="400" step="1" aria-label="API at 8 AM">
+      <input type="range" id="am" min="10" max="400" aria-label="API at 8 AM">
       <div class="lbl">API at 12 PM <b id="noonV"></b></div>
-      <input type="range" id="noon" min="10" max="400" step="1" aria-label="API at noon">
-      <div class="lbl" id="a3Lbl">API 3 h before announcement <b id="a3V"></b></div>
-      <input type="range" id="a3" min="10" max="400" step="1" aria-label="API three hours before">
-      <div class="lbl" id="nowLbl">API at announcement <b id="nowV"></b></div>
-      <input type="range" id="now" min="10" max="400" step="1" aria-label="API at announcement hour">
+      <input type="range" id="noon" min="10" max="400" aria-label="API at noon">
+      <div class="lbl" id="a3Lbl">API 3 h before <b id="a3V"></b></div>
+      <input type="range" id="a3" min="10" max="400" aria-label="API three hours before">
+      <div class="lbl" id="nowLbl">API now <b id="nowV"></b></div>
+      <input type="range" id="now" min="10" max="400" aria-label="API at model hour">
       <div class="lbl">Yesterday's daily mean <b id="prevV"></b></div>
-      <input type="range" id="prev" min="10" max="400" step="1" aria-label="Yesterday daily mean API">
+      <input type="range" id="prev" min="10" max="400" aria-label="Yesterday daily mean">
       <div class="lbl">Prior consecutive days with mean &gt; 150</div>
-      <div class="pills" id="streak" role="group" aria-label="Prior consecutive days above 150"></div>
-      <button class="btn" id="loadBtn">Load latest readings for this state</button>
-      <div class="note" id="loadNote"></div>
+      <div class="pills" id="streak" role="group" aria-label="Prior days above 150"></div>
+      <div class="note" id="inputNote"></div>
 
       <hr>
       <h2 style="margin-top:14px">Decision preferences</h2>
       <div class="lbl">Wrongly staying open costs <b id="cfnV"></b> × a needless closure</div>
-      <input type="range" id="cfn" min="1" max="30" step="1" aria-label="Relative cost of a missed closure">
+      <input type="range" id="cfn" min="1" max="30" aria-label="Relative cost of a missed closure">
       <div class="lbl">Cost of each hour later <b id="lamV"></b> of baseline</div>
-      <input type="range" id="lam" min="0" max="20" step="1" aria-label="Cost per hour of later announcement">
+      <input type="range" id="lam" min="0" max="20" aria-label="Cost per hour of later announcement">
     </aside>
 
     <main class="stack">
+      <section class="glass" id="overview">
+        <h2>National outlook for tomorrow morning <small id="ovSub"></small></h2>
+        <div class="hero" id="hero"></div>
+        <div class="tablewrap" style="margin-top:16px"><table id="stTable"></table></div>
+        <div class="note" id="ovNote"></div>
+      </section>
+
       <section class="glass verdict" id="verdict" aria-live="polite">
         <div class="ring"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="50" fill="none" stroke="var(--grid)" stroke-width="11"/><circle id="ringArc" cx="60" cy="60" r="50" fill="none" stroke="var(--vc)" stroke-width="11" stroke-linecap="round" stroke-dasharray="314" stroke-dashoffset="314" style="transition:stroke-dashoffset .6s cubic-bezier(.2,.8,.2,1),stroke .3s"/></svg>
           <div class="c"><b id="ringV">0%</b><span>closure risk</span></div></div>
@@ -169,6 +199,8 @@ footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
       </section>
 
       <section class="kpis" id="kpis"></section>
+
+      <section class="glass"><h2>Schools impacted · <span id="schTitle"></span></h2><div class="sch" id="sch"></div><div class="note" id="schNote"></div></section>
 
       <section class="glass">
         <h2>Three scenarios for tomorrow morning</h2>
@@ -185,10 +217,10 @@ footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
       </div>
 
       <div class="row2">
-        <section class="glass"><h2>Backtest by announcement time</h2><div id="bt"></div>
+        <section class="glass"><h2>Backtest by announcement time</h2><div class="tablewrap"><div id="bt"></div></div>
           <div class="note" id="btNote"></div></section>
         <section class="glass"><h2 id="climH">Seasonality</h2><svg class="chart" id="clim" viewBox="0 0 520 190"></svg>
-          <h2 style="margin-top:14px">Last 14 days · daily mean API</h2><svg class="chart" id="spark" viewBox="0 0 520 110"></svg></section>
+          <h2 style="margin-top:14px">Last 24 hours · API by hour</h2><svg class="chart" id="spark" viewBox="0 0 520 110"></svg></section>
       </div>
     </main>
   </div>
@@ -202,20 +234,24 @@ const M = window.HAZE_MODEL;
 const $ = id => document.getElementById(id);
 const NS = "http://www.w3.org/2000/svg";
 const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-const HLAB = {15:["3 PM",""],16:["4 PM","≈ 4:30"],17:["5 PM",""],18:["6 PM","≈ KPM 5:45"],19:["7 PM","≈ 7:30"],20:["8 PM","safety check"],21:["9 PM",""]};
 const SCN = {
   best:{name:"Best · improving",c:"var(--ok)",txt:"7 AM reading ≤ 100. Announce open early; families can plan."},
   base:{name:"Base · unstable",c:"var(--warn)",txt:"Unhealthy but below closure trigger. Open with restrictions; keep PdPR ready."},
   worst:{name:"Worst · closure",c:"var(--bad)",txt:"API > 180 in school hours, or 3rd straight day > 150. Close / PdPR."}
 };
+const STAT = {close:["var(--bad)","Close / PdPR"], watch:["var(--warn)","Watch"], ok:["var(--ok)","Open"], none:["var(--ink3)","No data"]};
 const pct = p => (p < .001 ? "<0.1" : p > .999 ? ">99.9" : (p * 100).toFixed(p < .1 ? 1 : 0)) + "%";
 const sig = z => 1 / (1 + Math.exp(-z));
 const clamp = (x, a, b) => Math.min(b, Math.max(a, x));
+const fmtN = n => Math.round(n).toLocaleString("en-US");
+const hl = H => (H % 12 || 12) + (H < 12 ? " AM" : " PM");
 const store = { get(k){ try{return localStorage.getItem(k)}catch(e){return null} }, set(k,v){ try{localStorage.setItem(k,v)}catch(e){} } };
+const AREA = Object.fromEntries(M.areas.map(a => [a.key, a]));
+const AH = M.announce_hours;
 
-const S = { state: M.states.includes("WP Kuala Lumpur") ? "WP Kuala Lumpur" : M.states[0], H: 18, am: 110, noon: 130, a3: 140, now: 155, prev: 120, streak: 1,
-  date: M.meta.synthetic ? new Date().toISOString().slice(0,10) : M.meta.latest_date, cfn: 8, lam: 5 };
-if (!M.hours.includes(S.H)) S.H = M.hours[Math.floor(M.hours.length / 2)];
+const S = { mode: "what", state: null, area: null, H: 19, am: 80, noon: 90, a3: 90, now: 95, prev: 80, streak: 0,
+  date: new Date().toISOString().slice(0,10), cfn: 8, lam: 5 };
+let LIVE = null, LIVE_ERR = null, LF = {};         // LF: per-area features derived from the live buffer
 
 /* ------------------------------ model ------------------------------ */
 function features(s){
@@ -224,17 +260,15 @@ function features(s){
   return [Math.log(s.now), Math.log(s.am), Math.log(s.noon), Math.log(s.now) - Math.log(s.a3), Math.log(s.prev), s.streak, Math.sin(ang), Math.cos(ang)];
 }
 function lin(fit, z, si){ return fit.b + fit.w.reduce((a, w, i) => a + w * z[i], 0) + fit.state[si]; }
-function predict(s){
-  const m = M.models[s.H], si = M.states.indexOf(s.state);
+function predict(s, state){
+  const m = M.models[s.H], si = M.states.indexOf(state);
   const x = features(s), zr = x.map((v, i) => (v - m.mu[i]) / m.sd[i]);
   const z = zr.map(v => clamp(v, -4, 4));            // never extrapolate beyond ~4 SD of training data
-  const P = {};
-  P.extrap = zr.some(v => Math.abs(v) > 4);
+  const P = {extrap: zr.some(v => Math.abs(v) > 4)};
   for (const k of Object.keys(m.clf)) P[k] = m.clf[k] ? sig(lin(m.clf[k], z, si)) : 0;
   const avg3 = Math.exp((x[0] + x[1] + x[2]) / 3);
-  const daysOver = s.streak + (avg3 > 150 ? 1 : 0);
-  P.daysOver = daysOver;
-  P.close = P.y180 + (1 - P.y180) * (daysOver >= 2 ? P.ymean150 : 0);
+  P.daysOver = s.streak + (avg3 > 150 ? 1 : 0);
+  P.close = P.y180 + (1 - P.y180) * (P.daysOver >= 2 ? P.ymean150 : 0);
   const mu7 = lin(m.reg, z, si);
   P.q = [-1.2816, 0, 1.2816].map(k => Math.min(500, Math.exp(mu7 + m.sigma * k)));
   P.best = (1 - P.y100) * (1 - P.close); P.worst = P.close; P.base = Math.max(0, 1 - P.best - P.worst);
@@ -242,20 +276,66 @@ function predict(s){
 }
 /* backtest -> expected cost per announcement hour (relative to "never close") */
 function timingCosts(){
-  const out = M.hours.map(H => {
+  const rows = AH.map(H => {
     const b = M.backtest[H], n = b.n, pos = b.pos;
     if (!pos) return {H, rel: NaN, t: null, tot: NaN, m: b.metrics};
     const cands = [{t: 0, fn: 0, fp: n - pos}, ...b.grid, {t: 1.01, fn: pos, fp: 0}];
     let best = null;
     for (const c of cands){ const rel = (S.cfn * c.fn + c.fp) / (S.cfn * pos); if (!best || rel < best.rel) best = {rel, t: c.t}; }
-    return {H, rel: best.rel, t: best.t, tot: best.rel + S.lam / 100 * (H - M.hours[0]), m: b.metrics};
+    return {H, rel: best.rel, t: best.t, tot: best.rel + S.lam / 100 * (H - AH[0]), m: b.metrics};
   });
-  const valid = out.filter(o => !isNaN(o.tot));
-  const bestH = valid.length ? valid.reduce((a, o) => o.tot < a.tot ? o : a).H : null;
-  return {rows: out, bestH};
+  const valid = rows.filter(o => !isNaN(o.tot));
+  return {rows, bestH: valid.length ? valid.reduce((a, o) => o.tot < a.tot ? o : a).H : null};
+}
+function triggerFor(T, H){
+  const row = T.rows.find(r => r.H === clamp(H, AH[0], AH[AH.length - 1]));
+  const t = row && row.t;
+  return t != null && t > 0 && t <= 1 ? t : 0.5;
+}
+function classify(P, thr){
+  if (P.close >= thr) return "close";
+  if (P.close >= thr / 2 || P.y150 >= .35) return "watch";
+  return "ok";
 }
 
-/* ------------------------------ ui helpers ------------------------------ */
+/* ------------------------------ live buffer -> features ------------------------------ */
+function mytNow(){ // Malaysia wall clock as a UTC-based ms value (naive), independent of the viewer's zone
+  const p = new Date().toLocaleString("sv-SE", {timeZone: "Asia/Kuala_Lumpur"}); return Date.parse(p.replace(" ", "T") + "Z");
+}
+function deriveLive(){
+  LF = {}; if (!LIVE) return;
+  const end = Date.parse(LIVE.end + ":00Z"), N = LIVE.hours, cap = Math.floor(mytNow() / 36e5) * 36e5;
+  const T0 = end - (N - 1) * 36e5;
+  const day0 = Math.floor(end / 864e5) * 864e5;
+  for (const [k, vals] of Object.entries(LIVE.areas)){
+    // readings stamped after the current Malaysia hour are ignored (hours that have not been reached yet)
+    const val = (day, h) => { const t = day + h * 36e5; if (t > cap || t > end) return null; const i = (t - T0) / 36e5; return i >= 0 && i < N ? vals[i] : null; };
+    let H = new Date(end).getUTCHours(); while (H >= 0 && val(day0, H) == null) H--;      // latest reported hour today
+    const f = {key: k, ok: false};
+    if (!AREA[k]){ f.reason = "Station not in the trained model yet."; LF[k] = f; continue; }
+    if (H < 12){ f.reason = "Models start at 12:00 – waiting for noon readings."; LF[k] = f; continue; }
+    const near = h => { for (const d of [0,-1,1,-2,2]){ const v = val(day0, h + d); if (v != null) return v; } return null; };
+    const am = near(8), noon = near(12), now = val(day0, H), a3 = near(H - 3);
+    const dm = day => { const v = Array.from({length: 24}, (_, h) => val(day, h)).filter(x => x != null); return v.length >= 18 ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+    let prev = dm(day0 - 864e5), approx = false;
+    if (prev == null){ const v = Array.from({length: 24}, (_, h) => val(day0 - 864e5, h)).filter(x => x != null); if (v.length >= 6){ prev = v.reduce((a, b) => a + b, 0) / v.length; approx = true; } }
+    let streak = 0; for (let d = 1; d <= 3; d++){ const m = dm(day0 - d * 864e5); if (m != null && m > 150) streak++; else break; }
+    if ([am, noon, now, a3, prev].some(v => v == null)){ f.reason = "Not enough readings in the last 24-48 h."; LF[k] = f; continue; }
+    Object.assign(f, {ok: true, approx, H, am, noon, now, a3, prev: Math.round(prev), streak, date: new Date(day0).toISOString().slice(0, 10)});
+    f.series = Array.from({length: H + 1}, (_, h) => [h, val(day0, h)]).filter(p => p[1] != null);
+    f.last24 = Array.from({length: 24}, (_, i) => { const t = end - (23 - i) * 36e5, hh = new Date(t).getUTCHours(); return [hh, val(Math.floor(t / 864e5) * 864e5, hh)]; });
+    LF[k] = f;
+  }
+}
+function liveStatus(){
+  if (!LIVE) return {c: "var(--bad)", t: "Live feed unavailable", age: null, level: "none"};
+  const age = (mytNow() - Date.parse(LIVE.end + ":00Z")) / 36e5, hh = LIVE.end.slice(11, 16);
+  if (age <= 2) return {c: "var(--ok)", t: `Live · ${hh} MYT`, age, level: "fresh"};
+  if (age <= 4) return {c: "var(--warn)", t: `Lagging · last ${hh} MYT`, age, level: "lag"};
+  return {c: "var(--bad)", t: `Stale · last ${hh} MYT`, age, level: "stale"};
+}
+
+/* ------------------------------ UI helpers ------------------------------ */
 function el(tag, attrs = {}, parent, text){
   const e = document.createElementNS(NS, tag);
   for (const k in attrs) e.setAttribute(k, attrs[k]);
@@ -266,163 +346,241 @@ const tip = $("tip");
 function showTip(ev, html){ tip.innerHTML = html; tip.style.opacity = 1;
   const x = Math.min(ev.clientX + 14, innerWidth - tip.offsetWidth - 8); tip.style.left = x + "px"; tip.style.top = (ev.clientY + 14) + "px"; }
 function hideTip(){ tip.style.opacity = 0; }
-function hl(H){ const [a] = HLAB[H] || [H + ":00"]; return a; }
+const areasOf = st => M.areas.filter(a => a.state === st);
+const curFeat = () => S.mode === "live" ? LF[S.area] : null;
+
+function applyLiveToInputs(){
+  const f = curFeat(); if (!f || !f.ok) return;
+  Object.assign(S, {H: f.H, am: f.am, noon: f.noon, a3: f.a3, now: f.now, prev: f.prev, streak: f.streak, date: f.date});
+}
+function pickDefaultArea(){
+  let best = null, bp = -1;   // most expected schools affected; ties (e.g. all zero) fall back to highest closure risk
+  for (const a of M.areas){ const f = LF[a.key]; if (!f || !f.ok) continue;
+    const P = predict(Object.assign({}, S, f), a.state), sc = P.close * a.schools + P.close * 1e-3; if (sc > bp){ bp = sc; best = a.key; } }
+  return best || (AREA["WP Kuala Lumpur|Cheras"] ? "WP Kuala Lumpur|Cheras" : M.areas[0].key);
+}
+function fillAreaSelect(){
+  const sel = $("area"); sel.innerHTML = "";
+  areasOf(S.state).forEach(a => sel.add(new Option(a.name, a.key)));
+  if (!AREA[S.area] || AREA[S.area].state !== S.state) S.area = sel.options[0].value; sel.value = S.area;
+}
+function savePrefs(){ store.set("hs.prefs", JSON.stringify({cfn: S.cfn, lam: S.lam})); }
 
 function buildControls(){
-  const st = $("state"); M.states.forEach(s => st.add(new Option(s, s))); st.value = S.state;
+  const st = $("state"); M.states.forEach(s => st.add(new Option(s, s)));
   const hs = $("hours");
-  M.hours.forEach(H => { const b = document.createElement("button"); b.className = "pill"; b.type = "button"; b.dataset.h = H;
-    b.innerHTML = hl(H) + "<small>" + ((HLAB[H] || [])[1] || "&nbsp;") + "</small>"; hs.appendChild(b); });
+  M.hours.forEach(H => { const b = document.createElement("button"); b.className = "pill" + (AH.includes(H) ? " cand" : ""); b.type = "button"; b.dataset.h = H; b.textContent = hl(H); hs.appendChild(b); });
   const sk = $("streak");
   [0,1,2,3].forEach(n => { const b = document.createElement("button"); b.className = "pill"; b.type = "button"; b.dataset.n = n; b.textContent = n === 3 ? "3+" : n; sk.appendChild(b); });
-  $("date").value = S.date;
-  const saved = JSON.parse(store.get("hs.prefs") || "null");
-  if (saved){ S.cfn = saved.cfn ?? S.cfn; S.lam = saved.lam ?? S.lam; if (M.hours.includes(saved.H)) S.H = saved.H; }
+  const saved = JSON.parse(store.get("hs.prefs") || "null"); if (saved){ S.cfn = saved.cfn ?? S.cfn; S.lam = saved.lam ?? S.lam; }
   $("cfn").value = S.cfn; $("lam").value = S.lam;
-  st.onchange = () => { S.state = st.value; loadLatest(false); render(); };
-  $("date").onchange = e => { if (e.target.value){ S.date = e.target.value; render(); } };
-  hs.onclick = e => { const b = e.target.closest("button"); if (b){ S.H = +b.dataset.h; savePrefs(); render(); } };
-  sk.onclick = e => { const b = e.target.closest("button"); if (b){ S.streak = +b.dataset.n; render(); } };
-  for (const k of ["am","noon","a3","now","prev","cfn","lam"]){
-    const inp = $(k); inp.value = S[k]; inp.oninput = () => { S[k] = +inp.value; if (k === "cfn" || k === "lam") savePrefs(); render(); };
-  }
-  $("loadBtn").onclick = () => { loadLatest(true); render(); };
+  st.onchange = () => { S.state = st.value; fillAreaSelect(); onAreaChange(); };
+  $("area").onchange = e => { S.area = e.target.value; onAreaChange(); };
+  hs.onclick = e => { const b = e.target.closest("button"); if (b && S.mode === "what"){ S.H = +b.dataset.h; render(); } };
+  sk.onclick = e => { const b = e.target.closest("button"); if (b && S.mode === "what"){ S.streak = +b.dataset.n; render(); } };
+  for (const k of ["am","noon","a3","now","prev"]){ const inp = $(k); inp.value = S[k]; inp.oninput = () => { S[k] = +inp.value; render(); }; }
+  for (const k of ["cfn","lam"]){ const inp = $(k); inp.oninput = () => { S[k] = +inp.value; savePrefs(); render(); }; }
+  $("modeLive").onclick = () => setMode("live"); $("modeWhat").onclick = () => setMode("what");
   $("themeBtn").onclick = () => { const r = document.documentElement; const dark = (r.dataset.theme || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")) === "dark";
     r.dataset.theme = dark ? "light" : "dark"; store.set("hs.theme", r.dataset.theme); render(); };
   const th = store.get("hs.theme"); if (th) document.documentElement.dataset.theme = th;
 }
-function savePrefs(){ store.set("hs.prefs", JSON.stringify({cfn: S.cfn, lam: S.lam, H: S.H})); }
-function loadLatest(announce){
-  const arr = M.latest[S.state]; if (!arr) return;
-  const g = h => arr[h] ?? arr.find(v => v != null);
-  S.am = g(8); S.noon = g(12); S.now = g(S.H); S.a3 = g(S.H - 3); S.prev = Math.round(M.prev_mean[S.state] ?? S.prev);
-  const rec = M.recent[S.state] || []; let n = 0;
-  for (let i = rec.length - 1; i >= 0 && rec[i] > 150; i--) n++;
-  S.streak = Math.min(3, n);
-  for (const k of ["am","noon","a3","now","prev"]) $(k).value = S[k];
-  $("loadNote").textContent = announce ? `Loaded ${M.meta.latest_date} readings (${S.state}).` : "";
+function onAreaChange(){ const f = LF[S.area]; if (S.mode === "live" && !(f && f.ok) && LIVE) { /* stay live: panel shows 'waiting' */ } applyLiveToInputs(); render(); }
+function setMode(m){
+  if (m === "live" && !LIVE) return;
+  S.mode = m; if (m === "live") applyLiveToInputs(); render();
 }
 
 /* ------------------------------ render ------------------------------ */
 function render(){
-  const P = predict(S), T = timingCosts();
-  const tStar = T.rows.find(r => r.H === S.H)?.t;
-  // labels
+  const area = AREA[S.area], f = curFeat(), live = S.mode === "live";
+  const stt = liveStatus(), T = timingCosts();
+  $("liveBadge").innerHTML = `<i class="dot ${stt.level === "fresh" ? "pulse" : ""}" style="--c:${stt.c}"></i>${stt.t}`;
+  $("banner").innerHTML = LIVE_ERR ? `<div class="banner" style="--c:var(--warn)">Live feed not loaded (${LIVE_ERR}). Showing What-if mode; the live view needs <code>live.json</code> served over http(s).</div>`
+    : stt.level === "stale" ? `<div class="banner" style="--c:var(--bad)">Latest DOE reading is ${Math.round(stt.age)} h old. Do not rely on live forecasts until the feed recovers.</div>`
+    : stt.level === "lag" ? `<div class="banner" style="--c:var(--warn)">DOE feed is lagging (${Math.round(stt.age)} h behind). Forecasts use the last reported hour.</div>` : "";
+  $("modeLive").setAttribute("aria-pressed", live); $("modeWhat").setAttribute("aria-pressed", !live);
+  $("modeLive").disabled = !LIVE;
+  document.querySelectorAll("#am,#noon,#a3,#now,#prev").forEach(i => i.disabled = live);
+  $("state").value = S.state; $("area").value = S.area;
   $("hLbl").textContent = hl(S.H);
-  $("nowLbl").firstChild.textContent = `API at ${hl(S.H)} `; $("a3Lbl").firstChild.textContent = `API at ${hl(S.H - 3)} (3 h earlier) `;
+  $("nowLbl").firstChild.textContent = `API at ${hl(S.H)} `; $("a3Lbl").firstChild.textContent = `API at ${hl(S.H - 3)} `;
   const fmt = {amV:S.am,noonV:S.noon,a3V:S.a3,nowV:S.now,prevV:S.prev}; for (const k in fmt) $(k).textContent = fmt[k];
+  for (const k of ["am","noon","a3","now","prev"]) $(k).value = S[k];
   $("cfnV").textContent = S.cfn; $("lamV").textContent = S.lam + "%";
-  document.querySelectorAll("#hours .pill").forEach(b => b.setAttribute("aria-pressed", +b.dataset.h === S.H));
-  document.querySelectorAll("#streak .pill").forEach(b => b.setAttribute("aria-pressed", +b.dataset.n === S.streak));
+  document.querySelectorAll("#hours .pill").forEach(b => { b.setAttribute("aria-pressed", +b.dataset.h === S.H); b.disabled = live; });
+  document.querySelectorAll("#streak .pill").forEach(b => { b.setAttribute("aria-pressed", +b.dataset.n === S.streak); b.disabled = live; });
+  $("hourNote").textContent = live ? "Live mode follows the latest reported hour. Outlined hours are candidate announcement times." : "What-if: edit any reading below.";
+  $("inputNote").textContent = live ? (f && f.ok ? `From the DOE live buffer for ${area.name}.${f.approx ? " Yesterday's mean is approximate (partial history)." : ""}` : (f && f.reason) || "") : "";
+  $("areaNote").textContent = area.schools ? `${fmtN(area.schools)} schools · ${fmtN(area.students)} students (${area.districts.join(", ")})` : "No district is mapped to this station (its surroundings are counted under neighbouring stations).";
 
-  // verdict
-  const thr = tStar != null && tStar <= 1 && tStar > 0 ? tStar : 0.5;
+  const P = predict(S, area.state), thr = triggerFor(T, S.H);
+  const ok = !live || !!(f && f.ok);
   let v;
-  if (P.close >= thr) v = {c:"var(--bad)", t:"Recommendation", h:"Close tomorrow · switch to PdPR", p:`Closure risk ${pct(P.close)} is above the cost-optimal trigger of ${pct(thr)}. Notify parents and hostels now; re-check at 8 PM.`};
+  if (!ok) v = {c:"var(--ink3)", t:"No forecast", h:"Waiting for readings", p:(f && f.reason) || "No live data for this station."};
+  else if (P.close >= thr) v = {c:"var(--bad)", t:"Recommendation", h:"Close tomorrow · switch to PdPR", p:`Closure risk ${pct(P.close)} is above the cost-optimal trigger of ${pct(thr)}. Notify parents and hostels; re-check at 8 PM and 6 AM.`};
   else if (P.close >= thr / 2 || P.y150 >= .35) v = {c:"var(--warn)", t:"Recommendation", h:"Open with restrictions · PdPR on standby", p:`Closure risk ${pct(P.close)} is below the trigger (${pct(thr)}) but not negligible. Cancel outdoor activity and confirm at 8 PM / 6 AM.`};
   else if (P.y100 >= .5) v = {c:"var(--warn)", t:"Recommendation", h:"Open · limit outdoor activity", p:`Unhealthy air is likely (${pct(P.y100)} for 7 AM > 100) but closure risk is only ${pct(P.close)}.`};
   else v = {c:"var(--ok)", t:"Recommendation", h:"Open as normal", p:`Closure risk ${pct(P.close)}; 7 AM API expected around ${Math.round(P.q[1])} (80% range ${Math.round(P.q[0])}–${Math.round(P.q[2])}).`};
-  $("verdict").style.setProperty("--vc", v.c); $("vt").textContent = v.t; $("vh").textContent = v.h; $("vp").textContent = v.p + (P.extrap ? " ⚠ Inputs are outside the range seen in training (e.g. an unusually sharp jump) - treat as indicative only." : "");
-  $("ringV").textContent = P.close < .01 ? "<1%" : P.close > .99 ? ">99%" : Math.round(P.close * 100) + "%"; $("ringArc").style.strokeDashoffset = 314 * (1 - clamp(P.close, 0, 1));
-  $("verdict").style.setProperty("--vc", v.c);
+  if (ok && area.days < 365) v.p += ` ⚠ Only ${area.days} days of history for this station – wider uncertainty than the headline suggests.`;
+  if (ok && P.extrap) v.p += " ⚠ Inputs are outside the range seen in training – indicative only.";
+  $("verdict").style.setProperty("--vc", v.c); $("vt").textContent = `${area.name} · ${area.state} · ${v.t}`; $("vh").textContent = v.h; $("vp").textContent = v.p;
+  $("ringV").textContent = !ok ? "–" : P.close < .01 ? "<1%" : P.close > .99 ? ">99%" : Math.round(P.close * 100) + "%";
+  $("ringArc").style.strokeDashoffset = ok ? 314 * (1 - clamp(P.close, 0, 1)) : 314;
 
-  // KPIs
+  const eS = ok ? P.close * area.schools : 0, eStu = ok ? P.close * area.students : 0;
   const K = [["7 AM API > 100", P.y100, "unhealthy"], ["7 AM API > 150", P.y150, "very unhealthy"], ["API > 180 in school hours", P.y180, "closure trigger"], ["Streak rule", P.daysOver >= 2 ? P.ymean150 : 0, P.daysOver >= 2 ? "tomorrow mean > 150" : "needs ≥2 prior days > 150"]];
-  $("kpis").innerHTML = K.map(k => `<div class="kpi"><span>${k[0]}</span><b>${pct(k[1])}</b><em>${k[2]}</em></div>`).join("");
+  $("kpis").innerHTML = K.map(k => `<div class="kpi"><span>${k[0]}</span><b>${ok ? pct(k[1]) : "–"}</b><em>${k[2]}</em></div>`).join("");
+  $("schTitle").textContent = area.name;
+  $("sch").innerHTML = [["Schools in area", fmtN(area.schools), "govt primary + secondary"], ["Expected affected", ok ? fmtN(eS) : "–", `${ok ? fmtN(eStu) : "–"} students · prob.-weighted`], ["If closed", fmtN(area.schools), `${fmtN(area.students)} students`]]
+    .map(k => `<div class="kpi"><span>${k[0]}</span><b>${k[1]}</b><em>${k[2]}</em></div>`).join("");
+  $("schNote").textContent = M.meta.schools ? `Source: ${M.meta.schools.source}, ${M.meta.schools.year.slice(0,4)} (${M.meta.schools.scope}). Districts are assigned to their nearest DOE station (data/district_station_map.csv) – an approximation.` : "School data unavailable in this build.";
 
-  // scenarios
   const lead = ["best","base","worst"].reduce((a, k) => P[k] > P[a] ? k : a, "best");
-  $("scen").innerHTML = ["best","base","worst"].map(k => `<div class="sc ${k === lead ? "lead" : ""}" style="--c:${SCN[k].c}"><h3>${SCN[k].name}</h3><div class="p">${pct(P[k])}</div><p>${SCN[k].txt}</p></div>`).join("");
-  $("stack").innerHTML = ["best","base","worst"].map(k => `<i style="width:${P[k] * 100}%;background:${SCN[k].c}"></i>`).join("");
-  $("stackLeg").innerHTML = ["best","base","worst"].map(k => `<span><i style="background:${SCN[k].c}"></i>${SCN[k].name.split(" ·")[0]} ${pct(P[k])}</span>`).join("");
+  $("scen").innerHTML = ["best","base","worst"].map(k => `<div class="sc ${ok && k === lead ? "lead" : ""}" style="--c:${SCN[k].c}"><h3>${SCN[k].name}</h3><div class="p">${ok ? pct(P[k]) : "–"}</div><p>${SCN[k].txt}</p></div>`).join("");
+  $("stack").innerHTML = ok ? ["best","base","worst"].map(k => `<i style="width:${P[k] * 100}%;background:${SCN[k].c}"></i>`).join("") : "";
+  $("stackLeg").innerHTML = ok ? ["best","base","worst"].map(k => `<span><i style="background:${SCN[k].c}"></i>${SCN[k].name.split(" ·")[0]} ${pct(P[k])}</span>`).join("") : "";
 
-  drawTrend(P); drawTiming(T); drawTable(T); drawClim(); drawSpark();
-  $("timingNote").textContent = T.bestH ? `★ ${hl(T.bestH)} minimises total expected cost at your preferences (missed closure = ${S.cfn}× needless closure; each hour later = ${S.lam}% of baseline). Click a bar to use it.` : "No closure events in the hold-out period; timing cannot be ranked.";
-  $("trendNote").textContent = `Dashed fan = model's 10–90% range for tomorrow's 7 AM reading (median ${Math.round(P.q[1])}).`;
+  drawOverview(T); drawTrend(P, f, ok); drawTiming(T); drawTable(T); drawClim(area); drawSpark(f);
+  $("timingNote").textContent = T.bestH ? `★ ${hl(T.bestH)} minimises total expected cost at your preferences (missed closure = ${S.cfn}× needless closure; each hour later = ${S.lam}% of baseline). Click a bar to explore that hour in What-if.` : "No closure events in the hold-out period; timing cannot be ranked.";
+  $("trendNote").textContent = ok ? `Dashed fan = model's 10–90% range for tomorrow's 7 AM reading (median ${Math.round(P.q[1])}).` : "";
 }
 
-function drawTrend(P){
+function drawOverview(T){
+  const tot = {areas: 0, risk: 0, schoolsRisk: 0, studentsRisk: 0, expS: 0, expStu: 0, schools: 0, nodata: 0, maxP: 0, maxA: null}, byState = {};
+  for (const a of M.areas){
+    const f = LF[a.key], b = byState[a.state] || (byState[a.state] = {state: a.state, n: 0, nd: 0, risk: 0, watch: 0, schools: 0, schRisk: 0, exp: 0, maxP: -1, maxA: null, p150: 0});
+    b.n++; b.schools += a.schools; tot.areas++; tot.schools += a.schools;
+    if (!LIVE || !f || !f.ok){ b.nd++; tot.nodata++; continue; }
+    const P = predict(Object.assign({}, S, f), a.state), thr = triggerFor(T, f.H), c = classify(P, thr);
+    if (c === "close"){ b.risk++; b.schRisk += a.schools; tot.risk++; tot.schoolsRisk += a.schools; tot.studentsRisk += a.students; }
+    if (c === "watch") b.watch++;
+    b.exp += P.close * a.schools; tot.expS += P.close * a.schools; tot.expStu += P.close * a.students;
+    b.p150 = Math.max(b.p150, P.y150);
+    if (P.close > b.maxP){ b.maxP = P.close; b.maxA = a.name; }
+    if (P.close > tot.maxP){ tot.maxP = P.close; tot.maxA = `${a.name}, ${a.state}`; }
+  }
+  const have = tot.areas - tot.nodata;
+  $("ovSub").textContent = LIVE ? `${have}/${tot.areas} stations reporting · latest hour ${LIVE.end.slice(11, 16)} MYT` : "live feed unavailable";
+  const Hk = [["Stations at closure risk", `${tot.risk} / ${have}`, tot.maxA ? `highest: ${tot.maxA} (${pct(tot.maxP)})` : "no data"],
+             ["Schools in those areas", fmtN(tot.schoolsRisk), `${fmtN(tot.studentsRisk)} students`],
+             ["Expected schools affected", fmtN(tot.expS), `${fmtN(tot.expStu)} students · prob.-weighted`],
+             ["Schools monitored", fmtN(tot.schools), `${M.areas.filter(a => a.schools).length} stations mapped`]];
+  $("hero").innerHTML = Hk.map((k, i) => `<div class="kpi"><span>${k[0]}</span><b style="${i === 0 && tot.risk ? "color:var(--bad)" : ""}">${k[1]}</b><em>${k[2]}</em></div>`).join("");
+  const order = Object.values(byState).sort((x, y) => y.maxP - x.maxP || x.state.localeCompare(y.state));
+  const head = `<thead><tr><th>State</th><th>Status</th><th>Top station</th><th>Closure</th><th>7AM&gt;150</th><th>Stns</th><th>Schools at risk</th><th>Exp. schools</th></tr></thead>`;
+  const body = order.map(b => {
+    const nd = b.maxP < 0, c = nd ? "none" : b.risk ? "close" : b.watch ? "watch" : "ok", [col, lab] = STAT[c];
+    return `<tr class="row ${b.state === S.state ? "sel" : ""}" data-s="${b.state}"><td>${b.state}</td><td><span class="tag" style="--c:${col}">${lab}</span></td><td>${b.maxA || "–"}</td>
+      <td>${nd ? "–" : pct(b.maxP)}<span class="mini" style="--c:${col}"><i style="width:${Math.max(0, b.maxP) * 100}%"></i></span></td><td>${nd ? "–" : pct(b.p150)}</td>
+      <td>${nd ? "–" : b.risk + " / " + (b.n - b.nd)}</td><td>${nd ? "–" : fmtN(b.schRisk)}</td><td>${nd ? "–" : fmtN(b.exp)}</td></tr>`; }).join("");
+  $("stTable").innerHTML = head + `<tbody>${body}</tbody>`;
+  $("stTable").querySelectorAll("tr.row").forEach(r => r.onclick = () => { S.state = r.dataset.s; fillAreaSelect(); onAreaChange(); });
+  $("ovNote").textContent = "Click a state to open its stations. 'Stns' = stations at risk / reporting. Status uses the cost-optimal closure trigger for the latest hour; 'Expected' weights each station's schools by its closure probability.";
+  $("overview").style.display = LIVE ? "" : "none";
+}
+
+function drawTrend(P, f, ok){
   const svg = $("trend"); svg.innerHTML = "";
-  const W = 520, Hh = 280, L = 40, R = 14, Tp = 14, B = 34;
-  const pts = [[8, S.am], [12, S.noon], [S.H - 3, S.a3], [S.H, S.now]].sort((a, b) => a[0] - b[0]).filter((p, i, a) => !i || p[0] !== a[i-1][0]);
-  const x1 = 31; // 7 AM next day = 24+7
-  const xs = h => L + (h - 8) / (x1 - 8) * (W - L - R);
-  const ymax = Math.max(200, P.q[2] * 1.1, ...pts.map(p => p[1])) * 1.05;
-  const ys = v => Tp + (1 - v / ymax) * (Hh - Tp - B);
-  [[100,"100","var(--warn)"],[150,"150","var(--bad)"],[180,"180","var(--bad)"]].forEach(([v,l,c]) => {
-    if (v > ymax) return; el("line", {x1:L, x2:W-R, y1:ys(v), y2:ys(v), stroke:c, "stroke-dasharray":"3 4", opacity:.5}, svg);
-    el("text", {x:L-6, y:ys(v)+4, "text-anchor":"end"}, svg, l); });
-  [8,12,16,20,24,31].forEach(h => { el("text", {x:xs(h), y:Hh-12, "text-anchor":"middle"}, svg, h === 31 ? "7 AM+1" : ((h % 24) % 12 || 12) + (h % 24 < 12 ? "AM" : "PM"));
+  const W = 520, Hh = 280, L = 40, R = 14, Tp = 14, B = 34, x0 = 6, x1 = 31;
+  const pts = (S.mode === "live" && f && f.ok) ? f.series.filter(p => p[0] >= x0) :
+    [[8, S.am], [12, S.noon], [S.H - 3, S.a3], [S.H, S.now]].sort((a, b) => a[0] - b[0]).filter((p, i, a) => !i || p[0] !== a[i-1][0]);
+  const xs = h => L + (h - x0) / (x1 - x0) * (W - L - R);
+  const ymax = Math.max(200, ok ? P.q[2] * 1.1 : 0, ...pts.map(p => p[1])) * 1.05, ys = v => Tp + (1 - v / ymax) * (Hh - Tp - B);
+  [[100,"var(--warn)"],[150,"var(--bad)"],[180,"var(--bad)"]].forEach(([v,c]) => { if (v > ymax) return;
+    el("line", {x1:L, x2:W-R, y1:ys(v), y2:ys(v), stroke:c, "stroke-dasharray":"3 4", opacity:.5}, svg); el("text", {x:L-6, y:ys(v)+4, "text-anchor":"end"}, svg, v); });
+  [6,9,12,15,18,21,24,31].forEach(h => { el("text", {x:xs(h), y:Hh-12, "text-anchor":"middle"}, svg, h === 31 ? "7 AM+1" : ((h % 24) % 12 || 12) + ((h % 24) < 12 ? "AM" : "PM"));
     el("line", {x1:xs(h), x2:xs(h), y1:Tp, y2:Hh-B, stroke:"var(--grid)", opacity:.5}, svg); });
-  const defs = el("defs", {}, svg), g = el("linearGradient", {id:"fan", x1:0, x2:1}, defs);
-  el("stop", {offset:0, "stop-color":"var(--accent)", "stop-opacity":.05}, g); el("stop", {offset:1, "stop-color":"var(--accent)", "stop-opacity":.45}, g);
+  if (!pts.length) return;
   const last = pts[pts.length - 1];
-  el("path", {d:`M${xs(last[0])},${ys(last[1])} L${xs(x1)},${ys(P.q[2])} L${xs(x1)},${ys(P.q[0])} Z`, fill:"url(#fan)"}, svg);
-  el("path", {d:`M${xs(last[0])},${ys(last[1])} L${xs(x1)},${ys(P.q[1])}`, stroke:"var(--accent)", "stroke-width":2, "stroke-dasharray":"5 4", fill:"none"}, svg);
+  if (ok){
+    const defs = el("defs", {}, svg), g = el("linearGradient", {id:"fan", x1:0, x2:1}, defs);
+    el("stop", {offset:0, "stop-color":"var(--accent)", "stop-opacity":.05}, g); el("stop", {offset:1, "stop-color":"var(--accent)", "stop-opacity":.45}, g);
+    el("path", {d:`M${xs(last[0])},${ys(last[1])} L${xs(x1)},${ys(P.q[2])} L${xs(x1)},${ys(P.q[0])} Z`, fill:"url(#fan)"}, svg);
+    el("path", {d:`M${xs(last[0])},${ys(last[1])} L${xs(x1)},${ys(P.q[1])}`, stroke:"var(--accent)", "stroke-width":2, "stroke-dasharray":"5 4", fill:"none"}, svg);
+  }
   el("path", {d: pts.map((p, i) => (i ? "L" : "M") + xs(p[0]) + "," + ys(p[1])).join(" "), stroke:"var(--accent2)", "stroke-width":2.6, fill:"none", "stroke-linejoin":"round"}, svg);
-  pts.forEach(p => { const c = el("circle", {cx:xs(p[0]), cy:ys(p[1]), r:4.5, fill:"var(--accent2)", stroke:"var(--bg1)", "stroke-width":2}, svg);
+  pts.forEach(p => { const c = el("circle", {cx:xs(p[0]), cy:ys(p[1]), r:pts.length > 8 ? 3 : 4.5, fill:"var(--accent2)", stroke:"var(--bg1)", "stroke-width":1.5}, svg);
     c.onmousemove = e => showTip(e, `<b>${hl(p[0])}</b> · API ${p[1]}`); c.onmouseleave = hideTip; });
-  const m = el("circle", {cx:xs(x1), cy:ys(P.q[1]), r:5.5, fill:"var(--accent)", stroke:"var(--bg1)", "stroke-width":2}, svg);
-  m.onmousemove = e => showTip(e, `<b>Tomorrow 7 AM</b><br>median ${Math.round(P.q[1])}<br>80% range ${Math.round(P.q[0])}–${Math.round(P.q[2])}`); m.onmouseleave = hideTip;
+  if (ok){ const m = el("circle", {cx:xs(x1), cy:ys(P.q[1]), r:5.5, fill:"var(--accent)", stroke:"var(--bg1)", "stroke-width":2}, svg);
+    m.onmousemove = e => showTip(e, `<b>Tomorrow 7 AM</b><br>median ${Math.round(P.q[1])}<br>80% range ${Math.round(P.q[0])}–${Math.round(P.q[2])}`); m.onmouseleave = hideTip; }
 }
 
 function drawTiming(T){
   const svg = $("timing"); svg.innerHTML = "";
   const W = 520, Hh = 280, L = 40, R = 10, Tp = 20, B = 52, n = T.rows.length;
   const vals = T.rows.map(r => r.tot).filter(v => !isNaN(v)); if (!vals.length) return;
-  const ymax = Math.max(...vals, T.rows.find(r => !isNaN(r.rel)) ? 0.2 : 1) * 1.15;
-  const bw = (W - L - R) / n, ys = v => Tp + (1 - v / ymax) * (Hh - Tp - B);
+  const ymax = Math.max(...vals, .2) * 1.15, bw = (W - L - R) / n, ys = v => Tp + (1 - v / ymax) * (Hh - Tp - B);
   for (let i = 0; i <= 4; i++){ const v = ymax * i / 4; el("line", {x1:L, x2:W-R, y1:ys(v), y2:ys(v), stroke:"var(--grid)"}, svg); el("text", {x:L-6, y:ys(v)+4, "text-anchor":"end"}, svg, Math.round(v * 100) + "%"); }
   T.rows.forEach((r, i) => {
-    const x = L + i * bw + bw * .14, w = bw * .72, sel = r.H === S.H, best = r.H === T.bestH;
-    if (isNaN(r.tot)) return;
-    const lead = S.lam / 100 * (r.H - M.hours[0]);
+    const x = L + i * bw + bw * .14, w = bw * .72, sel = r.H === S.H, best = r.H === T.bestH; if (isNaN(r.tot)) return;
+    const lead = S.lam / 100 * (r.H - AH[0]);
     el("rect", {x, y:ys(r.rel), width:w, height:Math.max(0, ys(0) - ys(r.rel)), rx:6, fill:best ? "var(--ok)" : "var(--accent)", opacity:sel || best ? .95 : .55}, svg);
     if (lead > 0) el("rect", {x, y:ys(r.rel + lead), width:w, height:Math.max(0, ys(r.rel) - ys(r.rel + lead)), rx:6, fill:"var(--warn)", opacity:.65}, svg);
     el("text", {x:x+w/2, y:ys(r.tot)-6, "text-anchor":"middle", style:"fill:var(--ink);font-weight:650"}, svg, best ? "★" : "");
     el("text", {x:x+w/2, y:Hh-30, "text-anchor":"middle", style:sel ? "fill:var(--ink);font-weight:700" : ""}, svg, hl(r.H));
-    el("text", {x:x+w/2, y:Hh-16, "text-anchor":"middle", style:"font-size:10px"}, svg, "AUC " + r.m.close.auc.toFixed(3));
+    el("text", {x:x+w/2, y:Hh-16, "text-anchor":"middle", style:"font-size:10px"}, svg, "skill " + (r.m.close.bss * 100).toFixed(0) + "%");
     const hit = el("rect", {x:L + i * bw, y:Tp, width:bw, height:Hh-Tp-B+30, fill:"transparent", class:"hit"}, svg);
-    hit.onclick = () => { S.H = r.H; savePrefs(); render(); };
+    hit.onclick = () => { S.mode = "what"; S.H = r.H; render(); };
     hit.onmousemove = e => showTip(e, `<b>${hl(r.H)}</b><br>error cost ${(r.rel*100).toFixed(0)}% of baseline<br>lead-time cost ${(lead*100).toFixed(0)}%<br>trigger ≥ ${r.t > 1 ? "never" : pct(r.t)}`);
     hit.onmouseleave = hideTip;
   });
   svg.insertAdjacentHTML("beforeend", `<g><rect x="${L}" y="2" width="9" height="9" rx="2" fill="var(--accent)"/><text x="${L+14}" y="10">wrong-call cost</text><rect x="${L+110}" y="2" width="9" height="9" rx="2" fill="var(--warn)"/><text x="${L+124}" y="10">lateness cost</text></g>`);
 }
-
 function drawTable(T){
-  const rows = T.rows.map(r => `<tr class="${r.H === S.H ? "sel" : ""} ${r.H === T.bestH ? "best" : ""}"><td>${hl(r.H)}</td><td>${r.m.close.auc.toFixed(3)}</td><td>${r.m.close.brier.toFixed(4)}</td><td>${r.m.y150.auc.toFixed(3)}</td><td>${isNaN(r.rel) ? "–" : (r.rel * 100).toFixed(0) + "%"}</td></tr>`).join("");
-  $("bt").innerHTML = `<table><thead><tr><th>Announce</th><th>AUC close</th><th>Brier close</th><th>AUC 7AM&gt;150</th><th>Err. cost</th></tr></thead><tbody>${rows}</tbody></table>`;
-  const b = M.backtest[S.H];
-  $("btNote").textContent = `Hold-out ${M.meta.test_from} → ${M.meta.end}: ${b.n.toLocaleString()} state-days, ${b.pos} closure events (${(b.pos / b.n * 100).toFixed(1)}%). Err. cost is relative to never closing.`;
+  const f = x => x == null ? "–" : x.toFixed(3);
+  const rows = T.rows.map(r => `<tr class="${r.H === S.H ? "sel" : ""} ${r.H === T.bestH ? "best" : ""}"><td>${hl(r.H)}</td><td>${(r.m.close.bss * 100).toFixed(0)}%</td><td>${f(r.m.close.auc_elev)}</td><td>${f(r.m.close.auc)}</td><td>${isNaN(r.rel) ? "–" : (r.rel * 100).toFixed(0) + "%"}</td></tr>`).join("");
+  $("bt").innerHTML = `<table><thead><tr><th>Announce</th><th>Skill</th><th>AUC &gt;100</th><th>AUC all</th><th>Err. cost</th></tr></thead><tbody>${rows}</tbody></table>`;
+  const b = M.backtest[AH.includes(S.H) ? S.H : AH[0]], me = b.metrics.close;
+  $("btNote").textContent = `Out-of-time hold-out ${M.meta.test_from} → ${M.meta.end}: ${b.n.toLocaleString()} station-days, ${b.pos} closure events (${(b.pos / b.n * 100).toFixed(1)}%). Skill = Brier improvement over always predicting the base rate. 'AUC all' is flattered by easy clear-air days; 'AUC >100' scores only days already unhealthy at that hour. Err. cost is relative to never closing.`;
 }
-function drawClim(){
-  const svg = $("clim"); svg.innerHTML = ""; const c = M.climatology[S.state]; const W = 520, Hh = 190, L = 36, B = 24, Tp = 10, bw = (W - L - 8) / 12;
+function drawClim(area){
+  const svg = $("clim"); svg.innerHTML = ""; const c = M.climatology[area.state]; const W = 520, Hh = 190, L = 36, B = 24, Tp = 10, bw = (W - L - 8) / 12;
   const mx = Math.max(.05, ...c) * 1.1, mo = new Date(S.date + "T00:00:00Z").getUTCMonth();
-  $("climH").textContent = `Seasonality · ${S.state} · share of days with mean API > 100`;
+  $("climH").textContent = `Seasonality · ${area.state} · share of station-days with mean API > 100`;
   c.forEach((v, i) => { const h = v / mx * (Hh - B - Tp), x = L + i * bw + 4;
     const r = el("rect", {x, y:Hh-B-h, width:bw-8, height:h, rx:5, fill: i === mo ? "var(--accent2)" : "var(--accent)", opacity: i === mo ? .95 : .5}, svg);
     r.onmousemove = e => showTip(e, `<b>${MON[i]}</b> · ${pct(v)} of days`); r.onmouseleave = hideTip;
     el("text", {x:x+(bw-8)/2, y:Hh-8, "text-anchor":"middle"}, svg, MON[i]); });
   el("text", {x:L-6, y:Tp+8, "text-anchor":"end"}, svg, Math.round(mx * 100) + "%");
 }
-function drawSpark(){
-  const svg = $("spark"); svg.innerHTML = ""; const a = M.recent[S.state] || []; if (a.length < 2) return;
-  const W = 520, Hh = 110, L = 8, Tp = 10, B = 18, mx = Math.max(160, ...a) * 1.05;
+function drawSpark(f){
+  const svg = $("spark"); svg.innerHTML = ""; const a = f && f.last24 ? f.last24.filter(p => p[1] != null) : [];
+  if (a.length < 2){ el("text", {x:8, y:50}, svg, "The live 24 h series appears in Live mode."); return; }
+  const W = 520, Hh = 110, L = 8, Tp = 10, B = 18, mx = Math.max(160, ...a.map(p => p[1])) * 1.05;
   const xs = i => L + i / (a.length - 1) * (W - 2 * L), ys = v => Tp + (1 - v / mx) * (Hh - Tp - B);
-  [100,150].forEach(v => { el("line", {x1:L, x2:W-L, y1:ys(v), y2:ys(v), stroke: v === 100 ? "var(--warn)" : "var(--bad)", "stroke-dasharray":"3 4", opacity:.5}, svg); });
-  const d = a.map((v, i) => (i ? "L" : "M") + xs(i) + "," + ys(v)).join(" ");
+  [100,150].forEach(v => el("line", {x1:L, x2:W-L, y1:ys(v), y2:ys(v), stroke: v === 100 ? "var(--warn)" : "var(--bad)", "stroke-dasharray":"3 4", opacity:.5}, svg));
+  const d = a.map((p, i) => (i ? "L" : "M") + xs(i) + "," + ys(p[1])).join(" ");
   el("path", {d: d + ` L${xs(a.length-1)},${Hh-B} L${xs(0)},${Hh-B} Z`, fill:"var(--accent2)", opacity:.15}, svg);
   el("path", {d, stroke:"var(--accent2)", "stroke-width":2.4, fill:"none", "stroke-linejoin":"round"}, svg);
-  a.forEach((v, i) => { const c = el("circle", {cx:xs(i), cy:ys(v), r:3.2, fill:"var(--accent2)"}, svg); c.onmousemove = e => showTip(e, `${a.length - i} day(s) before latest · mean ${v}`); c.onmouseleave = hideTip; });
-  el("text", {x:L, y:Hh-3}, svg, "−14 d"); el("text", {x:W-L, y:Hh-3, "text-anchor":"end"}, svg, "latest day");
+  a.forEach((p, i) => { const c = el("circle", {cx:xs(i), cy:ys(p[1]), r:3, fill:"var(--accent2)"}, svg); c.onmousemove = e => showTip(e, `<b>${hl(p[0])}</b> · API ${p[1]}`); c.onmouseleave = hideTip; });
+  el("text", {x:L, y:Hh-3}, svg, "24 h ago"); el("text", {x:W-L, y:Hh-3, "text-anchor":"end"}, svg, "latest");
+}
+
+/* ------------------------------ live feed ------------------------------ */
+async function loadLive(){
+  try{
+    const r = await fetch("live.json?t=" + Date.now(), {cache: "no-store"}); if (!r.ok) throw new Error("HTTP " + r.status);
+    LIVE = await r.json(); LIVE_ERR = null;
+  }catch(e){ if (!LIVE) LIVE_ERR = e.message || "network error"; }
+  deriveLive();
+  if (S.mode === "live") applyLiveToInputs();
+  render();
 }
 
 /* ------------------------------ boot ------------------------------ */
-$("dataBadge").textContent = `${M.meta.start} → ${M.meta.end} · ${M.states.length} states`;
+$("dataBadge").textContent = `Model: ${M.meta.start} → ${M.meta.end} · ${M.areas.length} stations · ${M.states.length} states`;
 if (M.meta.synthetic){ const b = document.createElement("span"); b.className = "badge demo"; b.textContent = "⚠ SYNTHETIC DEMO DATA – not for real decisions"; $("dataBadge").before(b); }
-$("foot").innerHTML = `<b>How it works.</b> For every state and announcement hour, logistic models learn P(7 AM API &gt; 100 / &gt; 150), P(API &gt; 180 during school hours tomorrow) and P(tomorrow's mean &gt; 150) from today's 8 AM, noon, 3-hour trend and announcement-hour readings, yesterday's mean, the over-150 streak and the season (plus a state effect). Closure risk = P(&gt;180) + remaining × [streak ≥ 2] × P(mean &gt; 150), mirroring KPM's triggers (API &gt; 180, or &gt; 150 for three days). Scenario split: Best = P(7 AM ≤ 100)·(1−closure), Worst = closure, Base = remainder. The best announcement time minimises backtested wrong-call cost plus a lateness penalty you control. Probabilities are model estimates – confirm with the official APIMS reading and MetMalaysia forecast before announcing. Built ${M.meta.built}.`;
-buildControls(); loadLatest(false); render();
+const dq = Object.entries(M.meta.quality || {}).map(([k, v]) => `${k}: ${Object.entries(v).filter(([, n]) => n).map(([a, n]) => `${fmtN(n)} ${a.replace(/_/g, " ")}`).join(", ") || "clean"}`).join(" · ");
+$("foot").innerHTML = `<b>How it works.</b> For every station and each hour from 12:00 to 23:00, logistic models learn P(7 AM API &gt; 100 / &gt; 150), P(API &gt; 180 during school hours tomorrow) and P(tomorrow's mean &gt; 150) from today's 8 AM, noon, 3-hour trend and latest readings, yesterday's mean, the over-150 streak and season, plus a state effect. Closure risk = P(&gt;180) + remaining × [streak ≥ 2] × P(mean &gt; 150), mirroring KPM's triggers (API &gt; 180, or &gt; 150 for three days). The live view recomputes every station whenever a new hourly DOE report lands (the page re-checks every 5 minutes). Readings stamped after the current Malaysia hour, non-numeric flags and values outside 1–500 are discarded before use. The best announcement time minimises backtested wrong-call cost plus the lateness penalty you set. Schools: government primary + secondary schools and enrolment from data.gov.my (OpenDOSM catalogue), by district, assigned to the nearest station. ${dq ? "<br>Data quality at build — " + dq + "." : ""} Stations with short history (Sabah, Sarawak, Kelantan and Labuan have DOE data only from Sep 2023) carry wider uncertainty. Decision support only: confirm with the official APIMS reading and MetMalaysia forecast. Built ${M.meta.built}.`;
+buildControls();
+S.state = AREA["WP Kuala Lumpur|Cheras"] ? "WP Kuala Lumpur" : M.states[0];
+fillAreaSelect(); render();
+loadLive().then(() => {
+  if (LIVE){ S.area = pickDefaultArea(); S.state = AREA[S.area].state; fillAreaSelect(); S.mode = "live"; applyLiveToInputs(); render(); }
+});
+setInterval(loadLive, 5 * 60 * 1000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) loadLive(); });
 </script>
 </body>
 </html>
