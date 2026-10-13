@@ -1,0 +1,9 @@
+# not needed at runtime on Vercel (static docs/ + api/live.js only)
+hazeshaman/
+tests/
+data/
+social/
+scripts/
+requirements.txt
+.github/
+__pycache__/
