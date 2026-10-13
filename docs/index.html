@@ -696,8 +696,17 @@ function render(){
   $("kpis").innerHTML = K.map(k => `<div class="kpi"><span>${k[0]}</span><b>${ok ? pct(k[1]) : "–"}</b><em>${k[2]}</em></div>`).join("");
 
   // schools impacted: STATE level, shown once a state is chosen
-  $("schPanel").style.display = S.state ? "" : "none";
-  if (S.state){
+  $("schPanel").style.display = "";
+  if (!S.state){            // nothing selected: sum every state, metric by metric
+    const t = scopeTotals(), have = live && t.have > 0;
+    $("schTitle").textContent = "Malaysia";
+    $("sch").innerHTML = [[`Schools in Malaysia`, fmtN(t.schools), `govt primary + secondary · all ${M.states.length} states${t.ipta ? ` · +${t.ipta} public universities` : ""}`],
+        ["Students and teachers", fmtN(t.students), `${fmtN(t.teachers)} teachers · ${t.teachers ? (t.students / t.teachers).toFixed(1) : "–"} pupils per teacher`],
+        ["If schools close", fmtN(t.schools), `schools · ${fmtN(t.students)} students · ${fmtN(t.teachers)} teachers affected (every state)`],
+        ["Likely affected tomorrow", have ? fmtN(t.expS) : "–", have ? `sum over states of closure chance × schools · ${fmtN(t.expStu)} students · ${fmtN(t.expTea)} teachers` : "waiting for readings"]]
+      .map(k => `<div class="kpi"><span>${k[0]}</span><b>${k[1]}</b><em>${k[2]}</em></div>`).join("");
+    $("schNote").textContent = `National totals: every figure is the sum of the 16 states. "Likely affected tomorrow" adds up, state by state, that state's highest-risk station chance × its schools. Pick a state to see it alone.`;
+  } else {
     const c = sch(S.state), ps = live && ST[S.state].maxP >= 0 ? ST[S.state].maxP : P.close, who = live && ST[S.state].maxA ? ST[S.state].maxA : area.name;
     $("schTitle").textContent = S.state;
     $("sch").innerHTML = [[`Schools in ${S.state}`, fmtN(c.schools), `govt primary + secondary${c.ipta ? ` · +${c.ipta} public universit${c.ipta > 1 ? "ies" : "y"}` : ""}`],

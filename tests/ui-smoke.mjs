@@ -22,13 +22,14 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); 
   const hdr = await p.evaluate(() => [...document.querySelectorAll('#stTable th')].map(t => t.textContent)); ok(hdr[0] === 'Station', 'state view lists stations: ' + hdr.join('|'));
   await p.keyboard.press('Tab'); await p.click('#stateBtn'); await p.waitForTimeout(300);
   ok(await p.evaluate(() => document.getElementById('sheet').classList.contains('open')), 'dropdown opens');
-  await p.keyboard.press('ArrowDown'); await p.keyboard.press('ArrowDown'); await p.keyboard.press('Enter'); await p.waitForTimeout(500);
-  const t = await p.textContent('#stateBtnTxt'); ok(t !== 'Selangor', 'keyboard selection changed state -> ' + t);
+  await p.keyboard.press('Home'); await p.keyboard.press('ArrowDown'); await p.keyboard.press('ArrowDown');
+  const want = await p.evaluate(() => document.activeElement.dataset.k); await p.keyboard.press('Enter'); await p.waitForTimeout(500);
+  const t = await p.textContent('#stateBtnTxt'); ok(t === want && want, 'keyboard selection picked the focused state -> ' + t);
   await p.click('#stateBtn'); await p.keyboard.press('Escape'); await p.waitForTimeout(300);
   ok(!(await p.evaluate(() => document.getElementById('sheet').classList.contains('open'))), 'Escape closes');
   await p.click('#stateBtn'); await p.click('#sheetList li[data-k=""]'); await p.waitForTimeout(500);
   const th = await p.evaluate(() => [...document.querySelectorAll('#stTable th')].map(t => t.textContent)); ok(th.includes('# schools in area') && !th.includes('Exp. schools'), 'Malaysia table has "# schools in area": ' + th.join('|'));
-  ok((await p.evaluate(() => getComputedStyle(document.getElementById('schPanel')).display)) === 'none', 'schools panel hidden for Malaysia');
+  ok((await p.evaluate(() => getComputedStyle(document.getElementById('schPanel')).display)) !== 'none' && (await p.textContent('#sch')).includes('10,238'), 'schools panel shows national totals for Malaysia');
   ok(errs.length === 0, 'no page errors ' + errs.join()); await p.close(); }
 // 3) phone: round button, sheet survives resize noise, closes on pick
 { const c = await b.newContext({ ...devices['iPhone 13'] }); const p = await c.newPage(); await p.goto(`${BASE}/`); await p.waitForSelector('#bandName:not(:empty)'); await p.waitForTimeout(1500);

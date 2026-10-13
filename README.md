@@ -177,7 +177,7 @@ Targets for tomorrow: 7 AM API > 100, 7 AM API > 150, any reading > 180 during 0
 * **Scenarios**: Best = P(7 AM <= 100)(1 - closure); Worst = closure; Base = remainder.
 * **Best announcement time**: the hold-out gives false-negative / false-positive counts per probability
   trigger for 3-9 PM; the browser minimises `(c_miss x FN + FP) / (c_miss x positives) + lateness% x (H - 3 PM)`.
-* **Schools impacted** (state level): a state's closure chance is its highest-risk station. *If schools close* = all
+* **Schools impacted** (state level; with no state chosen it shows the Malaysia total, the sum of all 16 states for each metric): a state's closure chance is its highest-risk station. *If schools close* = all
   schools / students / teachers in the state; *Likely affected tomorrow* = closure chance x schools in the state; a state
   is *at risk* when its highest-risk station is at or above the cost-optimal trigger.
 * Coefficients are exported as JSON and evaluated in the browser; inputs beyond ~4 SD are clamped and flagged.
