@@ -212,6 +212,25 @@ validates the file and writes `docs/closures.json`, which the dashboard's **Scho
 * It is **not** a complete history. It currently covers 28 Sep 2015, 17-23 Sep 2019, Sarawak in Aug-Sep 2026 and the Johor / Klang Valley / Melaka / Negeri Sembilan / Pahang / Sabah closures of 8-16 Oct 2026. Add rows as announcements are found.
 * It records what was announced, not what the model predicts, so it can also be used to back-test the closure trigger later.
 
+## 5d. Were the closure decisions the best ones? (analysis of the record above)
+
+`python -m hazeshaman.decisions` compares every recorded closure (`data/closures.csv`) with the DOE hourly API of the stations concerned and writes
+`docs/decisions.json`. Trigger used: KPM rule from 9 Oct 2026 (any reading above 180, or above 150 on three consecutive days); 200 before.
+"Reading" = highest hourly value in school hours (06:00-14:00); "met the evening before" uses 17:00-19:00 readings, when next-day decisions are usually announced.
+
+| Finding (data to 13 Oct 2026) | Result |
+|---|---|
+| Closure state-days with DOE data | 43 (2015 and Sarawak 2019 have no DOE data in the archive; 14 Oct was unfinished) |
+| Trigger met on the day or the evening before | 32 of 43 (74%); 7 more were at 150-180; 4 were below 150 (Selangor 12-13 Oct and KL Bangsar/Pudu are partial-district closures matched only at state level; Penang and Putrajaya on 20 Sep 2019) |
+| Timing, 6-14 Oct 2026 | Johor, Negeri Sembilan, Selangor, KL and Putrajaya had qualifying readings 1-2 school days before their first closure; Melaka closed on the day it qualified. Part of this is the rule itself: the 180 line only started on 9 Oct (200 before) |
+| Qualifying but open | Perak on 9 Oct (183 at one station), plus Negeri Sembilan, Selangor, KL and Putrajaya on 8 Oct, Pahang on 12 Oct |
+| Dashboard model replayed at 6 PM (6-13 Oct, 96 state-evenings, threshold at the default 8:1 cost ratio) | called 11 of the 14 days the trigger was met next day (recall 79%, 12 false alarms); the recorded closures called 6 of 14 (recall 43%, 9 closures without a state-level trigger) |
+
+How to read it: decisions were mostly consistent with the rule and tended to follow it by one to two school days at the start of an episode, then became more cautious
+(closing at 150-180 on persistence). That is defensible, but it is not the optimum the cost model suggests. Limits: one dominant episode, small and correlated sample; the record is incomplete;
+closures are per district while the DOE series is per station (only name matches are used, otherwise the whole state); the comparison to the model is not like-for-like (authorities also weigh
+health advice, the 3-day rule, logistics and partial closures); nothing here measures health outcomes or learning loss.
+
 ## 6. Run it
 
 ```bash
