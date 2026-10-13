@@ -78,5 +78,5 @@
       ]
     }
   ],
-  "ignoreCommand": "[ -n \"$VERCEL_GIT_PREVIOUS_SHA\" ] && git diff --quiet \"$VERCEL_GIT_PREVIOUS_SHA\" HEAD -- . ':(exclude)docs/live.json' ':(exclude)docs/xcheck.json' ':(exclude)data' ':(exclude)hazeshaman' ':(exclude)tests' ':(exclude)social' ':(exclude)README.md' ':(exclude)requirements.txt'"
+  "ignoreCommand": "bash scripts/ignore-build.sh"
 }
