@@ -9,6 +9,10 @@
     "api/live.js": {
       "maxDuration": 10,
       "includeFiles": "docs/live.json"
+    },
+    "api/xcheck.js": {
+      "maxDuration": 10,
+      "includeFiles": "docs/xcheck.json"
     }
   },
   "headers": [
