@@ -109,3 +109,14 @@ def test_school_mapping_covers_everything():
         by_area, meta = schools.build()
         assert meta["unmapped"] == []
         assert sum(v["schools"] for v in by_area.values()) == meta["total_schools"]
+
+
+def test_history_archive_is_idempotent_and_loadable(tmp_path):
+    as_of = pd.Timestamp("2026-10-13 15:00")
+    df, _ = apims.parse_live(_payload([(f"2026-10-13T{h:02d}:00:00", 50 + h) for h in range(10, 16)]), as_of)
+    assert apims.append_history(df, tmp_path) == 6
+    assert apims.append_history(df, tmp_path) == 0                       # same hours again: nothing new
+    df2 = df.assign(api=999.0).iloc[:1]
+    apims.append_history(df2.assign(api=77.0), tmp_path)                 # a revised value replaces the old one
+    back = apims.load_history_dir(tmp_path, as_of)
+    assert len(back) == 6 and (back["rank"] == 2).all() and 77.0 in back.api.values

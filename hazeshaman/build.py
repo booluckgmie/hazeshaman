@@ -26,6 +26,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--archive")
     ap.add_argument("--csv-dir")
+    ap.add_argument("--history-dir", help="permanent archive written by hazeshaman.live --history-dir")
     ap.add_argument("--raw", default=None)
     ap.add_argument("--synthetic", action="store_true")
     ap.add_argument("--no-live", action="store_true")
@@ -37,7 +38,7 @@ def main(argv=None):
     quality, stations, live_end = {}, None, None
     if a.synthetic:
         df = generate()
-    elif a.archive or a.csv_dir:
+    elif a.archive or a.csv_dir or a.history_dir:
         frames = []
         if a.archive:
             quality["archive"] = {}
@@ -45,6 +46,9 @@ def main(argv=None):
         if a.csv_dir:
             quality["csv"] = {}
             frames.append(apims.load_csv_dir(a.csv_dir, as_of, quality["csv"]))
+        if a.history_dir:
+            quality["history"] = {}
+            frames.append(apims.load_history_dir(a.history_dir, as_of, quality["history"]))
         if not a.no_live:
             quality["live"] = {}
             lv, stations = apims.parse_live(apims.fetch_live(), as_of, quality["live"])
@@ -82,6 +86,7 @@ def main(argv=None):
         sc = by_area.get(k, {})
         ok = np.isfinite(dm[i])
         area_meta.append(dict(key=k, state=st, name=loc, schools=sc.get("schools", 0), students=sc.get("students", 0),
+                              teachers=sc.get("teachers", 0), tertiary=sc.get("tertiary", 0), post_secondary=sc.get("post_secondary", 0),
                               districts=sc.get("districts", []), days=int(ok.sum()),
                               first=str(days[ok][0].date()) if ok.any() else None,
                               last=str(days[ok][-1].date()) if ok.any() else None, **coords.get(k, {})))

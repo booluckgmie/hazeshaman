@@ -150,3 +150,31 @@ state,district,station,weight
 "W.P. Kuala Lumpur","W.P. Kuala Lumpur","Cheras",0.5
 "W.P. Labuan","W.P. Labuan","Labuan",1
 "W.P. Putrajaya","W.P. Putrajaya","Putrajaya",1
+"Johor","Pasir Gudang","Larkin",1
+"Kedah","Kulim/Bandar Baharu","Kulim Hi-Tech",1
+"Kelantan","Pasir Putih","Kota Bharu",1
+"Negeri Sembilan","Jempol/Jelebu","Seremban",1
+"Pahang","Lipis","Jerantut",1
+"Perak","Kinta Selatan","Tasek Ipoh",1
+"Perak","Kinta Utara","Tasek Ipoh",1
+"Perak","Larut/Matang/Selama","Taiping",1
+"Perak","Larut dan Matang","Taiping",1
+"Perak","Manjung","Seri Manjung",1
+"Perlis","Jpn Perlis","Kangar",1
+"Sabah","Pensiangan","Keningau",1
+"Sabah","Telupid/Tongod","Sandakan",1
+"Sarawak","Baram","Miri",1
+"Sarawak","Meradong","Sarikei",1
+"Sarawak","Padawan","Kuching",1
+"Sarawak","Selangau","Sibu",1
+"Sarawak","Tatau/Sebauh","Bintulu",1
+"Selangor","Petaling Perdana","Shah Alam",1
+"Selangor","Petaling Utama","Shah Alam",1
+"W.P. Labuan","Jpwp Labuan","Labuan",1
+"W.P. Putrajaya","Jpwp Putrajaya","Putrajaya",1
+"W.P. Kuala Lumpur","Bangsar Pudu","Batu Muda",0.5
+"W.P. Kuala Lumpur","Bangsar Pudu","Cheras",0.5
+"W.P. Kuala Lumpur","Keramat","Batu Muda",0.5
+"W.P. Kuala Lumpur","Keramat","Cheras",0.5
+"W.P. Kuala Lumpur","Sentul","Batu Muda",0.5
+"W.P. Kuala Lumpur","Sentul","Cheras",0.5

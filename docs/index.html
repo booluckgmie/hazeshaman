@@ -7,32 +7,32 @@
 <meta name="description" content="Live probabilistic next-day school status, best announcement time and schools impacted, from DOE hourly API (IPU) by station and state.">
 <style>
 :root{
-  --bg1:#0a0f24;--bg2:#141036;--ink:#eef1ff;--ink2:#a9b0d6;--ink3:#7c84ae;
+  --bg1:#1a1318;--bg2:#2b1d19;--ink:#eef1ff;--ink2:#a9b0d6;--ink3:#7c84ae;
   --glass:rgba(255,255,255,.07);--glass2:rgba(255,255,255,.11);--edge:rgba(255,255,255,.16);--edge2:rgba(255,255,255,.08);
-  --shadow:0 10px 40px rgba(2,4,20,.45);--accent:#8b7bff;--accent2:#22d3ee;
+  --shadow:0 10px 40px rgba(10,4,2,.5);--grad:linear-gradient(135deg,var(--accent),#ff6b57);--sk:rgba(12,8,12,.92);--glow:rgba(255,170,90,.45);--hzc:255,168,92;--b0:#34d399;--b1:#facc15;--b2:#fb923c;--b3:#ef4444;--b4:#be185d;--accent:#ffa94d;--accent2:#7dd3fc;
   --ok:#34d399;--warn:#fbbf24;--bad:#fb7185;--grid:rgba(255,255,255,.10);
-  --orb1:#6d4cff;--orb2:#0ea5c6;--orb3:#e0489b;--field:rgba(8,12,34,.55);
+  --orb1:#e07a2f;--orb2:#8b7d99;--orb3:#b4532a;--field:rgba(8,12,34,.55);
 }
 :root[data-theme="light"]{
-  --bg1:#e8ecff;--bg2:#f6efff;--ink:#141a3a;--ink2:#46507e;--ink3:#69729c;
+  --bg1:#f3ece2;--bg2:#fbf6ee;--ink:#141a3a;--ink2:#46507e;--ink3:#69729c;
   --glass:rgba(255,255,255,.55);--glass2:rgba(255,255,255,.78);--edge:rgba(255,255,255,.9);--edge2:rgba(80,90,160,.14);
-  --shadow:0 10px 36px rgba(70,80,160,.18);--accent:#5b46e5;--accent2:#0891b2;
+  --shadow:0 10px 36px rgba(120,80,40,.2);--grad:linear-gradient(135deg,var(--accent),#e0452f);--sk:rgba(70,55,60,.8);--glow:rgba(255,190,120,.6);--hzc:210,150,90;--b0:#0f9f6e;--b1:#b8860b;--b2:#d9640a;--b3:#d1203f;--b4:#9d174d;--accent:#c2570c;--accent2:#0e7490;
   --ok:#0f9f6e;--warn:#a96a0a;--bad:#d1203f;--grid:rgba(20,26,58,.12);
-  --orb1:#a99bff;--orb2:#7dd3fc;--orb3:#f9a8d4;--field:rgba(255,255,255,.75);
+  --orb1:#f5b97a;--orb2:#c9bdd6;--orb3:#f0a58a;--field:rgba(255,255,255,.75);
 }
 @media (prefers-color-scheme: light){
   :root:not([data-theme]){
-    --bg1:#e8ecff;--bg2:#f6efff;--ink:#141a3a;--ink2:#46507e;--ink3:#69729c;
+    --bg1:#f3ece2;--bg2:#fbf6ee;--ink:#141a3a;--ink2:#46507e;--ink3:#69729c;
     --glass:rgba(255,255,255,.55);--glass2:rgba(255,255,255,.78);--edge:rgba(255,255,255,.9);--edge2:rgba(80,90,160,.14);
-    --shadow:0 10px 36px rgba(70,80,160,.18);--accent:#5b46e5;--accent2:#0891b2;
+    --shadow:0 10px 36px rgba(120,80,40,.2);--grad:linear-gradient(135deg,var(--accent),#e0452f);--sk:rgba(70,55,60,.8);--glow:rgba(255,190,120,.6);--hzc:210,150,90;--b0:#0f9f6e;--b1:#b8860b;--b2:#d9640a;--b3:#d1203f;--b4:#9d174d;--accent:#c2570c;--accent2:#0e7490;
     --ok:#0f9f6e;--warn:#a96a0a;--bad:#d1203f;--grid:rgba(20,26,58,.12);
-    --orb1:#a99bff;--orb2:#7dd3fc;--orb3:#f9a8d4;--field:rgba(255,255,255,.75);
+    --orb1:#f5b97a;--orb2:#c9bdd6;--orb3:#f0a58a;--field:rgba(255,255,255,.75);
   }
 }
 *{box-sizing:border-box}
 html{color-scheme:dark light;background:var(--bg1)}
 body{margin:0;min-height:100vh;color:var(--ink);font:15px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  background:linear-gradient(160deg,var(--bg1),var(--bg2));background-attachment:fixed;-webkit-font-smoothing:antialiased}
+  background:linear-gradient(170deg,var(--skyA,var(--bg1)),var(--skyB,var(--bg2)));background-attachment:fixed;transition:background 1s;-webkit-font-smoothing:antialiased}
 .orbs{position:fixed;inset:0;overflow:hidden;z-index:0;pointer-events:none}
 .orbs i{position:absolute;border-radius:50%;filter:blur(90px);opacity:.55;animation:float 22s ease-in-out infinite}
 .orbs i:nth-child(1){width:46vmax;height:46vmax;background:var(--orb1);left:-12vmax;top:-14vmax}
@@ -43,7 +43,7 @@ body{margin:0;min-height:100vh;color:var(--ink);font:15px/1.5 ui-sans-serif,syst
 .wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:24px 16px 56px}
 header{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;margin-bottom:18px}
 h1{margin:0;font-size:26px;letter-spacing:-.02em;font-weight:750}
-h1 span{background:linear-gradient(90deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;color:transparent}
+h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
 .sub{color:var(--ink2);font-size:13px;margin-top:2px}
 .hdr-r{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .badge{font:inherit;font-size:12px;padding:5px 11px;border-radius:99px;border:1px solid var(--edge);background:var(--glass);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);color:var(--ink2);display:inline-flex;gap:6px;align-items:center}
@@ -68,16 +68,46 @@ input[type=range]:disabled{opacity:.55}
 .seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:14px;background:var(--field);border:1px solid var(--edge2)}
 .seg button{border:0;border-radius:10px;padding:8px;background:transparent;color:var(--ink2);font:inherit;cursor:pointer;transition:.18s}
 .seg button:disabled{opacity:.45;cursor:default}
-.seg button[aria-pressed=true]{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 6px 16px color-mix(in srgb,var(--accent) 40%,transparent)}
+.seg button[aria-pressed=true]{background:var(--grad);color:#fff;box-shadow:0 6px 16px color-mix(in srgb,var(--accent) 40%,transparent)}
 .pills{display:flex;flex-wrap:wrap;gap:6px}
 .pill{border:1px solid var(--edge2);background:var(--field);color:var(--ink2);padding:6px 9px;border-radius:11px;font:inherit;font-size:12.5px;cursor:pointer;transition:.18s;font-variant-numeric:tabular-nums}
 .pill:hover:not(:disabled){color:var(--ink);transform:translateY(-1px)}
 .pill:disabled{cursor:default}
 .pill:disabled:not([aria-pressed=true]){opacity:.5}
-.pill[aria-pressed=true]{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-color:transparent}
+.pill[aria-pressed=true]{background:var(--grad);color:#fff;border-color:transparent}
 .pill.cand{border-color:var(--edge)}
 .note{font-size:12px;color:var(--ink3);margin-top:9px}
 hr{border:0;border-top:1px solid var(--edge2);margin:16px 0 2px}
+.sky{position:relative;overflow:hidden;padding:0;margin-bottom:18px;isolation:isolate}
+.sky::before{content:"";position:absolute;inset:0;z-index:-3;background:radial-gradient(55% 90% at 78% 12%,var(--glow),transparent 70%)}
+.sky .hz{position:absolute;inset:-25% -10%;z-index:-2;pointer-events:none;filter:blur(36px);opacity:calc(.12 + var(--haze,0)*.88);
+  background:radial-gradient(40% 50% at 25% 60%,rgba(var(--hzc),.7),transparent 70%),radial-gradient(35% 45% at 70% 40%,rgba(var(--hzc),.55),transparent 70%);animation:drift 46s ease-in-out infinite alternate}
+.sky .hz.b{animation-duration:62s;animation-direction:alternate-reverse;opacity:calc(.08 + var(--haze,0)*.7);transform:scaleX(-1)}
+@keyframes drift{from{transform:translateX(-6%)}to{transform:translateX(6%)}}
+.sky canvas{position:absolute;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}
+.skyline{position:absolute;left:0;right:0;bottom:0;width:100%;height:62%;z-index:-2;fill:var(--sk);filter:blur(calc(var(--haze,0)*4.5px));opacity:calc(1 - var(--haze,0)*.72);transition:filter 1s,opacity 1s}
+.sky-in{position:relative;padding:22px;display:grid;gap:16px}
+.sky-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink2);font-weight:700}
+.bandname{font-size:clamp(34px,6vw,60px);font-weight:800;letter-spacing:-.03em;line-height:1;color:var(--bc,var(--b2));text-shadow:0 2px 30px color-mix(in srgb,var(--bc,var(--b2)) 45%,transparent)}
+.bandsub{color:var(--ink);font-size:15px;margin-top:6px;max-width:62ch}
+.sky .kpi{background:color-mix(in srgb,var(--bg1) 52%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-color:var(--edge)}
+.sky .kpi span,.sky .kpi em{color:var(--ink)}.sky .kpi em{opacity:.78}
+.sky .chip{background:color-mix(in srgb,var(--bg1) 55%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.skystats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media (max-width:760px){.skystats{grid-template-columns:repeat(2,1fr)}}
+.scale{position:relative;height:12px;border-radius:99px;display:flex;overflow:visible;margin:26px 4px 24px}
+.scale i{display:block;height:100%}
+.scale i:first-child{border-radius:99px 0 0 99px}.scale i:last-of-type{border-radius:0 99px 99px 0}
+.mark{position:absolute;top:-7px;width:3px;height:26px;border-radius:2px;background:var(--ink);box-shadow:0 0 0 2px var(--bg1)}
+.mark span{position:absolute;top:30px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:11px;color:var(--ink);font-weight:650}
+.mark.t span{top:-20px}
+.scalelab{position:relative;height:14px;font-size:10.5px;color:var(--ink3);margin:-14px 4px 0}.scalelab span{position:absolute;transform:translateX(-50%)}
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:8px}
+.chip{padding:8px 10px;border-radius:14px;background:var(--glass);border:1px solid var(--edge2);border-left:4px solid var(--c);cursor:pointer;transition:.18s;min-width:0}
+.chip:hover{transform:translateY(-2px);background:var(--glass2)}
+.chip b{display:block;font-size:19px;font-variant-numeric:tabular-nums;line-height:1.1}
+.chip span{font-size:11px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .verdict{display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:center;border-left:4px solid var(--vc,var(--ok))}
 .ring{width:124px;height:124px;position:relative}
 .ring svg{width:100%;height:100%;transform:rotate(-90deg)}
@@ -124,8 +154,8 @@ tr.best td:first-child::after{content:" ★";color:var(--warn)}
 .hero{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 @media (max-width:760px){.hero{grid-template-columns:repeat(2,1fr)}}
 .hero .kpi b{font-size:28px}
-.sch{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-@media (max-width:760px){.sch{grid-template-columns:1fr}}
+.sch{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media (max-width:900px){.sch{grid-template-columns:repeat(2,1fr)}}
 .banner{padding:10px 14px;border-radius:14px;font-size:13px;border:1px solid color-mix(in srgb,var(--c) 50%,transparent);background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--ink)}
 footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
 .tip{position:fixed;pointer-events:none;z-index:9;padding:6px 10px;border-radius:10px;font-size:12px;background:var(--field);border:1px solid var(--edge);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);opacity:0;transition:opacity .12s;max-width:260px}
@@ -137,7 +167,7 @@ footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
   <header>
     <div>
       <h1><span>Hazeshaman</span> · School-status forecaster</h1>
-      <div class="sub">Hourly DOE API by station → next-morning haze probability, best announcement time and schools impacted.</div>
+      <div class="sub">Hourly DOE air-pollutant index by station → next-morning haze probability, best announcement time, and the schools, students and teachers affected.</div>
     </div>
     <div class="hdr-r">
       <span class="badge" id="liveBadge"></span>
@@ -146,6 +176,28 @@ footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
     </div>
   </header>
   <div id="banner" style="margin-bottom:14px"></div>
+
+  <section class="glass sky" id="sky" aria-live="polite">
+    <div class="hz"></div><div class="hz b"></div><canvas id="parts"></canvas>
+    <svg class="skyline" viewBox="0 0 1200 220" preserveAspectRatio="none" aria-hidden="true">
+  <g><rect x="0" y="150" width="1200" height="70"/>
+  <rect x="20" y="120" width="40" height="100"/><rect x="66" y="96" width="34" height="124"/><rect x="108" y="130" width="52" height="90"/><rect x="170" y="84" width="38" height="136"/><rect x="214" y="112" width="46" height="108"/>
+  <rect x="270" y="100" width="36" height="120"/><rect x="312" y="136" width="44" height="84"/>
+  <rect x="392" y="60" width="9" height="160"/><ellipse cx="396.5" cy="58" rx="19" ry="11"/><rect x="394" y="22" width="5" height="38"/>
+  <rect x="440" y="104" width="44" height="116"/><rect x="490" y="78" width="40" height="142"/><rect x="536" y="118" width="38" height="102"/>
+  <path d="M606 220V70l8-30 8 30v150zM662 220V70l8-30 8 30v150z"/><rect x="618" y="92" width="48" height="9"/><rect x="613" y="30" width="2" height="12"/><rect x="669" y="30" width="2" height="12"/>
+  <rect x="724" y="108" width="40" height="112"/><rect x="770" y="68" width="42" height="152"/><rect x="818" y="112" width="36" height="108"/>
+  <path d="M884 220V56l14-34 14 34v164z"/><rect x="896" y="6" width="3" height="20"/>
+  <rect x="936" y="98" width="42" height="122"/><rect x="984" y="126" width="46" height="94"/><rect x="1038" y="88" width="36" height="132"/><rect x="1080" y="116" width="48" height="104"/><rect x="1136" y="94" width="44" height="126"/></g></svg>
+    <div class="sky-in">
+      <div class="sky-top"><span class="eyebrow">Malaysia · haze right now</span><span class="eyebrow" id="skyTime"></span></div>
+      <div><div class="bandname" id="bandName">—</div><div class="bandsub" id="bandSub"></div></div>
+      <div class="skystats" id="skyStats"></div>
+      <div class="scale" id="scale" role="img" aria-label="National API distribution on the Malaysian API scale"></div>
+      <div class="scalelab" id="scaleLab"></div>
+      <div class="chips" id="chips"></div>
+    </div>
+  </section>
 
   <div class="grid">
     <aside class="glass" aria-label="Controls">
@@ -412,7 +464,7 @@ function render(){
   document.querySelectorAll("#streak .pill").forEach(b => { b.setAttribute("aria-pressed", +b.dataset.n === S.streak); b.disabled = live; });
   $("hourNote").textContent = live ? "Live mode follows the latest reported hour. Outlined hours are candidate announcement times." : "What-if: edit any reading below.";
   $("inputNote").textContent = live ? (f && f.ok ? `From the DOE live buffer for ${area.name}.${f.approx ? " Yesterday's mean is approximate (partial history)." : ""}` : (f && f.reason) || "") : "";
-  $("areaNote").textContent = area.schools ? `${fmtN(area.schools)} schools · ${fmtN(area.students)} students (${area.districts.join(", ")})` : "No district is mapped to this station (its surroundings are counted under neighbouring stations).";
+  $("areaNote").textContent = area.schools ? `${fmtN(area.schools)} schools · ${fmtN(area.students)} students · ${fmtN(area.teachers)} teachers (${area.districts.join(", ")})` : "No district is mapped to this station (its surroundings are counted under neighbouring stations).";
 
   const P = predict(S, area.state), thr = triggerFor(T, S.H);
   const ok = !live || !!(f && f.ok);
@@ -432,7 +484,11 @@ function render(){
   const K = [["7 AM API > 100", P.y100, "unhealthy"], ["7 AM API > 150", P.y150, "very unhealthy"], ["API > 180 in school hours", P.y180, "closure trigger"], ["Streak rule", P.daysOver >= 2 ? P.ymean150 : 0, P.daysOver >= 2 ? "tomorrow mean > 150" : "needs ≥2 prior days > 150"]];
   $("kpis").innerHTML = K.map(k => `<div class="kpi"><span>${k[0]}</span><b>${ok ? pct(k[1]) : "–"}</b><em>${k[2]}</em></div>`).join("");
   $("schTitle").textContent = area.name;
-  $("sch").innerHTML = [["Schools in area", fmtN(area.schools), "govt primary + secondary"], ["Expected affected", ok ? fmtN(eS) : "–", `${ok ? fmtN(eStu) : "–"} students · prob.-weighted`], ["If closed", fmtN(area.schools), `${fmtN(area.students)} students`]]
+  const stT = area.teachers ? (area.students / area.teachers).toFixed(1) : "–";
+  $("sch").innerHTML = [["Schools in area", fmtN(area.schools), `govt primary + secondary${area.tertiary ? ` · +${area.tertiary} public universities` : ""}`],
+      ["Students", fmtN(area.students), `${fmtN(area.teachers)} teachers · ${stT} pupils per teacher`],
+      ["Expected affected", ok ? fmtN(eS) : "–", ok ? `${fmtN(eStu)} students · ${fmtN(P.close * area.teachers)} teachers` : "waiting for readings"],
+      ["If closed", fmtN(area.schools), `${fmtN(area.students)} students · ${fmtN(area.teachers)} teachers`]]
     .map(k => `<div class="kpi"><span>${k[0]}</span><b>${k[1]}</b><em>${k[2]}</em></div>`).join("");
   $("schNote").textContent = M.meta.schools ? `Source: ${M.meta.schools.source}, ${M.meta.schools.year.slice(0,4)} (${M.meta.schools.scope}). Districts are assigned to their nearest DOE station (data/district_station_map.csv) – an approximation.` : "School data unavailable in this build.";
 
@@ -441,21 +497,74 @@ function render(){
   $("stack").innerHTML = ok ? ["best","base","worst"].map(k => `<i style="width:${P[k] * 100}%;background:${SCN[k].c}"></i>`).join("") : "";
   $("stackLeg").innerHTML = ok ? ["best","base","worst"].map(k => `<span><i style="background:${SCN[k].c}"></i>${SCN[k].name.split(" ·")[0]} ${pct(P[k])}</span>`).join("") : "";
 
-  drawOverview(T); drawTrend(P, f, ok); drawTiming(T); drawTable(T); drawClim(area); drawSpark(f);
+  const tot = drawOverview(T); drawSky(tot); drawTrend(P, f, ok); drawTiming(T); drawTable(T); drawClim(area); drawSpark(f);
   $("timingNote").textContent = T.bestH ? `★ ${hl(T.bestH)} minimises total expected cost at your preferences (missed closure = ${S.cfn}× needless closure; each hour later = ${S.lam}% of baseline). Click a bar to explore that hour in What-if.` : "No closure events in the hold-out period; timing cannot be ranked.";
   $("trendNote").textContent = ok ? `Dashed fan = model's 10–90% range for tomorrow's 7 AM reading (median ${Math.round(P.q[1])}).` : "";
 }
 
+const BANDS = [[50,"Good","var(--b0)"],[100,"Moderate","var(--b1)"],[200,"Unhealthy","var(--b2)"],[300,"Very unhealthy","var(--b3)"],[1e9,"Hazardous","var(--b4)"]];
+const band = a => BANDS.find(b => a <= b[0]);
+const SKY = {dark:[["#0a2233","#12384a"],["#2a281c","#3a3420"],["#3d2414","#5c3a1b"],["#3d1511","#5c2318"],["#240b12","#40121c"]],
+             light:[["#dcf1ff","#f3fbff"],["#f6f0d2","#fbf7e6"],["#f9dfc6","#fdf0e2"],["#f6cfc7","#fbe6e1"],["#ebbfc8","#f6dde2"]]};
+const isDark = () => (document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")) === "dark";
+let HAZE = 0;
+function latestApi(k){ const v = LIVE.areas[k]; if (!v) return null; for (let i = v.length - 1; i >= 0; i--) if (v[i] != null) return v[i]; return null; }
+function drawSky(tot){
+  const sky = $("sky");
+  if (!LIVE){ $("bandName").textContent = "No live data"; $("bandSub").textContent = "The haze view needs live.json (serve over http/s)."; $("skyStats").innerHTML = ""; $("scale").innerHTML = ""; $("chips").innerHTML = ""; HAZE = 0; sky.style.setProperty("--haze", 0); return; }
+  const rows = M.areas.map(a => ({a, v: latestApi(a.key)})).filter(r => r.v != null).sort((x, y) => y.v - x.v);
+  const n = rows.length, vals = rows.map(r => r.v), mean = vals.reduce((x, y) => x + y, 0) / n;
+  const top = rows.slice(0, Math.max(1, Math.ceil(n * .25))), intensity = top.reduce((x, r) => x + r.v, 0) / top.length;
+  HAZE = clamp((intensity - 40) / 200, 0, 1);
+  const w = rows[0], b = band(w.v), ge100 = vals.filter(v => v > 100).length, ge150 = vals.filter(v => v > 150).length;
+  const bi = BANDS.indexOf(b), th = isDark() ? SKY.dark : SKY.light;
+  document.documentElement.style.setProperty("--skyA", th[bi][0]); document.documentElement.style.setProperty("--skyB", th[bi][1]);
+  sky.style.setProperty("--haze", HAZE.toFixed(3)); sky.style.setProperty("--bc", b[2]);
+  $("skyTime").textContent = `${LIVE.end.slice(0, 10)} · ${LIVE.end.slice(11, 16)} MYT · ${n} stations`;
+  $("bandName").textContent = b[1].toUpperCase();
+  const sts = new Set(rows.filter(r => r.v > 100).map(r => r.a.state));
+  $("bandSub").textContent = ge100 ? `Worst: ${w.a.name}, ${w.a.state} at API ${w.v}. ${ge100} station${ge100 > 1 ? "s" : ""} above 100 across ${sts.size} state${sts.size > 1 ? "s" : ""}.` : `Highest reading: ${w.a.name}, ${w.a.state} at API ${w.v}. No station is above 100.`;
+  const tomorrow = tot ? `${tot.risk} / ${tot.areas - tot.nodata}` : "–";
+  $("skyStats").innerHTML = [["Highest API", w.v, `${w.a.name}`], ["National mean", Math.round(mean), `median ${Math.round(vals.slice().sort((x, y) => x - y)[n >> 1])}`], ["Stations > 100", `${ge100} / ${n}`, `${ge150} above 150`], ["Tomorrow: closure risk", tomorrow, tot ? `${fmtN(tot.schoolsRisk)} schools · ${fmtN(tot.teachersRisk)} teachers` : ""]]
+    .map(k => `<div class="kpi"><span>${k[0]}</span><b>${k[1]}</b><em>${k[2]}</em></div>`).join("");
+  const X = v => clamp(v, 0, 340) / 340 * 100;
+  let acc = 0; $("scale").innerHTML = BANDS.map(bd => { const hi = Math.min(bd[0], 340), wd = X(hi) - acc; acc = X(hi); return `<i style="width:${wd}%;background:${bd[2]}"></i>`; }).join("")
+    + `<div class="mark t" style="left:${X(mean)}%"><span>mean ${Math.round(mean)}</span></div><div class="mark" style="left:${X(w.v)}%;background:${b[2]}"><span>${w.a.name} ${w.v}</span></div>`;
+  $("scaleLab").innerHTML = [0, 50, 100, 200, 300].map(v => `<span style="left:${X(v)}%">${v}${v === 300 ? "+" : ""}</span>`).join("");
+  const byS = {}; rows.forEach(r => { (byS[r.a.state] = byS[r.a.state] || []).push(r); });
+  $("chips").innerHTML = Object.entries(byS).map(([st, rs]) => ({st, r: rs[0]})).sort((x, y) => y.r.v - x.r.v).map(({st, r}) => `<div class="chip" data-s="${st}" style="--c:${band(r.v)[2]}" title="${band(r.v)[1]}"><b>${r.v}</b><span>${st}</span></div>`).join("");
+  $("chips").querySelectorAll(".chip").forEach(c => c.onclick = () => { S.state = c.dataset.s; fillAreaSelect(); onAreaChange(); });
+  startParticles();
+}
+/* drifting haze particles: density follows regional intensity; static when reduced motion is requested */
+let _pr = null;
+function startParticles(){
+  const cv = $("parts"), ctx = cv.getContext("2d"), reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const d = Math.min(devicePixelRatio || 1, 2), r = cv.getBoundingClientRect(); cv.width = r.width * d; cv.height = r.height * d; ctx.setTransform(d, 0, 0, d, 0, 0);
+  const N = Math.round(14 + HAZE * 190);
+  const P = Array.from({length: N}, () => ({x: Math.random() * r.width, y: Math.random() * r.height, s: .6 + Math.random() * 2.4, v: .08 + Math.random() * .35, ph: Math.random() * 6.28, a: .12 + Math.random() * .3}));
+  const col = isDark() ? "255,190,120" : "150,100,60";
+  const frame = t => {
+    ctx.clearRect(0, 0, r.width, r.height);
+    for (const p of P){ p.x += p.v * (1 + HAZE); if (p.x > r.width + 4) p.x = -4; const y = p.y + Math.sin(t / 2400 + p.ph) * 6;
+      ctx.beginPath(); ctx.fillStyle = `rgba(${col},${p.a})`; ctx.arc(p.x, y, p.s, 0, 6.283); ctx.fill(); }
+    if (!reduce && !document.hidden) _pr = requestAnimationFrame(frame);
+  };
+  cancelAnimationFrame(_pr); frame(0);
+  if (!reduce) _pr = requestAnimationFrame(frame);
+  if (!startParticles.bound){ startParticles.bound = 1; addEventListener("resize", () => { clearTimeout(startParticles.t); startParticles.t = setTimeout(startParticles, 200); }); }
+}
+
 function drawOverview(T){
-  const tot = {areas: 0, risk: 0, schoolsRisk: 0, studentsRisk: 0, expS: 0, expStu: 0, schools: 0, nodata: 0, maxP: 0, maxA: null}, byState = {};
+  const tot = {areas: 0, risk: 0, schoolsRisk: 0, studentsRisk: 0, teachersRisk: 0, expS: 0, expStu: 0, expTea: 0, schools: 0, students: 0, teachers: 0, tertiary: 0, nodata: 0, maxP: 0, maxA: null}, byState = {};
   for (const a of M.areas){
     const f = LF[a.key], b = byState[a.state] || (byState[a.state] = {state: a.state, n: 0, nd: 0, risk: 0, watch: 0, schools: 0, schRisk: 0, exp: 0, maxP: -1, maxA: null, p150: 0});
-    b.n++; b.schools += a.schools; tot.areas++; tot.schools += a.schools;
+    b.n++; b.schools += a.schools; tot.areas++; tot.schools += a.schools; tot.students += a.students; tot.teachers += a.teachers; tot.tertiary += a.tertiary;
     if (!LIVE || !f || !f.ok){ b.nd++; tot.nodata++; continue; }
     const P = predict(Object.assign({}, S, f), a.state), thr = triggerFor(T, f.H), c = classify(P, thr);
-    if (c === "close"){ b.risk++; b.schRisk += a.schools; tot.risk++; tot.schoolsRisk += a.schools; tot.studentsRisk += a.students; }
+    if (c === "close"){ b.risk++; b.schRisk += a.schools; tot.risk++; tot.schoolsRisk += a.schools; tot.studentsRisk += a.students; tot.teachersRisk += a.teachers; }
     if (c === "watch") b.watch++;
-    b.exp += P.close * a.schools; tot.expS += P.close * a.schools; tot.expStu += P.close * a.students;
+    b.exp += P.close * a.schools; tot.expS += P.close * a.schools; tot.expStu += P.close * a.students; tot.expTea += P.close * a.teachers;
     b.p150 = Math.max(b.p150, P.y150);
     if (P.close > b.maxP){ b.maxP = P.close; b.maxA = a.name; }
     if (P.close > tot.maxP){ tot.maxP = P.close; tot.maxA = `${a.name}, ${a.state}`; }
@@ -463,9 +572,9 @@ function drawOverview(T){
   const have = tot.areas - tot.nodata;
   $("ovSub").textContent = LIVE ? `${have}/${tot.areas} stations reporting · latest hour ${LIVE.end.slice(11, 16)} MYT` : "live feed unavailable";
   const Hk = [["Stations at closure risk", `${tot.risk} / ${have}`, tot.maxA ? `highest: ${tot.maxA} (${pct(tot.maxP)})` : "no data"],
-             ["Schools in those areas", fmtN(tot.schoolsRisk), `${fmtN(tot.studentsRisk)} students`],
-             ["Expected schools affected", fmtN(tot.expS), `${fmtN(tot.expStu)} students · prob.-weighted`],
-             ["Schools monitored", fmtN(tot.schools), `${M.areas.filter(a => a.schools).length} stations mapped`]];
+             ["Schools in those areas", fmtN(tot.schoolsRisk), `${fmtN(tot.studentsRisk)} students · ${fmtN(tot.teachersRisk)} teachers (${(tot.studentsRisk / tot.students * 100).toFixed(1)}% of pupils)`],
+             ["Expected schools affected", fmtN(tot.expS), `${fmtN(tot.expStu)} students · ${fmtN(tot.expTea)} teachers · prob.-weighted`],
+             ["Monitored nationally", fmtN(tot.schools), `${fmtN(tot.students)} students · ${fmtN(tot.teachers)} teachers · ${fmtN(tot.tertiary)} public universities`]];
   $("hero").innerHTML = Hk.map((k, i) => `<div class="kpi"><span>${k[0]}</span><b style="${i === 0 && tot.risk ? "color:var(--bad)" : ""}">${k[1]}</b><em>${k[2]}</em></div>`).join("");
   const order = Object.values(byState).sort((x, y) => y.maxP - x.maxP || x.state.localeCompare(y.state));
   const head = `<thead><tr><th>State</th><th>Status</th><th>Top station</th><th>Closure</th><th>7AM&gt;150</th><th>Stns</th><th>Schools at risk</th><th>Exp. schools</th></tr></thead>`;
@@ -478,6 +587,7 @@ function drawOverview(T){
   $("stTable").querySelectorAll("tr.row").forEach(r => r.onclick = () => { S.state = r.dataset.s; fillAreaSelect(); onAreaChange(); });
   $("ovNote").textContent = "Click a state to open its stations. 'Stns' = stations at risk / reporting. Status uses the cost-optimal closure trigger for the latest hour; 'Expected' weights each station's schools by its closure probability.";
   $("overview").style.display = LIVE ? "" : "none";
+  return tot;
 }
 
 function drawTrend(P, f, ok){

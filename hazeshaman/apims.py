@@ -119,6 +119,35 @@ def fetch_live(timeout=30, retries=3) -> dict:
     raise RuntimeError(f"DOE live API failed after {retries} tries: {last}")
 
 
+HIST_COLS = ["datetime", "state", "area", "api"]
+
+
+def append_history(df: pd.DataFrame, hist_dir) -> int:
+    """Durable hourly archive: data/history/YYYY-MM.csv.gz, one row per (area, hour), latest value wins.
+    Returns the number of new rows written (the public DOE API only exposes the last 24 h)."""
+    os.makedirs(hist_dir, exist_ok=True)
+    new = 0
+    for ym, g in df.groupby(df.datetime.dt.strftime("%Y-%m")):
+        path = os.path.join(hist_dir, f"{ym}.csv.gz")
+        cur = pd.read_csv(path, parse_dates=["datetime"]) if os.path.exists(path) else pd.DataFrame(columns=HIST_COLS)
+        before = len(cur)
+        both = pd.concat([cur, g[HIST_COLS]], ignore_index=True).drop_duplicates(["datetime", "area"], keep="last")
+        both = both.sort_values(["datetime", "area"])
+        new += max(0, len(both) - before)
+        both.to_csv(path, index=False, compression="gzip", date_format="%Y-%m-%d %H:%M")
+    return new
+
+
+def load_history_dir(path, as_of, stats=None) -> pd.DataFrame:
+    """Read the archive written by append_history (rank 2 = date-corrected collector data)."""
+    parts = [pd.read_csv(f, parse_dates=["datetime"]) for f in sorted(glob.glob(os.path.join(path, "*.csv.gz")))]
+    if not parts:
+        return pd.DataFrame(columns=COLS)
+    df = pd.concat(parts, ignore_index=True)
+    df["rank"] = 2
+    return clean(df[COLS], as_of, stats)
+
+
 def merge(frames) -> pd.DataFrame:
     """Same area+hour in several sources: keep the highest rank (later row wins ties)."""
     df = pd.concat(frames, ignore_index=True)

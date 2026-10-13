@@ -1,74 +1,207 @@
 # Hazeshaman
 
-Probabilistic next-day school-status forecaster for Malaysian haze (DOE API / IPU), per
-station and state, with a cost-optimal **announcement time** and **schools impacted**.
+**Haze early-warning and school-status decision support for Malaysia.**
+It turns the DOE hourly air-pollutant index (API / IPU) of every monitoring station into a
+probability that schools will have to close tomorrow, tells you the best time to announce it,
+and counts the schools, students and teachers affected.
 
-* `docs/index.html` - glassmorphism dashboard (Live + What-if). Serve `docs/` (GitHub Pages) over http(s).
-* `docs/model.js` - trained model (coefficients, backtest, schools), rebuilt by `hazeshaman.build`.
-* `docs/live.json` - rolling 120 h per-station buffer, refreshed hourly by `.github/workflows/live.yml`.
+* `docs/index.html` - the dashboard (static; host `docs/` on GitHub Pages)
+* `docs/model.js` - trained model: coefficients, backtest, schools/teachers per station
+* `docs/live.json` - rolling 120 h per-station buffer, refreshed hourly
+* `data/history/` - **permanent hourly archive** (see the problem statement below)
 
-## Data sources
+---
 
-| Source | Used for |
+## 1. Problem statement
+
+**Nobody publishes a haze history.** The only public sources are:
+
+| Public source | What it exposes |
 |---|---|
-| `booluckgmie/sharecode/data_apims/archiveAPI201707-20241103.parquet` | 2017-07 -> 2024-11 history (12 peninsular states) |
-| `booluckgmie/sharecode/data_apims/20*.csv` | 2023-09 -> now (adds Sabah, Sarawak, Kelantan, Labuan) |
-| `https://eqms.doe.gov.my/api3/publicportalapims/apitablehourly` | live hourly readings, 68 stations |
-| `api.data.gov.my` `schools_district`, `enrolment_school_district` (OpenDOSM catalogue) | schools / students per district |
-| `data/district_station_map.csv` | district -> nearest station (manual, editable, supports weights) |
+| `https://eqms.doe.gov.my/api3/publicportalapims/apitablehourly` (DOE, current APIMS portal) | the **last 24 hours** per station (68 stations x 24 h = 1,632 rows; verified, from 21:00 yesterday to the current hour) |
+| `http://apims.doe.gov.my/data/public_v2/CAQM/last24hours.json` (older APIMS feed) | the last 24 hours |
+| APIMS website | "yesterday" and "today" only |
 
-Known gap: no DOE data between 2024-11-04 and 2025-06-30 in either source. Sabah, Sarawak,
-Kelantan and Labuan have data only from 2023-09.
+There is no official archive, bulk download or API for earlier days. Anything older than ~24 h
+disappears unless somebody was recording it. That has three consequences:
 
-### Bad-value guard
-Every source is cut at the current Malaysia hour: readings stamped after it ("hours not reached
-yet"), non-numeric flags, off-the-hour stamps (e.g. `05:15AM`) and values outside 1-500 are dropped
-(counts are recorded in `model.js` `meta.quality` and `live.json` `dropped`). Old collector files
-(single date stamp per file) rank below the archive and the date-corrected files. The dashboard
-repeats the future-hour check in the browser. Daily means need >= 18 hourly readings.
+1. **You cannot train a forecaster, audit past closure decisions or study seasonality** from public
+   data alone. Every probability in this project depends on history somebody collected.
+2. **Gaps are permanent.** The data we could recover (`booluckgmie/sharecode`) has no readings between
+   **2024-11-04 and 2025-06-30**, and Sabah, Sarawak, Kelantan and Labuan only appear from
+   **2023-09**. Those hours can never be re-fetched.
+3. **Naive collectors corrupt the record.** The 24 h window spans two calendar days. The early collector
+   stamped the whole window with one date, so hours that "had not been reached yet" carried yesterday's
+   values under today's date. Those wrong values must be discarded (section 4).
 
-## Run
+**What this repo does about it**
+
+* `hazeshaman.live` runs **every hour** (GitHub Actions, `:50`), fetches the API and appends each reading to
+  `data/history/YYYY-MM.csv.gz` (one row per station-hour, latest value wins; ~2.7 MB for 15 months). From
+  the moment it is merged to `main` the repo is its own archive, so the gap cannot reopen.
+* The 2017-2024 archive (`archiveAPI201707-20241103.parquet`) and the 2023-2026 hourly CSVs from `sharecode`
+  are merged, cleaned and de-duplicated into one training set (3.5 M station-hours, 2017-07 -> now).
+* A rolling 120 h buffer (`docs/live.json`) gives the live model what it needs (yesterday's mean, the
+  over-150 streak) even though the API only returns 24 h.
+
+---
+
+## 2. The dashboard at a glance
+
+Designed around haze itself: the page background, the sky and the skyline react to how bad the air is.
+
+* **Haze right now** - a smog-tinted sky whose colour follows the worst Malaysian API band
+  (Good 0-50, Moderate 51-100, Unhealthy 101-200, Very unhealthy 201-300, Hazardous 300+). The KL skyline
+  blurs and fades and the drifting particle count rises with regional intensity (mean of the worst
+  quarter of stations). Headline band, worst station, national mean, stations above 100/150, a band
+  scale with markers, and one API tile per state (click to drill in).
+* **National outlook for tomorrow morning** - stations at closure risk, schools / students / teachers in
+  those areas, probability-weighted *expected* schools affected, status per state.
+* **Station detail** - recommendation (open / restrictions / close-PdPR), closure ring, 7 AM
+  probabilities, schools impacted (schools, students, teachers, pupils per teacher, public universities),
+  three scenarios, today's trend with the model's 10-90% fan for tomorrow 7 AM, best announcement time,
+  backtest table, seasonality and the last 24 h.
+* **Live vs What-if** - Live follows the newest hourly report automatically (re-checks every 5 min,
+  warns when the feed is lagging/stale); What-if lets you edit any reading.
+* Light/dark themes, responsive to phone width, honours `prefers-reduced-motion`.
+
+---
+
+## 3. Decision context (KPM) and how announcement time was chosen
+
+KPM closes schools when **API > 180**, or **API > 150 for three consecutive days**. Weekday status is
+currently announced at 5:45 PM (to let hostel students travel). The question this project answers
+quantitatively: *when is the best time to announce, given the afternoon/evening trend?*
+
+Three usual scenarios (used as the dashboard's "three scenarios"):
+
+| Scenario | Pattern | Action |
+|---|---|---|
+| **Best - improving** | API < 100 and falling | announce open early |
+| **Base - unstable** | API 101-180, flat or rising | open with restrictions / PdPR ready, re-check at 8 PM |
+| **Worst - deteriorating** | API > 180, or > 150 for 3 days | close / PdPR immediately; do not wait for the scheduled time |
+
+Suggested protocol (unchanged by the data): 7 AM confirm morning API -> 12 PM advisory -> main
+next-day decision in the afternoon -> 8 PM safety update -> any time API > 180 close immediately.
+
+**What the data says (hold-out 2025-07-01 -> now).** Waiting does add skill - Brier skill versus always
+predicting the base rate rises from ~66% at 3 PM to ~72% at 9 PM - but each hour of delay also costs
+families and hostels. With the default preferences (a missed closure costs 8x a needless one, each hour of
+lateness costs 5% of baseline) the cost-optimal announcement is the earliest candidate, **3 PM**, and a
+**8 PM re-check** captures most of the late gain. The sliders let you change those preferences; the
+recommendation updates immediately. API does **not** always spike in the evening - it varies by episode - so
+the rule is trend-based, not clock-based.
+
+---
+
+## 4. Data sources and cleaning
+
+| Source | Role |
+|---|---|
+| `booluckgmie/sharecode/data_apims/archiveAPI201707-20241103.parquet` | 2017-07 -> 2024-11, date-corrected, 12 peninsular states, 42 stations |
+| `booluckgmie/sharecode/data_apims/20*.csv` (hourly cron since 2023-09) | adds Sabah, Sarawak, Kelantan, Labuan; format A until 2024-10, format B from 2025-07 |
+| DOE live API (above) | newest hours, 68 stations, 16 states |
+| `data/history/*.csv.gz` | this repo's own durable archive (hourly job) |
+
+**Rank when the same station-hour appears twice:** CSV format A < archive < CSV format B / history < live API.
+
+**Bad-value guard (applied to every source, and again in the browser):**
+
+* hours stamped **after the current Malaysia hour** ("not reached yet") are dropped;
+* non-numeric flags (`&`, `*`, `c`, `-`, blanks), off-the-hour stamps (e.g. `05:15AM`) and values outside 1-500 are dropped;
+* per-file guard: no row may be dated after its own file's day;
+* a daily mean needs >= 18 hourly readings; gaps <= 3 h are interpolated, longer gaps stay missing;
+* counts are recorded in `model.js` -> `meta.quality` and `live.json` -> `dropped` and shown in the page footer.
+
+### Education data (OpenDOSM / data.gov.my, MOE administrative data)
+
+All three are yearly, national / state / district, 2017-2025, official administrative (tier T2).
+The catalogue card says "data to 1 Jan 2025"; the newest rows in the API are dated 2025-06-30.
+
+| Dataset (EN / BM) | API id | Used for |
+|---|---|---|
+| Public Education Institutions by District / *Institusi Pendidikan Awam mengikut Daerah* | `schools_district` | schools by type and stage; IPTA public universities (the only tertiary type published per district; IPG, polytechnics and community colleges are state/national only) |
+| Enrolment in Government Schools by District / *Enrolmen di Sekolah Kerajaan mengikut Daerah* | `enrolment_school_district` | students (primary, secondary) and post-secondary students |
+| Teachers in Government Schools by District / *Guru di Sekolah Kerajaan mengikut Daerah* | `teachers_district` | teachers (primary, secondary) |
+
+Fetched from `https://api.data.gov.my/data-catalogue?id=<id>&limit=100000`; the build falls back to the cached
+copy (`data/schools/*.json`, git-ignored) if the API is unreachable and never invents numbers.
+National totals reconcile exactly with the published "All Districts" rows: **10,238 schools, 4,818,596
+students, 417,462 teachers, 20 IPTA**.
+
+The enrolment and teacher tables use the Education Department's own district names (e.g. Pasir Gudang,
+Kinta Utara, Petaling Perdana), so `data/district_station_map.csv` maps both naming systems to the nearest
+DOE station (`state,district,station,weight`; a district may be split by weight). **This mapping is a manual
+approximation - review and edit it.**
+
+---
+
+## 5. Model
+
+For each **station** and each hour **H = 12:00 ... 23:00** (so every new hourly report refreshes every station),
+using only information available at H:
+
+`ln API` at 8 AM, noon, H-3 and H; `ln` yesterday's daily mean; streak of prior days with mean > 150;
+season (sin/cos of day-of-year); plus a state effect shared by its stations.
+
+Targets for tomorrow: 7 AM API > 100, 7 AM API > 150, any reading > 180 during 06:00-14:00, daily mean > 150
+(logistic regression each) and ln 7 AM API (ridge, Gaussian residual -> forecast fan).
+
+* **Closure risk** = `P(>180) + (1 - P(>180)) x [>= 2 prior days > 150] x P(mean > 150)` (KPM's two triggers).
+* **Scenarios**: Best = P(7 AM <= 100)(1 - closure); Worst = closure; Base = remainder.
+* **Best announcement time**: the hold-out gives false-negative / false-positive counts per probability
+  trigger for 3-9 PM; the browser minimises `(c_miss x FN + FP) / (c_miss x positives) + lateness% x (H - 3 PM)`.
+* **Schools impacted**: schools / students / teachers of the districts mapped to a station; *at risk* = stations
+  at or above the cost-optimal trigger; *expected* = closure probability x counts.
+* Coefficients are exported as JSON and evaluated in the browser; inputs beyond ~4 SD are clamped and flagged.
+
+**Hold-out (2025-07-01 -> 2026-10-13; 30,022 station-days; 415 closure station-days, 1.4%).**
+Brier skill 66-72%; AUC on days already above 100 at the decision hour 0.93-0.96. The headline "AUC on all days"
+(~0.998) is flattered by easy clear-air days, so the dashboard shows the harder numbers first.
+
+---
+
+## 6. Run it
 
 ```bash
-pip install -r requirements.txt
-# 1. train on DOE history (clone booluckgmie/sharecode next to this repo first)
-python -m hazeshaman.build --archive ../sharecode/data_apims/archiveAPI201707-20241103.parquet \
-    --csv-dir ../sharecode/data_apims --test-from 2025-07-01
-# 2. pre-fill the live buffer once (the API only serves 24 h); the workflow keeps it fresh afterwards
-python -m hazeshaman.live --seed-csv-dir ../sharecode/data_apims
-python -m pytest
+pip install -r requirements.txt          # numpy pandas scikit-learn pyarrow requests pytest
+git clone https://github.com/booluckgmie/sharecode ../sharecode
+
+# train (about 2 minutes)
+python -m hazeshaman.build \
+    --archive ../sharecode/data_apims/archiveAPI201707-20241103.parquet \
+    --csv-dir ../sharecode/data_apims --history-dir data/history --test-from 2025-07-01
+
+# one-off: import the date-corrected CSVs into the permanent archive and seed the live buffer
+python -m hazeshaman.live --seed-csv-dir ../sharecode/data_apims --seed-since 2025-07-01 --history-dir data/history
+
+python -m pytest                          # 10 tests
+python -m http.server -d docs 8000        # live.json needs http(s); file:// falls back to What-if
 ```
-Other inputs: `--raw data/raw` (your own hourly CSVs, see `data/raw/README.md`), `--synthetic` (demo).
-The hourly workflow only runs from the default branch: merge to `main` to activate it, and re-run
-`hazeshaman.build` periodically (e.g. monthly) to re-train on new data.
 
-## Method
+Other inputs: `--raw data/raw` (your own hourly CSVs, `data/raw/README.md`), `--synthetic` (demo data, clearly badged).
+**Deploy:** merge to `main`, enable Pages on `/docs`; `.github/workflows/live.yml` then refreshes `live.json` and the
+archive every hour (scheduled workflows only run from the default branch). Re-run `hazeshaman.build` periodically
+(e.g. monthly) to re-train.
 
-For each station and every hour H in 12:00-23:00, features available at H only: ln API at 8 AM,
-noon, H-3 and H; ln of yesterday's mean; the streak of prior days with mean > 150; season
-(sin/cos day-of-year); plus a state effect. Targets (tomorrow): 7 AM API > 100, 7 AM API > 150,
-any reading > 180 during 06:00-14:00, daily mean > 150. Logistic regression for each, plus a
-log-linear model with Gaussian residual for the 7 AM forecast fan. Coefficients are exported and
-evaluated in the browser, so each new hourly report updates every station immediately.
+```
+hazeshaman/  apims.py (sources, guard, archive)  live.py (hourly job)  schools.py (OpenDOSM)  features.py
+             model.py  build.py  loader.py  synth.py  states.py
+docs/        index.html  model.js  live.json
+data/        district_station_map.csv  history/  raw/  schools/ (cache)
+tests/       test_pipeline.py
+```
 
-**Closure risk** mirrors KPM's triggers: `P(>180) + (1-P(>180)) * [>=2 prior days >150] * P(mean>150)`.
-Scenarios: Best = P(7 AM <= 100)(1-closure), Worst = closure, Base = remainder.
+---
 
-**Schools impacted** = government primary + secondary schools in the districts mapped to a station;
-"expected" = closure probability x schools; "at risk" = stations at or above the cost-optimal trigger.
+## 7. Caveats and roadmap
 
-**Best announcement time**: an out-of-time hold-out (default 2025-07-01 onward) gives FN/FP counts per
-probability trigger for 3-9 PM. The dashboard minimises
-`(c_miss*FN + FP)/(c_miss*positives) + lateness% * (H - 3 PM)` in the browser using your cost sliders.
-
-## Caveats
-- Brier skill vs always predicting the base rate is ~66-72% on the hold-out. AUC on all days is
-  inflated by easy clear days, so the dashboard also shows AUC on days already > 100. The hold-out
-  covers one haze season (~415 closure station-days): treat percentages as indicative.
-- District -> station assignment is an approximation; some stations (Pasir Gudang, Pengerang,
-  Nilai, ...) have no district of their own, so their schools are counted under a neighbouring station.
-- Government schools only (no private/religious); school counts are the latest year published.
-- Hour labels use the reading at HH:00; sub-hour timing is not modelled. Inputs beyond ~4 SD of
-  training data are clamped and flagged.
-- No weather covariates (rainfall, wind, hotspots) yet: the largest expected accuracy gain.
-- Decision support only: confirm with the official APIMS reading and MetMalaysia forecast.
+* One haze season in the hold-out; probabilities are indicative. Stations with short history (Sabah, Sarawak,
+  Kelantan, Labuan) carry wider uncertainty and are flagged.
+* District -> station mapping is approximate; stations without a district of their own (Pasir Gudang,
+  Pengerang, Nilai, ...) show no schools of their own.
+* Government schools only (no private / religious schools). Counts are annual snapshots.
+* Hour labels use the reading at HH:00; sub-hour timing is not modelled.
+* No weather covariates yet. Highest-value additions: rainfall/wind forecast (MetMalaysia), hotspot counts, regional
+  transboundary indicators, and a consolidated copy of the 2017-2024 archive inside this repo.
+* Decision support only: confirm with the official APIMS reading and the MetMalaysia forecast.
