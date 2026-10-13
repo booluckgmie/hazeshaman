@@ -1,12 +1,12 @@
-"""Schools / students per air-quality station area, from data.gov.my (OpenDOSM catalogue).
+"""Schools / students / teachers per STATE, from data.gov.my (OpenDOSM catalogue).
 
-Datasets (OpenDOSM catalogue, district level, MOE administrative data):
-  schools_district            "Public Education Institutions by District": schools (primary/secondary) and
-                              tertiary institutions (IPTA, IPG, Politeknik, Kolej Komuniti) by type/stage/district
-  enrolment_school_district   "Enrolment in Government Schools by District": students by stage/sex/district
-  teachers_district           "Teachers in Government Schools by District": teachers by stage/sex/district
-Each district is assigned to its nearest DOE station via data/district_station_map.csv
-(a manual approximation: edit it to refine; a district may be split across stations by weight).
+The DOE API reports by state (every station carries a STATE_ID), so impact is attached to the state:
+station -> state -> number of schools. No district or station mapping is needed.
+
+Datasets (MOE administrative data, yearly, state level = the 'All Districts' rows):
+  schools_district            "Public Education Institutions by District": schools by type/stage, IPTA universities
+  enrolment_school_district   "Enrolment in Government Schools by District": students by stage
+  teachers_district           "Teachers in Government Schools by District": teachers by stage
 """
 import json
 from pathlib import Path
@@ -37,43 +37,33 @@ def _fetch(ds_id, cache_dir):
         raise
 
 
-def _latest(df):
-    return df[df.date == df.date.max()]
+def _state_rows(df):
+    """State-level rows only (district == 'All Districts', state != 'Malaysia'), latest date of this subset."""
+    d = df[(df.district == "All Districts") & (df.state != "Malaysia")]
+    return d[d.date == d.date.max()] if len(d) else d
 
 
-def build(map_csv="data/district_station_map.csv", cache_dir="data/schools"):
-    """-> (by_area dict {"State|Station": {...}}, meta dict)."""
+def build(cache_dir="data/schools"):
+    """-> (by_state {"Johor": {schools, students, teachers, post_secondary, ipta}}, meta)."""
     sc, src1 = _fetch("schools_district", cache_dir)
     en, src2 = _fetch("enrolment_school_district", cache_dir)
     te, src3 = _fetch("teachers_district", cache_dir)
-    keep = lambda d: d[d.district != "All Districts"]  # noqa: E731
-    sc, en, te = keep(sc), keep(en), keep(te)
-    sch = _latest(sc[sc.stage.isin(STAGES)])
-    ter = _latest(sc[sc.stage == "tertiary"])
-    enr = _latest(en[(en.sex == "both")])
-    tea = _latest(te[(te.sex == "both") & te.stage.isin(STAGES)])
-    g = lambda d, col, name, stages=None: (d if stages is None else d[d.stage.isin(stages)]).groupby(["state", "district"])[col].sum().rename(name)  # noqa: E731
-    d = pd.concat([g(sch, "schools", "schools"), g(enr, "students", "students", STAGES),
-                   g(enr, "students", "post_secondary", ["post_secondary"]), g(tea, "teachers", "teachers"),
-                   ter.groupby(["state", "district"]).schools.sum().rename("tertiary")], axis=1).fillna(0).reset_index()
-    mp = pd.read_csv(map_csv)
-    j = d.merge(mp, on=["state", "district"], how="left")
-    unmapped = j[j.station.isna()][["state", "district"]].values.tolist()
-    j = j.dropna(subset=["station"])
-    j["state"] = j.state.map(normalise_state)
-    nums = ["schools", "students", "post_secondary", "teachers", "tertiary"]
-    for c in nums:
-        j[c] = j[c] * j.weight
-    agg = {c: (c, "sum") for c in nums}
-    gg = j.groupby(["state", "station"]).agg(**agg, districts=("district", lambda s: sorted(set(s)))).reset_index()
-    by_area = {f"{r.state}|{r.station}": dict(schools=int(round(r.schools)), students=int(round(r.students)),
-                                              teachers=int(round(r.teachers)), tertiary=int(round(r.tertiary)),
-                                              post_secondary=int(round(r.post_secondary)), districts=r.districts)
-               for r in gg.itertuples()}
-    tot = d[nums].sum()
+    sch = _state_rows(sc[sc.stage.isin(STAGES)])
+    ipta = _state_rows(sc[(sc.stage == "tertiary") & (sc.type == "IPTA")])
+    enr = _state_rows(en[en.sex == "both"])
+    tea = _state_rows(te[(te.sex == "both") & te.stage.isin(STAGES)])
+    by = lambda d, col, stages=None: (d if stages is None else d[d.stage.isin(stages)]).groupby("state")[col].sum()  # noqa: E731
+    t = pd.concat({"schools": by(sch, "schools"), "students": by(enr, "students", STAGES),
+                   "post_secondary": by(enr, "students", ["post_secondary"]), "teachers": by(tea, "teachers"),
+                   "ipta": by(ipta, "schools")}, axis=1).fillna(0)
+    t.index = [normalise_state(s) for s in t.index]
+    assert t.index.notna().all() and t.index.is_unique, "unmapped state names"
+    by_state = {s: {k: int(round(v)) for k, v in row.items()} for s, row in t.iterrows()}
+    nat = lambda d, col: int(d[(d.state == "Malaysia") & (d.district == "All Districts")][col].sum())  # noqa: E731
+    tot = t.sum()
     meta = dict(source="data.gov.my / OpenDOSM catalogue: schools_district, enrolment_school_district, teachers_district",
-                year=str(sch.date.max())[:10], scope="government primary + secondary schools (+ IPTA public universities, the only tertiary type published by district)",
+                year=str(sch.date.max())[:10], level="state",
+                scope="government primary + secondary schools; IPTA public universities listed separately",
                 total_schools=int(tot.schools), total_students=int(tot.students), total_teachers=int(tot.teachers),
-                total_tertiary=int(tot.tertiary), total_post_secondary=int(tot.post_secondary),
-                fetched=[src1, src2, src3], unmapped=unmapped)
-    return by_area, meta
+                total_ipta=int(tot.ipta), total_post_secondary=int(tot.post_secondary), fetched=[src1, src2, src3])
+    return by_state, meta

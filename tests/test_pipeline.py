@@ -100,15 +100,14 @@ def test_live_buffer_rolls_and_ignores_future(tmp_path):
     assert 71 not in a                                    # 16:00 is in the future
 
 
-def test_school_mapping_covers_everything():
-    mp = pd.read_csv("data/district_station_map.csv")
-    w = mp.groupby(["state", "district"]).weight.sum()
-    assert np.allclose(w, 1.0)
-    cached = __import__("pathlib").Path("data/schools/schools_district.json")
-    if cached.exists():
-        by_area, meta = schools.build()
-        assert meta["unmapped"] == []
-        assert sum(v["schools"] for v in by_area.values()) == meta["total_schools"]
+def test_schools_are_attached_at_state_level():
+    from pathlib import Path
+    if not Path("data/schools/schools_district.json").exists():
+        pytest.skip("no cached school data")
+    by_state, meta = schools.build()
+    assert set(by_state) == set(__import__("hazeshaman.states", fromlist=["STATES"]).STATES)       # 16 canonical states
+    assert sum(v["schools"] for v in by_state.values()) == meta["total_schools"] == 10238          # reconciles with the national row
+    assert by_state["Johor"]["schools"] == 1195 and by_state["Johor"]["teachers"] > 40000
 
 
 def test_history_archive_is_idempotent_and_loadable(tmp_path):

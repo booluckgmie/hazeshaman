@@ -1,27 +1,27 @@
 {
- "at": "2026-10-13T21:35:00+08:00",
+ "at": "2026-10-13T23:35:00+08:00",
  "band": "UNHEALTHY",
- "sub": "Worst: Pasir Gudang, Johor at API 175. 26 stations above 100 across 10 states.",
+ "sub": "Worst: Pasir Gudang, Johor at API 175. 27 stations above 100 across 10 states.",
  "national": [
   {
    "l": "Stations at closure risk",
-   "v": "12 / 68",
+   "v": "13 / 68",
    "e": "highest: Pasir Gudang, Johor (83%)"
   },
   {
-   "l": "Schools in those areas",
-   "v": "1,710",
-   "e": "795,579 students · 68,410 teachers (16.5% of pupils)"
+   "l": "Schools in states at risk",
+   "v": "3,238",
+   "e": "5 of 16 states · 1,437,339 students · 128,209 teachers"
   },
   {
-   "l": "Expected schools affected",
-   "v": "1,237",
-   "e": "605,655 students · 51,126 teachers · prob.-weighted"
+   "l": "Schools likely affected",
+   "v": "2,616",
+   "e": "closure chance × schools, state by state · 1,213,805 students"
   },
   {
-   "l": "Monitored nationally",
+   "l": "# schools monitored",
    "v": "10,238",
-   "e": "4,818,597 students · 417,462 teachers · 20 public universities"
+   "e": "4,818,596 students · 417,462 teachers · 20 public universities"
   }
  ],
  "haze": [
@@ -32,18 +32,18 @@
   },
   {
    "l": "National mean",
-   "v": "105",
+   "v": "106",
    "e": "median 91"
   },
   {
    "l": "Stations > 100",
-   "v": "26 / 68",
-   "e": "24 above 150"
+   "v": "27 / 68",
+   "e": "25 above 150"
   },
   {
    "l": "Tomorrow: closure risk",
-   "v": "12 / 68",
-   "e": "1,710 schools · 68,410 teachers"
+   "v": "13 / 68",
+   "e": "3,238 schools · 128,209 teachers in states at risk"
   }
  ]
 }
