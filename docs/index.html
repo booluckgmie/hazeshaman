@@ -436,10 +436,12 @@ function mytNow(){ // Malaysia wall clock as a UTC-based ms value (naive), indep
 }
 let XC = null, LFX = {}, RISKX = {};     // XC: Open-Meteo cross-check document; LFX: features from its DOE-scale series
 function deriveOne(k, vals, end, N, cap){
-  const T0 = end - (N - 1) * 36e5, day0 = Math.floor(end / 864e5) * 864e5;
+  const T0 = end - (N - 1) * 36e5; let day0 = Math.floor(end / 864e5) * 864e5;
   // readings stamped after the current Malaysia hour are ignored (hours that have not been reached yet)
   const val = (day, h) => { const t = day + h * 36e5; if (t > cap || t > end) return null; const i = (t - T0) / 36e5; return i >= 0 && i < N ? vals[i] : null; };
   let H = new Date(end).getUTCHours(); while (H >= 0 && val(day0, H) == null) H--;      // latest reported hour today
+  // after midnight the models (12:00-23:00) have no hour on the new day: keep using last evening's 23:00 view for this morning
+  if (H < 12 && val(day0 - 864e5, 23) != null){ day0 -= 864e5; H = 23; }
   const f = {key: k, ok: false};
   if (!AREA[k]){ f.reason = "Station not in the trained model yet."; return f; }
   if (H < 12){ f.reason = "Models start at 12:00 – waiting for noon readings."; return f; }
