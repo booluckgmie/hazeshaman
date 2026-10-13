@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hazeshaman guide</title>
+<meta name="description" content="How to read and use the Hazeshaman haze and school-status dashboard, in seven steps.">
+<meta property="og:title" content="How to use Hazeshaman"><link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23ffa94d'/%3E%3Cpath d='M5 21h22M8 16h16M11 11h10' stroke='%231a1318' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E"><meta property="og:image" content="howto/social-card.png">
+<style>
+:root{--bg1:#1a1318;--bg2:#2b1d19;--ink:#f6ede6;--ink2:#d0bfb1;--card:rgba(255,255,255,.07);--edge:rgba(255,255,255,.16);--accent:#ffa94d}
+@media (prefers-color-scheme:light){:root{--bg1:#f3ece2;--bg2:#fbf6ee;--ink:#2a1c14;--ink2:#6a5446;--card:rgba(255,255,255,.7);--edge:rgba(120,80,40,.2);--accent:#c2570c}}
+*{box-sizing:border-box}body{margin:0;font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:linear-gradient(170deg,var(--bg1),var(--bg2)) fixed;min-height:100vh}
+main{max-width:980px;margin:0 auto;padding:28px 16px 64px}h1{font-size:30px;letter-spacing:-.02em;margin:.2em 0}h1 span{color:var(--accent)}
+.lead{color:var(--ink2);max-width:62ch}a{color:var(--accent)}.btns{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 30px}
+.btn{padding:9px 16px;border-radius:99px;border:1px solid var(--edge);background:var(--card);color:var(--ink);text-decoration:none;font-weight:600}
+.btn.p{background:var(--accent);color:#1a1318;border-color:transparent}
+.step{margin:0 0 34px;padding:18px;border:1px solid var(--edge);border-radius:20px;background:var(--card)}
+.step h2{margin:0 0 6px;font-size:19px}.step h2 b{display:inline-block;width:30px;height:30px;line-height:30px;text-align:center;border-radius:50%;background:var(--accent);color:#1a1318;margin-right:10px}
+.step p{margin:.2em 0 12px;color:var(--ink2)}.step img{display:block;width:100%;height:auto;border-radius:14px;border:1px solid var(--edge)}
+footer{color:var(--ink2);font-size:13px}
+</style></head>
+<body><main>
+<h1><span>Hazeshaman</span> · how to use the dashboard</h1>
+<p class="lead">A haze early-warning view for Malaysian schools: the air right now, the chance schools must close tomorrow morning, the best time to announce it, and the schools, students and teachers affected. Seven steps, each with a numbered screenshot.</p>
+<div class="btns"><a class="btn p" href="./">Open the dashboard</a><a class="btn" href="howto/hazeshaman-guide.pdf">Download as PDF (LinkedIn carousel)</a><a class="btn" href="howto/social-card.png">Social card (1200×630)</a><a class="btn" href="howto/social-square.png">Square card (1080×1080)</a></div>
+
+<section class="step"><h2><b>1</b>Orientation</h2><p>Check the live badge first (green = newest hourly DOE report is under 2 hours old). Then read the sky, pick a state tile, and use the picker to choose a station.</p><img src="howto/01-tour.png" alt="Numbered tour of the dashboard" loading="lazy"></section>
+<section class="step"><h2><b>2</b>Read the air</h2><p>The band follows the worst station using Malaysia’s API bands. The skyline blurs and the particles thicken as haze worsens.</p><img src="howto/02-haze-at-a-glance.png" alt="Haze right now panel with callouts" loading="lazy"></section>
+<section class="step"><h2><b>3</b>Tomorrow morning, nationally</h2><p>See how many stations are above the cost-optimal closure trigger and how many schools, students and teachers sit behind them. Click a state row to drill in.</p><img src="howto/03-national-outlook.png" alt="National outlook table" loading="lazy"></section>
+<section class="step"><h2><b>4</b>One station</h2><p>The recommendation, KPM’s two triggers (API above 180, or above 150 for three days), schools impacted and the best / base / worst scenarios.</p><img src="howto/04-station-detail.png" alt="Station detail" loading="lazy"></section>
+<section class="step"><h2><b>5</b>When to announce</h2><p>Waiting improves the forecast, but late calls cost families. Set how bad a missed closure is and what each hour of delay costs; the ★ shows the cheapest hour.</p><img src="howto/05-announcement-time.png" alt="Announcement time chart before and after changing preferences" loading="lazy"></section>
+<section class="step"><h2><b>6</b>Try your own numbers</h2><p>Switch to What-if, pick a model hour and type the readings you expect. Everything recomputes instantly.</p><img src="howto/06-what-if.png" alt="What-if mode" loading="lazy"></section>
+<section class="step"><h2><b>7</b>On your phone</h2><p>The same panels stack for small screens; the state table keeps the essential columns.</p><img src="howto/07-mobile.png" alt="Mobile screens" loading="lazy"></section>
+<footer>Model estimates from the hourly DOE API – not an official decision. Confirm with the official APIMS reading, MetMalaysia and KPM announcements. Images show a snapshot; the live dashboard updates hourly.</footer>
+</main></body></html>

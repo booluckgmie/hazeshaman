@@ -1,0 +1,49 @@
+{
+ "at": "2026-10-13T21:35:00+08:00",
+ "band": "UNHEALTHY",
+ "sub": "Worst: Pasir Gudang, Johor at API 175. 26 stations above 100 across 10 states.",
+ "national": [
+  {
+   "l": "Stations at closure risk",
+   "v": "12 / 68",
+   "e": "highest: Pasir Gudang, Johor (83%)"
+  },
+  {
+   "l": "Schools in those areas",
+   "v": "1,710",
+   "e": "795,579 students · 68,410 teachers (16.5% of pupils)"
+  },
+  {
+   "l": "Expected schools affected",
+   "v": "1,237",
+   "e": "605,655 students · 51,126 teachers · prob.-weighted"
+  },
+  {
+   "l": "Monitored nationally",
+   "v": "10,238",
+   "e": "4,818,597 students · 417,462 teachers · 20 public universities"
+  }
+ ],
+ "haze": [
+  {
+   "l": "Highest API",
+   "v": "175",
+   "e": "Pasir Gudang"
+  },
+  {
+   "l": "National mean",
+   "v": "105",
+   "e": "median 91"
+  },
+  {
+   "l": "Stations > 100",
+   "v": "26 / 68",
+   "e": "24 above 150"
+  },
+  {
+   "l": "Tomorrow: closure risk",
+   "v": "12 / 68",
+   "e": "1,710 schools · 68,410 teachers"
+  }
+ ]
+}

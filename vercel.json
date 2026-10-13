@@ -21,7 +21,7 @@
     },
     { "source": "/live.json", "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }] },
     { "source": "/model.js", "headers": [{ "key": "Cache-Control", "value": "public, max-age=600, stale-while-revalidate=3600" }] },
-    { "source": "/guide/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }] }
+    { "source": "/howto/(.*)", "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400" }] }
   ],
   "ignoreCommand": "git diff --quiet HEAD^ HEAD -- . ':(exclude)docs/live.json' ':(exclude)data' ':(exclude)hazeshaman' ':(exclude)tests' ':(exclude)social' ':(exclude)README.md' ':(exclude)requirements.txt'"
 }

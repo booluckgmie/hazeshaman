@@ -7,7 +7,7 @@
 <meta name="description" content="Live probabilistic next-day school status, best announcement time and schools impacted, from DOE hourly API (IPU) by station and state.">
 <meta property="og:type" content="website"><meta property="og:title" content="Hazeshaman - Malaysia haze and school-status forecaster">
 <meta property="og:description" content="Hourly DOE API by station: next-morning closure probability, best announcement time, and the schools, students and teachers affected.">
-<meta property="og:image" content="guide/social-card.png"><meta name="twitter:card" content="summary_large_image">
+<meta property="og:image" content="howto/social-card.png"><meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='14' fill='%23ffa94d'/%3E%3Cpath d='M5 21h22M8 16h16M11 11h10' stroke='%231a1318' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
 :root{
@@ -97,7 +97,7 @@ hr{border:0;border-top:1px solid var(--edge2);margin:16px 0 2px}
 .bandsub{color:var(--ink);font-size:15px;margin-top:6px;max-width:62ch}
 .sky .kpi{background:color-mix(in srgb,var(--bg1) 52%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-color:var(--edge)}
 .sky .kpi span,.sky .kpi em{color:var(--ink)}.sky .kpi em{opacity:.78}
-.sky .chip{background:color-mix(in srgb,var(--bg1) 55%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
+.sky .chip{background:color-mix(in srgb,var(--bg1) 62%,transparent)}
 .skystats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 @media (max-width:760px){.skystats{grid-template-columns:repeat(2,1fr)}}
 .scale{position:relative;height:12px;border-radius:99px;display:flex;overflow:visible;margin:26px 4px 24px}
@@ -127,7 +127,7 @@ hr{border:0;border-top:1px solid var(--edge2);margin:16px 0 2px}
 .kpi{padding:12px 14px;border-radius:16px;background:var(--glass);border:1px solid var(--edge2);min-width:0}
 .kpi span{font-size:12px;color:var(--ink2)}
 .kpi b{display:block;font-size:24px;font-variant-numeric:tabular-nums;margin-top:2px;white-space:nowrap}
-.kpi em{font-style:normal;font-size:11px;color:var(--ink3)}
+.kpi em{font-style:normal;font-size:11px;color:var(--ink2)}
 .scen{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
 @media (max-width:760px){.scen{grid-template-columns:1fr}}
 .sc{padding:14px;border-radius:16px;border:1px solid var(--edge2);background:var(--glass);transition:.25s}
@@ -146,6 +146,7 @@ th,td{text-align:right;padding:7px 8px;border-bottom:1px solid var(--edge2);whit
 th:first-child,td:first-child{text-align:left}
 th:nth-child(3),td:nth-child(3){text-align:left}
 th{color:var(--ink2);font-weight:600;font-size:12px}
+@media (max-width:760px){#stTable th:nth-child(3),#stTable td:nth-child(3),#stTable th:nth-child(5),#stTable td:nth-child(5),#stTable th:nth-child(6),#stTable td:nth-child(6),#stTable th:nth-child(7),#stTable td:nth-child(7){display:none}}
 tr.row{cursor:pointer;transition:background .15s}
 tr.row:hover td{background:var(--glass)}
 tr.sel td{background:color-mix(in srgb,var(--accent) 20%,transparent)}
@@ -176,6 +177,7 @@ footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
     <div class="hdr-r">
       <span class="badge" id="liveBadge"></span>
       <span class="badge" id="dataBadge"></span>
+      <a class="badge" href="guide" style="text-decoration:none">How to use</a>
       <button class="badge" id="themeBtn" aria-label="Toggle light and dark theme" style="cursor:pointer">◐ Theme</button>
     </div>
   </header>
