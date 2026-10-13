@@ -237,8 +237,8 @@ The repo is Vercel-ready: no build step; `vercel.json` publishes `docs/` and dep
 
 How the pieces fit: `.github/workflows/live.yml` (hourly, `:50`) appends to `data/history/` and commits `docs/live.json`;
 `/api/live` reads that file from `raw.githubusercontent.com/<owner>/<repo>/main/docs/live.json` (override with `LIVE_BASE_URL`
-/ `LIVE_BASE_BRANCH`), overlays the live DOE response, and edge-caches for 5 minutes. `ignoreCommand` skips Vercel builds for
-data-only commits, so the hourly job does not trigger hourly deployments. Security headers incl. a strict CSP are in `vercel.json`.
+/ `LIVE_BASE_BRANCH`), overlays the live DOE response, and edge-caches for 5 minutes. The hourly data commits also trigger a Vercel build (an `ignoreCommand` made every deployment fail, so none is set; the
+APIs read the data from GitHub, so the pages stay fresh regardless). Security headers incl. a strict CSP are in `vercel.json`.
 Local check of the whole stack: `npm run dev` (serves `docs/`, runs `api/live.js`, applies the `vercel.json` headers).
 
 ```
