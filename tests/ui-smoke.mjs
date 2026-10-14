@@ -50,7 +50,7 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); 
   await p.goto(`${BASE}/`); await p.waitForSelector('#bandName:not(:empty)', { state: 'attached' }); await p.waitForTimeout(1500);
   const vis = id => p.evaluate(i => { const e = document.getElementById(i); return !!e && e.getClientRects().length > 0; }, id);
   ok(await vis('overview') && !(await vis('verdict')) && !(await vis('xcPanel')) && !(await vis('closPanel')) && !(await vis('anPanel')), 'default tab shows only the overview');
-  for (const [t, shown, hidden] of [['forecast', 'verdict', 'overview'], ['schools', 'closPanel', 'verdict'], ['timing', 'timing', 'closPanel'], ['check', 'xcPanel', 'timing'], ['analysis', 'anPanel', 'xcPanel']]) {
+  for (const [t, shown, hidden] of [['forecast', 'verdict', 'overview'], ['outlook', 'outPanel', 'verdict'], ['schools', 'closPanel', 'outPanel'], ['timing', 'timing', 'closPanel'], ['check', 'xcPanel', 'timing'], ['analysis', 'anPanel', 'xcPanel']]) {
     await p.click('#tab-' + t); await p.waitForTimeout(150);
     ok((await vis(shown)) && !(await vis(hidden)) && (await p.getAttribute('#tab-' + t, 'aria-selected')) === 'true' && (await p.evaluate(() => location.hash)).endsWith(t), 'tab ' + t + ' shows ' + shown + ' and hides ' + hidden);
   }
@@ -61,9 +61,9 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); 
   await p.goto(`${BASE}/#Johor/check`); await p.reload(); await p.waitForSelector('#bandName:not(:empty)', { state: 'attached' }); await p.waitForTimeout(1200);
   ok((await p.textContent('#stateBtnTxt')) === 'Johor' && (await p.getAttribute('#tab-check', 'aria-selected')) === 'true', 'deep link #Johor/check restores state and tab');
   ok(errs.length === 0, 'tabs: no page errors ' + errs.join()); await p.close(); }
-// 5c) forecast tab: 7-day outlook, history chart (timeline + compare years) and the model panel
+// 5c) outlook tab: 7-day outlook, history chart (timeline + compare years) and the model panel
 { const p = await b.newPage({ viewport: { width: 1300, height: 1000 } }); const errs = []; p.on('pageerror', e => errs.push(String(e)));
-  await p.goto(`${BASE}/#Johor/forecast`); await p.reload(); await p.waitForSelector('#bandName:not(:empty)', { state: 'attached' }); await p.waitForTimeout(3500);
+  await p.goto(`${BASE}/#Johor/outlook`); await p.reload(); await p.waitForSelector('#bandName:not(:empty)', { state: 'attached' }); await p.waitForTimeout(3500);
   ok((await p.evaluate(() => document.querySelectorAll('#outDays .od').length)) === 7, 'outlook: seven projected days');
   ok((await p.evaluate(() => document.querySelectorAll('#outChart rect').length)) >= 10 && (await p.evaluate(() => document.querySelectorAll('#outChart path').length)) >= 3, 'outlook chart: observed bars and projection bands drawn');
   ok(await p.evaluate(() => [...document.querySelectorAll('#outDays .od')].every(d => /\d+%|<0\.1%/.test(d.textContent) && /confidence/.test(d.textContent))), 'outlook: each day shows odds and a confidence label');
@@ -72,7 +72,7 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); 
   await p.click('#hRange button[data-d="0"]'); await p.waitForTimeout(200); ok(/2017/.test(await p.textContent('#histNote')), 'history "All" range starts in 2017');
   await p.click('#hvYear'); await p.waitForTimeout(250); ok((await p.evaluate(() => document.querySelectorAll('#histChart path').length)) >= 5 && /2026/.test(await p.textContent('#histLeg')), 'compare years overlays each year');
   ok((await p.evaluate(() => document.querySelectorAll('#modelRows .mrow').length)) === 4 && /No weather input/i.test(await p.textContent('#modelRows')), 'model panel explains which model is used');
-  ok(errs.length === 0, 'forecast tab: no page errors ' + errs.join()); await p.close(); }
+  ok(errs.length === 0, 'outlook tab: no page errors ' + errs.join()); await p.close(); }
 // 5b) closures on record (news / announcements)
 { const p = await b.newPage({ viewport: { width: 1400, height: 1200 } }); const errs = []; p.on('pageerror', e => errs.push(String(e)));
   await p.goto(`${BASE}/#/schools`); await p.reload(); await p.waitForSelector('#bandName:not(:empty)', { state: 'attached' }); await p.waitForTimeout(2000);
