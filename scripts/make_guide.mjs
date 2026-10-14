@@ -80,7 +80,7 @@ const stamp = `Snapshot: DOE API ${NOW.slice(0, 10)} ${NOW.slice(11, 16)} MYT`;
 await page.evaluate(() => scrollTo(0, 0));
 await injectAnn([
   { sel: '#liveBadge', n: 1, pos: 'tl' }, { sel: '#sky', n: 2, pos: 'tl' }, { sel: '#chips', n: 3, pos: 'tl' },
-  { sel: '.seg', n: 4, pos: 'tl' }, { sel: '#fbar', n: 5, pos: 'tl' }, { sel: '#overview', n: 6, pos: 'tl' }]);
+  { sel: '.seg', n: 4, pos: 'tl' }, { sel: '#fbar', n: 5, pos: 'tl' }, { sel: '#tabs', n: 6, pos: 'tl' }, { sel: '#overview', n: 7, pos: 'tl' }]);
 let shot = await page.screenshot({ clip: { x: 0, y: 0, width: 1400, height: 960 } });
 await compose('01-tour.png', 'Step 1 · Orientation', 'The dashboard in one screen', shot, [
   '<b>Live badge</b> – green = the newest hourly DOE report is under 2 h old; amber/red = the feed is lagging or stale.',
@@ -88,6 +88,7 @@ await compose('01-tour.png', 'Step 1 · Orientation', 'The dashboard in one scre
   '<b>State tiles</b> – highest API per state, coloured by band. Click one to open that state.',
   '<b>Live data / What-if</b> – Live follows the newest report; What-if lets you type your own readings.',
   '<b>State filter</b> – the whole page follows it: “Malaysia” (all states) or one state. On a phone, use the round button at the bottom-right.',
+  '<b>Tabs</b> – one topic per tab: Overview · Forecast · Schools · Announce time · Data check · Analysis. The haze view stays above as a one-line strip.',
   '<b>National outlook</b> – tomorrow morning: stations at closure risk and the schools, students and teachers behind them.'], stamp);
 await clearAnn();
 await page.evaluate(() => { document.querySelector('header').style.visibility = 'hidden'; });   // keep later crops clean
@@ -158,7 +159,7 @@ await clearAnn();
 
 /* ---------- 5. station detail (Larkin, Johor) ---------- */
 await page.click('#stTable tr.row[data-k="Johor"]');
-await page.selectOption('#area', 'Johor|Larkin');
+await page.evaluate(() => setTab('forecast')); await page.selectOption('#area', 'Johor|Larkin');
 await page.waitForTimeout(500);
 await injectAnn([
   { sel: '#verdict', n: 1, pos: 'tl' }, { sel: '#kpis', n: 2, pos: 'tl' }, { sel: '#sch', n: 3, pos: 'tl' }, { sel: '#scen', n: 4, pos: 'tl' }]);
@@ -171,7 +172,7 @@ await compose('05-station-detail.png', 'Step 5 · One station', 'Recommendation,
 await clearAnn();
 
 /* ---------- 6. data check: is every DOE report backed by an independent source? ---------- */
-await page.evaluate(() => selectState('')); await page.waitForTimeout(600);
+await page.evaluate(() => { selectState(''); setTab('check'); }); await page.waitForTimeout(600);
 await injectAnn([{ sel: '#xcHero', n: 1, pos: 'tl' }, { sel: '#xcList .frow:nth-child(1)', n: 2, pos: 'tl' }, { sel: '#xcCmp', n: 3, pos: 'tl' }]);
 const xcA = await page.screenshot({ clip: pad(await bbox(['#xcPanel'])), fullPage: true });
 await clearAnn();
@@ -199,9 +200,9 @@ await clearAnn(); await page.evaluate(() => selectState('')); await page.waitFor
 }
 
 /* ---------- 7. announcement time: default view, then change the preference ---------- */
-await page.evaluate(() => document.querySelector('#timing').scrollIntoView({ block: 'center' }));
-await injectAnn([{ sel: '#trend', n: 1, pos: 'tl' }, { sel: '#timing', n: 2, pos: 'tl' }]);
-const rowShot = await page.screenshot({ clip: pad(await bbox(['#trend', '#timing', '#timingNote'])), fullPage: true });
+await page.evaluate(() => { setTab('timing'); document.querySelector('#timing').scrollIntoView({ block: 'center' }); });
+await injectAnn([{ sel: '#timing', n: 1, pos: 'tl' }, { sel: '#bt', n: 2, pos: 'tl' }]);
+const rowShot = await page.screenshot({ clip: pad(await bbox(['#timing', '#timingNote', '#bt'])), fullPage: true });
 await clearAnn();
 await page.evaluate(() => { const l = document.getElementById('lam'); l.value = 0; l.dispatchEvent(new Event('input')); });
 await page.waitForTimeout(300);
@@ -222,8 +223,8 @@ await clearAnn();
    <div class="mid">Now drag “Cost of each hour later” from 5% to 0% (delay is free) – the ★ moves from the earliest hour to the latest:</div>
    <div class="row2"><img src="${img(prefShot)}"><img src="${img(afterShot)}"></div>
    <div class="lg">${[
-     '<b>Trend + fan</b> – today’s hourly API and the model’s 10–90% range for tomorrow 7 AM.',
      '<b>Cost bars</b> – wrong-call cost (missed closure vs needless closure) plus lateness cost for each candidate hour; ★ = cheapest. Click a bar to explore that hour.',
+     '<b>Backtest table</b> – on days the model never saw: skill and ranking quality at each decision hour.',
      '<b>Decision preferences</b> (left panel) – how bad a missed closure is, and what each hour of lateness costs.',
      '<b>Result</b> – with free delay the ★ moves to 9 PM because later hours forecast better; with costly delay the earliest hour wins.'].map((l, i) => `<div><span>${i + 1}</span><p style="margin:0">${l}</p></div>`).join('')}</div>
    <div class="ft"><span>Hazeshaman · haze early-warning for Malaysian schools</span><span>${stamp}</span></div>`);
@@ -232,7 +233,7 @@ await clearAnn();
 await page.evaluate(() => { const l = document.getElementById('lam'); l.value = 5; l.dispatchEvent(new Event('input')); });
 
 /* ---------- 8. what-if ---------- */
-await page.evaluate(() => scrollTo(0, 0));
+await page.evaluate(() => { setTab('forecast'); scrollTo(0, 0); });
 await page.click('#modeWhat');
 await page.evaluate(() => { for (const [k, v] of [['am', 105], ['noon', 120], ['a3', 135], ['now', 150]]) { const i = document.getElementById(k); i.value = v; i.dispatchEvent(new Event('input')); } });
 await page.click('#streak button[data-n="1"]');
@@ -254,6 +255,7 @@ await page.click('#modeLive');
 await mob.goto(BASE + '/'); await mob.addStyleTag({ content: 'body{background-attachment:scroll!important}' }); await mob.waitForSelector('#bandName:not(:empty)'); await mob.waitForTimeout(1500);
 const shots = [];
 for (const sel of ['#sky', '#overview', '#verdict']) {
+  if (sel === '#verdict') await mob.evaluate(() => setTab('forecast'));
   const h = await mob.evaluate((s) => { const e = document.querySelector(s); e.scrollIntoView({ block: 'start' }); const r = e.getBoundingClientRect(); return { x: 0, y: r.top + scrollY - 8, h: Math.min(r.height + 16, 1100) }; }, sel);
   shots.push(await mob.screenshot({ clip: { x: 0, y: h.y, width: 390, height: h.h }, fullPage: true }));
 }
@@ -267,7 +269,7 @@ for (const sel of ['#sky', '#overview', '#verdict']) {
 }
 
 /* ---------- 8. social cards (numbers read from the live dashboard) ---------- */
-await page.evaluate(() => selectState(''));      // social cards always show the national picture
+await page.evaluate(() => { selectState(''); setTab('overview'); });      // social cards always show the national picture
 await page.waitForTimeout(600);
 await page.evaluate(() => scrollTo(0, 0));
 const facts = await page.evaluate(() => {

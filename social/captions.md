@@ -100,7 +100,7 @@ Pautan: {URL}
 | Image | Alt text |
 |---|---|
 | `social-card.png` / `social-square.png` | Haze dashboard card: Malaysia haze is "Unhealthy", highest API 175 at Pasir Gudang, 27 of 68 stations above 100, 13 flagged for closure risk tomorrow, about 2,600 schools likely affected. |
-| `01-tour.png` | Numbered tour of the Hazeshaman dashboard: live status badge, haze sky, state tiles, Live/What-if switch, state filter and national outlook. |
+| `01-tour.png` | Numbered tour of the Hazeshaman dashboard: live status badge, haze sky, state tiles, Live/What-if switch, state filter, the six tabs (Overview, Forecast, Schools, Announce time, Data check, Analysis) and national outlook. |
 | `02-state-filter.png` | The state filter: a dropdown on desktop, and on a phone a round button at the bottom-right that opens a bottom sheet listing Malaysia and each state with its highest API and status. |
 | `03-haze-at-a-glance.png` | The haze panel: band name, four headline numbers, a colour scale of Malaysian API bands with markers, and one API tile per state. |
 | `04-national-outlook.png` | Table of states ranked by tomorrow's closure risk, with the number of schools in each state and the schools likely affected. |

@@ -29,7 +29,8 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); 
   ok(!(await p.evaluate(() => document.getElementById('sheet').classList.contains('open'))), 'Escape closes');
   await p.click('#stateBtn'); await p.click('#sheetList li[data-k=""]'); await p.waitForTimeout(500);
   const th = await p.evaluate(() => [...document.querySelectorAll('#stTable th')].map(t => t.textContent)); ok(th.includes('# schools in area') && !th.includes('Exp. schools'), 'Malaysia table has "# schools in area": ' + th.join('|'));
-  ok((await p.evaluate(() => getComputedStyle(document.getElementById('schPanel')).display)) !== 'none' && (await p.textContent('#sch')).includes('10,238'), 'schools panel shows national totals for Malaysia');
+  await p.click('#tab-schools'); await p.waitForTimeout(200);
+  ok((await p.evaluate(() => getComputedStyle(document.getElementById('schPanel')).display)) !== 'none' && (await p.textContent('#sch')).includes('10,238'), 'Schools tab shows national totals for Malaysia');
   ok(errs.length === 0, 'no page errors ' + errs.join()); await p.close(); }
 // 3) phone: round button, sheet survives resize noise, closes on pick
 { const c = await b.newContext({ ...devices['iPhone 13'] }); const p = await c.newPage(); await p.goto(`${BASE}/`); await p.waitForSelector('#bandName:not(:empty)'); await p.waitForTimeout(1500);
@@ -41,12 +42,28 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); 
   ok(!(await p.evaluate(() => document.getElementById('sheet').classList.contains('open'))) && (await p.textContent('#stateBtnTxt')) === 'Sabah', 'phone: picking a state closes the sheet and filters');
   ok(await p.evaluate(() => document.getElementById('fab').dataset.on) === '1', 'phone: button shows an active-filter dot'); await c.close(); }
 // 4) what-if still works (state level schools follow editable P)
-{ const p = await b.newPage({ viewport: { width: 1400, height: 1000 } }); await p.goto(`${BASE}/#Johor`); await p.waitForSelector('#bandName:not(:empty)'); await p.waitForTimeout(1500);
+{ const p = await b.newPage({ viewport: { width: 1400, height: 1000 } }); await p.goto(`${BASE}/#Johor/forecast`); await p.waitForSelector('#bandName:not(:empty)'); await p.waitForTimeout(1500);
   await p.click('#modeWhat'); await p.evaluate(() => { const i = document.getElementById('now'); i.value = 60; i.dispatchEvent(new Event('input')); }); await p.waitForTimeout(300);
   const txt = await p.textContent('#sch'); ok(/Likely affected tomorrow/.test(txt) && /If schools close/.test(txt), 'what-if: schools cards use the new labels'); await p.close(); }
+// 5a) tabs: one topic per tab, shareable links, analysis cards
+{ const p = await b.newPage({ viewport: { width: 1300, height: 1000 } }); const errs = []; p.on('pageerror', e => errs.push(String(e)));
+  await p.goto(`${BASE}/`); await p.waitForSelector('#bandName:not(:empty)'); await p.waitForTimeout(1500);
+  const vis = id => p.evaluate(i => { const e = document.getElementById(i); return !!e && e.getClientRects().length > 0; }, id);
+  ok(await vis('overview') && !(await vis('verdict')) && !(await vis('xcPanel')) && !(await vis('closPanel')) && !(await vis('anPanel')), 'default tab shows only the overview');
+  for (const [t, shown, hidden] of [['forecast', 'verdict', 'overview'], ['schools', 'closPanel', 'verdict'], ['timing', 'timing', 'closPanel'], ['check', 'xcPanel', 'timing'], ['analysis', 'anPanel', 'xcPanel']]) {
+    await p.click('#tab-' + t); await p.waitForTimeout(150);
+    ok((await vis(shown)) && !(await vis(hidden)) && (await p.getAttribute('#tab-' + t, 'aria-selected')) === 'true' && (await p.evaluate(() => location.hash)).endsWith(t), 'tab ' + t + ' shows ' + shown + ' and hides ' + hidden);
+  }
+  ok(await p.evaluate(() => document.querySelectorAll('#anCards .acard').length >= 6 && [...document.querySelectorAll('#anCards a')].every(a => a.href.startsWith('https://github.com/') && a.rel.includes('noopener'))), 'analysis tab: six cards with safe links to the written notes');
+  ok(await vis('foot'), 'analysis tab keeps the how-it-works footer');
+  ok(await p.evaluate(() => !document.getElementById('tabbody').classList.contains('solo') === false), 'analysis tab uses the single-column layout');
+  await p.click('#tab-forecast'); ok(await p.evaluate(() => !document.getElementById('tabbody').classList.contains('solo')), 'forecast tab shows the controls column');
+  await p.goto(`${BASE}/#Johor/check`); await p.reload(); await p.waitForSelector('#bandName:not(:empty)'); await p.waitForTimeout(1200);
+  ok((await p.textContent('#stateBtnTxt')) === 'Johor' && (await p.getAttribute('#tab-check', 'aria-selected')) === 'true', 'deep link #Johor/check restores state and tab');
+  ok(errs.length === 0, 'tabs: no page errors ' + errs.join()); await p.close(); }
 // 5b) closures on record (news / announcements)
 { const p = await b.newPage({ viewport: { width: 1400, height: 1200 } }); const errs = []; p.on('pageerror', e => errs.push(String(e)));
-  await p.goto(`${BASE}/`); await p.waitForSelector('#bandName:not(:empty)'); await p.waitForTimeout(2000);
+  await p.goto(`${BASE}/#/schools`); await p.reload(); await p.waitForSelector('#bandName:not(:empty)'); await p.waitForTimeout(2000);
   ok((await p.evaluate(() => getComputedStyle(document.getElementById('closPanel')).display)) !== 'none' && (await p.textContent('#closList')).includes('Johor'), 'closures panel lists Johor for Malaysia');
   await p.evaluate(() => selectState('Sarawak')); await p.waitForTimeout(800);
   const lst = await p.textContent('#closList'); ok(/Serian/.test(lst) && !/Selangor ·/.test(lst), 'closures panel follows the state filter (Sarawak)');
@@ -55,7 +72,7 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); 
 // 5) cross-check panels (Open-Meteo): flags, grades, second opinion, banner
 { const p = await b.newPage({ viewport: { width: 1400, height: 1200 } }); const errs = []; p.on('pageerror', e => errs.push(String(e)));
   const reqs = []; p.on('response', r => reqs.push(r.status() + ' ' + new URL(r.url()).pathname));
-  await p.goto(`${BASE}/`); await p.waitForSelector('#bandName:not(:empty)'); await p.waitForTimeout(2000);
+  await p.goto(`${BASE}/#/check`); await p.reload(); await p.waitForSelector('#bandName:not(:empty)'); await p.waitForTimeout(2000);
   ok(reqs.some(r => /200 \/api\/xcheck/.test(r)), 'cross-check data loads from /api/xcheck');
   ok(await p.isVisible('#xcPanel'), 'Data check panel is visible');
   const hero = await p.textContent('#xcHero'); ok(/Reliability A · B · C/.test(hero) && /Stations flagged/.test(hero), 'Data check summary cards present');

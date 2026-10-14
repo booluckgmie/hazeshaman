@@ -1,7 +1,7 @@
 {
- "at": "2026-10-13T23:35:00+08:00",
+ "at": "2026-10-14T08:35:00+08:00",
  "band": "UNHEALTHY",
- "sub": "Worst: Pasir Gudang, Johor at API 175. 27 stations above 100 across 10 states.",
+ "sub": "Worst: Pasir Gudang, Johor at API 177. 27 stations above 100 across 9 states.",
  "national": [
   {
    "l": "Stations at closure risk",
@@ -27,18 +27,18 @@
  "haze": [
   {
    "l": "Highest API",
-   "v": "175",
+   "v": "177",
    "e": "Pasir Gudang"
   },
   {
    "l": "National mean",
-   "v": "106",
+   "v": "109",
    "e": "median 91"
   },
   {
    "l": "Stations > 100",
    "v": "27 / 68",
-   "e": "25 above 150"
+   "e": "26 above 150"
   },
   {
    "l": "Tomorrow: closure risk",
