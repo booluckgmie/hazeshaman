@@ -72,6 +72,14 @@ h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text
 .skymini{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;padding:11px 16px;border-radius:16px;margin:0 0 18px;border-left:5px solid var(--bc,var(--accent))}
 .skymini b{letter-spacing:.04em;color:var(--bc,var(--ink))}.skymini span{color:var(--ink2);font-size:14px}.skymini em{margin-left:auto;font-style:normal;font-size:12px;color:var(--ink3,var(--ink2))}
 .skymini .dot{width:10px;height:10px;border-radius:50%;background:var(--bc,var(--accent));box-shadow:0 0 12px var(--bc,var(--accent))}
+.outdays{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:10px}
+.od{min-width:0;border:1px solid var(--edge);background:var(--card);border-radius:14px;padding:9px 8px;text-align:center;font-size:12px;color:var(--ink2);border-top:4px solid var(--c,var(--ink3))}
+.od b{display:block;font-size:20px;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.15}.od .dn{font-weight:700;color:var(--ink)}.od i{font-style:normal;display:block;margin-top:2px}.od .cf{margin-top:5px;font-size:10.5px;letter-spacing:.04em;text-transform:uppercase;font-weight:700}
+@media (max-width:760px){.outdays{grid-template-columns:repeat(4,minmax(0,1fr))}.od{padding:8px 4px}.od b{font-size:18px}}
+.hctl{display:flex;gap:10px 14px;flex-wrap:wrap;align-items:center;margin:2px 0 8px}
+.mrows{display:grid;gap:12px}.mrow{display:grid;grid-template-columns:200px 1fr;gap:14px;padding:14px 16px;border:1px solid var(--edge);border-radius:16px;background:var(--card)}
+.mrow h3{margin:0;font-size:15px}.mrow h3 span{display:block;font-weight:500;font-size:12px;color:var(--ink2);margin-top:3px}.mrow p{margin:0;font-size:14px;color:var(--ink2)}.mrow p b{color:var(--ink)}.mrow a{color:inherit;font-weight:650}
+@media (max-width:760px){.mrow{grid-template-columns:1fr}}
 .acards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
 .acard{display:flex;flex-direction:column;gap:6px;padding:16px;border-radius:16px;border:1px solid var(--edge);background:var(--card)}
 .acard .k{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);font-weight:700}
@@ -379,6 +387,28 @@ footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
         <div class="scen" id="scen"></div>
         <div class="bar" id="stack" role="img" aria-label="Scenario probability split"></div>
         <div class="legend" id="stackLeg"></div>
+      </section>
+
+      <section class="glass" id="outPanel" data-tab="forecast">
+        <h2>Next 7 days · <span id="outName"></span> <small>statistical outlook for the daily average API</small></h2>
+        <svg class="chart" id="outChart" viewBox="0 0 720 300" role="img" aria-label="Daily average API: the last 14 days and a 7-day projection with ranges"></svg>
+        <div class="legend" id="outLeg"></div>
+        <div class="outdays" id="outDays"></div>
+        <div class="note" id="outNote"></div>
+      </section>
+
+      <section class="glass" id="histPanel" data-tab="forecast">
+        <h2>All data available · <span id="histName"></span> <small id="histSub"></small></h2>
+        <div class="hctl"><div class="seg" role="group" aria-label="View"><button id="hvTime" aria-pressed="true">Timeline</button><button id="hvYear" aria-pressed="false">Compare years</button></div>
+          <div class="pills" id="hRange" role="group" aria-label="Range"></div></div>
+        <svg class="chart" id="histChart" viewBox="0 0 720 320" role="img" aria-label="Daily API history for the selected station"></svg>
+        <div class="legend" id="histLeg"></div>
+        <div class="note" id="histNote"></div>
+      </section>
+
+      <section class="glass" id="modelPanel" data-tab="forecast">
+        <h2>Which model is used here? <small>everything runs in your browser from the files below</small></h2>
+        <div class="mrows" id="modelRows"></div>
       </section>
 
       <div class="row2" data-tab="forecast">
@@ -792,7 +822,7 @@ function render(){
   $("stack").innerHTML = ok ? ["best","base","worst"].map(k => `<i style="width:${P[k] * 100}%;background:${SCN[k].c}"></i>`).join("") : "";
   $("stackLeg").innerHTML = ok ? ["best","base","worst"].map(k => `<span><i style="background:${SCN[k].c}"></i>${SCN[k].name.split(" ·")[0]} ${pct(P[k])}</span>`).join("") : "";
 
-  const tot = scopeTotals(); drawSky(tot); drawMini(); drawOverview(tot); drawXcPanel(); drawClosures(); drawAnalysis(); drawXcStation(P, thr, ok); drawTrend(P, f, ok); drawTiming(T); drawTable(T); drawClim(area); drawSpark(f);
+  const tot = scopeTotals(); drawSky(tot); drawMini(); drawOverview(tot); drawXcPanel(); drawClosures(); drawAnalysis(); drawXcStation(P, thr, ok); drawOutlook(); drawHistory(); drawModelPanel(); drawTrend(P, f, ok); drawTiming(T); drawTable(T); drawClim(area); drawSpark(f);
   $("timingNote").textContent = T.bestH ? `★ ${hl(T.bestH)} minimises total expected cost at your preferences (missed closure = ${S.cfn}× needless closure; each hour later = ${S.lam}% of baseline). Click a bar to explore that hour in What-if.` : "No closure events in the hold-out period; timing cannot be ranked.";
   $("trendNote").textContent = ok ? `Dashed fan = model's 10–90% range for tomorrow's 7 AM reading (median ${Math.round(P.q[1])}).` : "";
 }
@@ -1117,10 +1147,142 @@ function drawAnalysis(){
   rows.push(["Best time to announce", T.bestH != null ? hl(T.bestH) : "–", `Waiting adds skill but costs families time. With your two sliders the cheapest hour is ${T.bestH != null ? hl(T.bestH) : "–"}; an 8 PM re-check keeps most of the late gain. Change the sliders in the Announce time tab.`, "03-announcement-timing.md", "Scenarios, trade-off and protocol"]);
   rows.push(["Second source (Open-Meteo)", XC ? `${g.A} · ${g.B} · ${g.C}` : "–", `Stations graded A · B · C by how well DOE agrees with an independent air-quality model. ${XC && XC.summary ? XC.summary.flagged + " stations flagged in the last 5 days." : ""} ${bo.length ? "Used alone, Open-Meteo reaches " + Math.round(Math.min(...bo) * 100) + "–" + Math.round(Math.max(...bo) * 100) + "% skill, so it is a check, not a replacement." : ""}`, "04-openmeteo-crosscheck.md", "Method, flags, grades, Sabah and Sarawak"]);
   rows.push(["Closure decisions so far", sm && sm.evaluated ? `${Math.round(sm.justified / sm.evaluated * 100)}%` : "–", sm ? `of ${sm.evaluated} recorded closure state-days met the trigger on the day or the evening before. Several states qualified 1–2 school days before they closed; the model replay called more of the qualifying days than the recorded closures did.` : "Recorded closures compared with the DOE readings they were made against.", "06-closure-decisions.md", "Were the decisions the best ones?"]);
+  if (OUT) rows.push(["Seven-day outlook", `+${Math.round(OUT.skill[1].skill_vs_climatology * 100)}% → +${Math.round(OUT.skill[7].skill_vs_climatology * 100)}%`, `lower error than the monthly norm from day +1 to day +7, tested on days the model never saw. The level keeps some skill all week; closure-level odds are only dependable for the first day or two. No weather input.`, "07-seven-day-outlook.md", "Method, skill by day, limits"]);
   rows.push(["Schools in scope", fmtN(Object.values(SCH).reduce((n, c) => n + c.schools, 0)), `government schools, ${fmtN(Object.values(SCH).reduce((n, c) => n + c.students, 0))} students and ${fmtN(Object.values(SCH).reduce((n, c) => n + c.teachers, 0))} teachers, attached at state level from OpenDOSM / data.gov.my.`, "05-school-impact.md", "How impact is counted"]);
   rows.push(["Data and limits", `${fmtN(M.meta.n_days)} days`, `of DOE history behind the model (${M.meta.start} → ${M.meta.end}), with a permanent gap Nov 2024–Jun 2025 and East Malaysia only from Sep 2023. Bad readings are removed before use.`, "01-data-sources-and-quality.md", "Sources, cleaning and known gaps"]);
   $("anCards").innerHTML = rows.map(r => `<div class="acard"><span class="k">${r[0]}</span><b class="big">${r[1]}</b><p>${r[2]}</p><a href="${RPT}${r[3]}" target="_blank" rel="noopener noreferrer">${r[4]} →</a></div>`).join("");
   $("anNote").innerHTML = `Full written notes are in <a href="${RPT}README.md" target="_blank" rel="noopener noreferrer">docs/analysis</a> in the repository. Numbers on these cards come from the same files the dashboard runs on, so they update when the model is rebuilt.`;
+}
+/* ------------------------------ 7-day outlook, history chart, model panel ------------------------------ */
+let OUT = null, HIST = null; const HCACHE = {};
+async function fetchJson(u){ try{ const r = await fetch(u, {cache: "no-cache"}); if (r.ok) return await r.json(); }catch(e){ /* panel explains */ } return null; }
+const DAY = 864e5, dstr = ms => new Date(ms).toISOString().slice(0, 10), WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"], MN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+/* daily mean and school-hours peak per day: the archive (history.json) plus complete days from the live buffer */
+function seriesOf(key){
+  if (!HIST || !HIST.areas[key]) return null;
+  if (HCACHE[key] && HCACHE[key].live === (LIVE && LIVE.end)) return HCACHE[key];
+  const dec = t => Float32Array.from(t.split(","), v => v === "" ? NaN : +v), a = HIST.areas[key], m = dec(a.m), p = dec(a.p), t0 = Date.parse(HIST.start + "T00:00:00Z");
+  let n = m.length, mm = Array.from(m), pp = Array.from(p);
+  if (LIVE && LIVE.areas[key]){
+    const end = Date.parse(LIVE.end + ":00Z"), N = LIVE.hours, vals = LIVE.areas[key], byDay = {};
+    for (let i = 0; i < N; i++){ const v = vals[i]; if (v == null) continue; const t = end - (N - 1 - i) * 36e5, d = Math.floor((t - t0) / DAY), h = new Date(t).getUTCHours(); (byDay[d] = byDay[d] || []).push([h, v]); }
+    for (const [d, arr] of Object.entries(byDay)){ const di = +d; if (arr.length < 18 || di < 0) continue;
+      while (mm.length <= di){ mm.push(NaN); pp.push(NaN); }
+      mm[di] = Math.round(arr.reduce((x, y) => x + y[1], 0) / arr.length); const sc = arr.filter(x => x[0] >= 6 && x[0] <= 14); pp[di] = sc.length >= 5 ? Math.max(...sc.map(x => x[1])) : NaN; }
+    n = mm.length;
+  }
+  return HCACHE[key] = {t0, m: mm, p: pp, n, live: LIVE && LIVE.end};
+}
+/* residual-quantile table per level of the predicted mean (see hazeshaman/outlook.py): median, ranges and exceedance odds come from one distribution */
+const QL = [.05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55, .6, .65, .7, .75, .8, .85, .9, .95];
+function qrow(tab, level){
+  const c = tab.centers, q = tab.q; if (level <= c[0]) return q[0]; if (level >= c[c.length - 1]) return q[q.length - 1];
+  let j = 0; while (c[j + 1] < level) j++; const f = (Math.log(level) - Math.log(c[j])) / (Math.log(c[j + 1]) - Math.log(c[j]));
+  return q[j].map((v, i) => v * (1 - f) + q[j + 1][i] * f);
+}
+function interp1(xs, ys, v){ if (v <= xs[0]) return ys[0]; if (v >= xs[xs.length - 1]) return ys[ys.length - 1]; let j = 0; while (xs[j + 1] < v) j++; return ys[j] + (ys[j + 1] - ys[j]) * (v - xs[j]) / (xs[j + 1] - xs[j]); }
+function probOver(tab, predLn, thr){
+  const row = qrow(tab, Math.exp(predLn)), r = Math.log(thr) - predLn, xs = [row[0] - .25, ...row, row[row.length - 1] + .25], ps = [0, ...QL, 1];
+  if (r <= xs[0]) return 1; if (r >= xs[xs.length - 1]) return 0; let j = 0; while (xs[j + 1] < r) j++;
+  return 1 - (ps[j] + (ps[j + 1] - ps[j]) * (r - xs[j]) / ((xs[j + 1] - xs[j]) || 1));
+}
+function outlookFor(key){
+  const sr = seriesOf(key), a = AREA[key]; if (!sr || !OUT || !a) return null;
+  const si = OUT.states.indexOf(a.state); if (si < 0) return null;
+  let t = sr.n - 1; while (t >= 6 && !(isFinite(sr.m[t]) && isFinite(sr.p[t]) && [1, 2, 3, 4, 5, 6].every(l => isFinite(sr.m[t - l])))) t--;
+  if (t < 6 || sr.n - 1 - t > 3) return {stale: true};
+  const d = new Date(sr.t0 + t * DAY), ang = 2 * Math.PI * Math.floor((Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) - Date.UTC(d.getUTCFullYear(), 0, 0)) / DAY) / 365.25;
+  const m = sr.m, x = [Math.log(m[t]), Math.log(m[t - 1]), Math.log(m[t - 2]), Math.log((m[t - 3] + m[t - 4] + m[t - 5] + m[t - 6]) / 4), Math.log(sr.p[t]), [0, 1, 2].filter(l => m[t - l] > 150).length, Math.sin(ang), Math.cos(ang)];
+  const days = OUT.horizons.map(k => { const M_ = OUT.models[k], z = x.map((v, i) => clamp((v - M_.mu[i]) / M_.sd[i], -4, 4)), mu = lin(M_.reg, z, si), row = qrow(M_.rq, Math.exp(mu)), q = i => Math.exp(mu + row[i]);
+    const P = {y100: probOver(M_.rq, mu, 100), y150: probOver(M_.rq, mu, 150), y180: interp1(M_.clf.y180.x, M_.clf.y180.y, Math.exp(mu))};
+    return {k, ms: sr.t0 + (t + k) * DAY, med: q(9), lo80: q(1), hi80: q(17), lo50: q(4), hi50: q(14), P, sk: OUT.skill[k]}; });
+  return {t, tms: sr.t0 + t * DAY, days, past: Array.from({length: 14}, (_, i) => { const di = t - 13 + i; return {ms: sr.t0 + di * DAY, m: isFinite(m[di]) ? m[di] : null, p: isFinite(sr.p[di]) ? sr.p[di] : null}; })};
+}
+const confOf = sk => sk.skill_vs_climatology >= .5 ? ["solid", "var(--ok)"] : sk.skill_vs_climatology >= .38 ? ["fair", "var(--warn)"] : ["low", "var(--bad)"];
+function drawOutlook(){
+  const svg = $("outChart"); svg.innerHTML = ""; const a = AREA[S.area]; if (!a) return;
+  $("outName").textContent = `${a.name}, ${a.state}`;
+  if (!OUT || !HIST){ $("outDays").innerHTML = ""; $("outNote").textContent = OUT === null && HIST === null ? "Loading the outlook…" : "The outlook data could not be loaded."; return; }
+  const o = outlookFor(S.area);
+  if (!o || o.stale){ $("outDays").innerHTML = ""; $("outLeg").innerHTML = ""; $("outNote").textContent = "Not enough recent complete days for this station to project from (needs the last seven days, newest within three days)."; return; }
+  const narrow = svg.parentElement.clientWidth < 600, W = narrow ? 440 : 720, Hh = 300, L = 40, R = 10, Tp = 14, B = 40, n = 21, xs = i => L + (i + .5) / n * (W - L - R); svg.setAttribute("viewBox", `0 0 ${W} ${Hh}`);
+  const ymax = Math.max(200, ...o.days.map(d => d.hi80), ...o.past.map(d => d.p || d.m || 0)) * 1.06, ys = v => Tp + (1 - Math.min(v, ymax) / ymax) * (Hh - Tp - B), bw = (W - L - R) / n * .62;
+  [[100, "var(--warn)"], [150, "var(--bad)"], [180, "var(--bad)"]].forEach(([v, c]) => { if (v > ymax) return; el("line", {x1: L, x2: W - R, y1: ys(v), y2: ys(v), stroke: c, "stroke-dasharray": "3 4", opacity: .5}, svg); el("text", {x: L - 6, y: ys(v) + 4, "text-anchor": "end"}, svg, v); });
+  const sepX = (xs(13) + xs(14)) / 2; el("line", {x1: sepX, x2: sepX, y1: Tp, y2: Hh - B, stroke: "var(--ink3)", "stroke-dasharray": "2 3"}, svg);
+  el("text", {x: sepX - 8, y: Tp + 10, "text-anchor": "end", style: "font-size:11px"}, svg, "last 14 days"); el("text", {x: sepX + 8, y: Tp + 10, style: "font-size:11px"}, svg, "projection →");
+  // observed: daily mean bar + school-hours peak tick
+  o.past.forEach((d, i) => { if (d.m == null) return; const c = band(d.m)[2];
+    const r = el("rect", {x: xs(i) - bw / 2, y: ys(d.m), width: bw, height: Math.max(1, ys(0) - ys(d.m)), rx: 4, fill: c, opacity: .8}, svg);
+    if (d.p != null) el("line", {x1: xs(i) - bw / 2, x2: xs(i) + bw / 2, y1: ys(d.p), y2: ys(d.p), stroke: "var(--ink)", "stroke-width": 2.2}, svg);
+    r.onmousemove = e => showTip(e, `<b>${WD[new Date(d.ms).getUTCDay()]} ${dstr(d.ms).slice(5)}</b><br>daily mean ${Math.round(d.m)}${d.p != null ? `<br>peak 6 AM–2 PM ${Math.round(d.p)}` : ""}`); r.onmouseleave = hideTip; });
+  // projection: 80% and 50% ranges around the median, fading with the horizon
+  const px = i => xs(14 + i), poly = (hi, lo) => o.days.map((d, i) => (i ? "L" : "M") + px(i) + "," + ys(d[hi])).join(" ") + " " + o.days.slice().reverse().map((d, j) => "L" + px(6 - j) + "," + ys(d[lo])).join(" ") + " Z";
+  el("path", {d: poly("hi80", "lo80"), fill: "var(--accent)", opacity: .16}, svg); el("path", {d: poly("hi50", "lo50"), fill: "var(--accent)", opacity: .26}, svg);
+  const lastObs = o.past[13]; const pts = [[xs(13), ys(lastObs.m)], ...o.days.map((d, i) => [px(i), ys(d.med)])];
+  el("path", {d: pts.map((q, i) => (i ? "L" : "M") + q[0] + "," + q[1]).join(" "), stroke: "var(--accent)", "stroke-width": 2.6, "stroke-dasharray": "6 4", fill: "none"}, svg);
+  o.days.forEach((d, i) => { const c = el("circle", {cx: px(i), cy: ys(d.med), r: 5, fill: "var(--accent)", stroke: "var(--bg1)", "stroke-width": 2}, svg);
+    c.onmousemove = e => showTip(e, `<b>${WD[new Date(d.ms).getUTCDay()]} ${dstr(d.ms).slice(5)}</b> · day +${d.k}<br>median daily mean ${Math.round(d.med)}<br>80% range ${Math.round(d.lo80)}–${Math.round(d.hi80)}<br>P(mean > 150) ${pct(d.P.y150)} · P(peak > 180) ${pct(d.P.y180)}`); c.onmouseleave = hideTip; });
+  for (let i = 0; i < n; i += i < 14 ? 3 : narrow ? 2 : 1){ const ms = o.tms + (i - 13) * DAY; el("text", {x: xs(i), y: Hh - 20, "text-anchor": "middle"}, svg, `${WD[new Date(ms).getUTCDay()]}`); el("text", {x: xs(i), y: Hh - 7, "text-anchor": "middle", style: "font-size:10px"}, svg, `${new Date(ms).getUTCDate()} ${MN[new Date(ms).getUTCMonth()]}`); }
+  $("outLeg").innerHTML = `<span><i style="background:var(--b2)"></i>daily mean (bar colour = API band)</span><span><i style="background:var(--ink)"></i>highest reading 6 AM–2 PM</span><span><i style="background:var(--accent)"></i>projection: median, 50% and 80% range</span>`;
+  $("outDays").innerHTML = o.days.map(d => { const [cf, cc] = confOf(d.sk), hi = d.P.y180; return `<div class="od" style="--c:${band(d.med)[2]}"><span class="dn">${WD[new Date(d.ms).getUTCDay()]} ${new Date(d.ms).getUTCDate()}</span><b>${Math.round(d.med)}</b><i>mean API</i><i>>150: ${pct(d.P.y150)}</i><i>peak >180: ${pct(hi)}</i><div class="cf" style="color:${cc}">${cf} confidence</div></div>`; }).join("");
+  const k1 = OUT.skill[1], k7 = OUT.skill[7];
+  $("outNote").innerHTML = `Projection from <b>${dstr(o.tms)}</b>, the last complete day, using the last week of this station's readings, the season and its state. It has <b>no weather forecast</b>, so it fades towards the typical level: against the typical level for the month, error is ${Math.round(k1.skill_vs_climatology * 100)}% lower one day ahead and ${Math.round(k7.skill_vs_climatology * 100)}% lower seven days ahead (tested from ${OUT.test_from}); the shaded 80% range held the outcome ${Math.round(Math.min(k1.coverage80, k7.coverage80) * 100)}–${Math.round(Math.max(k1.coverage80, k7.coverage80) * 100)}% of the time in that test, so read it as slightly optimistic; the chance of a closure-level reading (peak above 180) is only dependable up to day ${(() => { let n = 0; while (n < 7 && OUT.skill[n + 1].y180 && OUT.skill[n + 1].y180.bss >= .1) n++; return Math.max(n, 1); })()}. Use the first days to prepare, and the later days as a trend only.`;
+}
+const RANGES = [["30D", 30], ["90D", 90], ["1Y", 365], ["All", 0]];
+function drawHistory(){
+  const svg = $("histChart"); svg.innerHTML = ""; const a = AREA[S.area]; if (!a) return;
+  $("histName").textContent = `${a.name}, ${a.state}`;
+  const sr = seriesOf(S.area); if (!sr){ $("histNote").textContent = HIST === null ? "Loading the history…" : "No history for this station."; return; }
+  S.hv = S.hv || "timeline"; S.hr = S.hr == null ? 365 : S.hr;
+  $("hvTime").setAttribute("aria-pressed", S.hv === "timeline"); $("hvYear").setAttribute("aria-pressed", S.hv === "yearly");
+  $("hRange").style.display = S.hv === "timeline" ? "" : "none";
+  $("hRange").innerHTML = RANGES.map(([l, d]) => `<button class="pill ${S.hr === d ? "on" : ""}" type="button" data-d="${d}" aria-pressed="${S.hr === d}">${l}</button>`).join("");
+  $("hRange").querySelectorAll("button").forEach(b => b.onclick = () => { S.hr = +b.dataset.d; drawHistory(); });
+  let first = sr.m.findIndex(v => isFinite(v)), lastI = sr.n - 1; while (lastI > 0 && !isFinite(sr.m[lastI])) lastI--;
+  $("histSub").textContent = `${dstr(sr.t0 + first * DAY)} → ${dstr(sr.t0 + lastI * DAY)} · ${fmtN(sr.m.filter(v => isFinite(v)).length)} days`;
+  const narrow = svg.parentElement.clientWidth < 600, W = narrow ? 440 : 720, Hh = narrow ? 300 : 320, L = 40, R = 10, Tp = 14, B = 36, yTop = Math.min(360, Math.max(220, ...sr.m.map(v => isFinite(v) ? v : 0))) * 1.04, ys = v => Tp + (1 - Math.min(v, yTop) / yTop) * (Hh - Tp - B);
+  svg.setAttribute("viewBox", `0 0 ${W} ${Hh}`);
+  [[100, "var(--warn)"], [150, "var(--bad)"], [180, "var(--bad)"]].forEach(([v, c]) => { el("line", {x1: L, x2: W - R, y1: ys(v), y2: ys(v), stroke: c, "stroke-dasharray": "3 4", opacity: .5}, svg); el("text", {x: L - 6, y: ys(v) + 4, "text-anchor": "end"}, svg, v); });
+  if (S.hv === "yearly"){
+    const byYear = {}; for (let i = first; i <= lastI; i++){ const d = new Date(sr.t0 + i * DAY), y = d.getUTCFullYear(), doy = Math.floor((Date.UTC(y, d.getUTCMonth(), d.getUTCDate()) - Date.UTC(y, 0, 0)) / DAY) - 1; (byYear[y] = byYear[y] || new Array(366).fill(NaN))[doy] = sr.m[i]; }
+    const yrs = Object.keys(byYear).map(Number).sort(), cur = yrs[yrs.length - 1], xs = d => L + d / 365 * (W - L - R);
+    MN.forEach((m, i) => { const d = Math.floor(i * 30.44); el("text", {x: xs(d + 15), y: Hh - 14, "text-anchor": "middle"}, svg, m); el("line", {x1: xs(d), x2: xs(d), y1: Tp, y2: Hh - B, stroke: "var(--grid)", opacity: .5}, svg); });
+    const smooth = arr => arr.map((_, i) => { let s = 0, c = 0; for (let j = i - 3; j <= i + 3; j++){ const v = arr[j]; if (isFinite(v)){ s += v; c++; } } return c >= 4 ? s / c : NaN; });
+    const pal = ["#7dd3fc", "#34d399", "#facc15", "#fb923c", "#f472b6", "#a78bfa", "#94a3b8", "#22d3ee", "#e879f9", "#fde047"];
+    yrs.forEach((y, yi) => { const sm = smooth(byYear[y]); let dpath = "", pen = false; sm.forEach((v, d) => { if (!isFinite(v)){ pen = false; return; } dpath += (pen ? "L" : "M") + xs(d) + "," + ys(v); pen = true; });
+      el("path", {d: dpath, fill: "none", stroke: y === cur ? "var(--accent)" : pal[yi % pal.length], "stroke-width": y === cur ? 3 : 1.5, opacity: y === cur ? 1 : .6, "stroke-linejoin": "round"}, svg); });
+    const hit = el("rect", {x: L, y: Tp, width: W - L - R, height: Hh - Tp - B, fill: "transparent"}, svg);
+    hit.onmousemove = e => { const r = svg.getBoundingClientRect(), d = clamp(Math.round(((e.clientX - r.left) / r.width * W - L) / (W - L - R) * 365), 0, 365), md = new Date(Date.UTC(2021, 0, d + 1));
+      showTip(e, `<b>${md.getUTCDate()} ${MN[md.getUTCMonth()]}</b> (7-day smoothed daily mean)<br>` + yrs.filter(y => isFinite(smooth(byYear[y])[d])).map(y => `${y}: ${Math.round(smooth(byYear[y])[d])}`).join(" · ")); }; hit.onmouseleave = hideTip;
+    $("histLeg").innerHTML = yrs.map((y, yi) => `<span><i style="background:${y === cur ? "var(--accent)" : pal[yi % pal.length]}"></i>${y}${y === cur ? " (now)" : ""}</span>`).join("");
+    $("histNote").textContent = "Each line is one year of 7-day smoothed daily means laid over the same calendar. Haze seasons repeat (Jun–Oct on the peninsula; Aug–Oct in Borneo), but every year is different, which is why the projection uses recent days rather than the calendar alone. Gaps are periods with no reading (Nov 2024–Jun 2025 is missing for everyone).";
+    return;
+  }
+  const span = S.hr || (lastI - first + 1), i0 = Math.max(first, lastI - span + 1), nD = lastI - i0 + 1, xs = i => L + (i - i0) / Math.max(1, nD - 1) * (W - L - R);
+  // closures on record for this state (red ticks at the bottom)
+  if (CL) for (const r of CL.rows){ if (r.state !== a.state || r.action !== "closed") continue; const i = Math.round((Date.parse(r.date + "T00:00:00Z") - sr.t0) / DAY); if (i < i0 || i > lastI) continue; el("rect", {x: xs(i) - 1.5, y: Hh - B - 8, width: 3, height: 8, fill: "var(--bad)"}, svg); }
+  const agg = nD > 500 ? 7 : 1; let dm = "", dp = "", pen = false, band_ = [], runs = [];
+  for (let s0 = i0; s0 <= lastI; s0 += agg){ let sm = 0, cm = 0, mx = NaN; for (let i = s0; i < Math.min(lastI + 1, s0 + agg); i++){ if (isFinite(sr.m[i])){ sm += sr.m[i]; cm++; } const pv = isFinite(sr.p[i]) ? sr.p[i] : sr.m[i]; if (isFinite(pv)) mx = isFinite(mx) ? Math.max(mx, pv) : pv; }
+    if (!cm){ pen = false; continue; } const x = xs(s0 + (agg - 1) / 2), v = sm / cm; dm += (pen ? "L" : "M") + x + "," + ys(v); pen = true; band_.push([x, ys(v), ys(mx)]); }
+  if (band_.length) el("path", {d: band_.map((q, i) => (i ? "L" : "M") + q[0] + "," + q[2]).join(" ") + " " + band_.slice().reverse().map(q => "L" + q[0] + "," + q[1]).join(" ") + " Z", fill: "var(--accent)", opacity: .2}, svg);
+  el("path", {d: dm, fill: "none", stroke: "var(--accent2)", "stroke-width": nD > 500 ? 1.6 : 2.2, "stroke-linejoin": "round"}, svg);
+  // x labels
+  const ticks = 6; for (let t = 0; t <= ticks; t++){ const i = Math.round(i0 + t / ticks * (nD - 1)), d = new Date(sr.t0 + i * DAY); el("text", {x: xs(i), y: Hh - 14, "text-anchor": t === 0 ? "start" : t === ticks ? "end" : "middle"}, svg, nD > 400 ? `${MN[d.getUTCMonth()]} ${d.getUTCFullYear()}` : `${d.getUTCDate()} ${MN[d.getUTCMonth()]}`); }
+  const hit = el("rect", {x: L, y: Tp, width: W - L - R, height: Hh - Tp - B, fill: "transparent"}, svg);
+  hit.onmousemove = e => { const r = svg.getBoundingClientRect(), i = clamp(Math.round(i0 + ((e.clientX - r.left) / r.width * W - L) / (W - L - R) * (nD - 1)), i0, lastI);
+    const evs = CL ? CL.rows.filter(q => q.state === a.state && q.action === "closed" && q.date === dstr(sr.t0 + i * DAY)) : [];
+    showTip(e, `<b>${dstr(sr.t0 + i * DAY)}</b><br>daily mean ${isFinite(sr.m[i]) ? Math.round(sr.m[i]) : "–"}<br>peak 6 AM–2 PM ${isFinite(sr.p[i]) ? Math.round(sr.p[i]) : "–"}${evs.length ? `<br><span style="color:var(--bad)">schools closed in ${a.state}</span>` : ""}`); }; hit.onmouseleave = hideTip;
+  $("histLeg").innerHTML = `<span><i style="background:var(--accent2)"></i>daily mean${agg > 1 ? " (weekly average)" : ""}</span><span><i style="background:var(--accent)"></i>range up to the day's highest reading</span><span><i style="background:var(--bad)"></i>school closures on record in ${a.state}</span>`;
+  $("histNote").textContent = `Everything on record for this station: ${dstr(sr.t0 + first * DAY)} to ${dstr(sr.t0 + lastI * DAY)} (older days come from the archive, the newest from the live feed). Dashed lines mark API 100, 150 and 180. ${a.first && a.first > "2023-01-01" ? "This station has data only from " + a.first + ", so its history is short. " : ""}Use "Compare years" to overlay each year on the same calendar.`;
+}
+function drawModelPanel(){
+  const bs = AH.map(H => M.backtest[H].metrics.close.bss), ox = OUT ? OUT.skill : null;
+  const rows = [
+    ["Tomorrow morning", "closure risk, per decision hour", `A bundle of <b>logistic regressions</b> (7 AM above 100 and 150, any reading above 180 in school hours, daily mean above 150) and a <b>ridge regression</b> for the 7 AM level, one set for each hour from 12:00 to 23:00, with a shared state effect. Trained on ${M.meta.start} to ${M.meta.test_from}, tested on the days after (${Math.round(Math.min(...bs) * 100)}–${Math.round(Math.max(...bs) * 100)}% lower error than the base-rate guess). This drives the recommendation, the ring and the three scenarios. <a href="${RPT}02-model-and-backtest.md" target="_blank" rel="noopener noreferrer">Method →</a>`],
+    ["Next 7 days", "daily level, per horizon", ox ? `The same family of models, refitted for each of days +1 to +7 on the station's daily series (last three days, the week before, the school-hours peak, days above 150, season, state). <b>No weather input</b>, so it fades towards the typical level: ${Math.round(ox[1].skill_vs_climatology * 100)}% lower error than the monthly norm at day +1, ${Math.round(ox[7].skill_vs_climatology * 100)}% at day +7. <a href="${RPT}07-seven-day-outlook.md" target="_blank" rel="noopener noreferrer">Method and skill by day →</a>` : "Loading…"],
+    ["Is the reading right?", "independent cross-check", `Not a forecaster: every DOE station is compared with Open-Meteo (CAMS) on one scale, doubtful reports are flagged and the closure chance is also computed from that second source as a sanity check. <a href="${RPT}04-openmeteo-crosscheck.md" target="_blank" rel="noopener noreferrer">Method →</a>`],
+    ["Where it runs", "no server-side model", `The coefficients live in <code>model.js</code> and <code>outlook.json</code> and are evaluated in your browser on the newest hourly readings, so the numbers you see change within minutes of a new DOE report.`]];
+  $("modelRows").innerHTML = rows.map(r => `<div class="mrow"><h3>${r[0]}<span>${r[1]}</span></h3><p>${r[2]}</p></div>`).join("");
 }
 async function fetchXc(){
   for (const u of ["api/xcheck", "xcheck.json"]){
@@ -1130,6 +1292,8 @@ async function fetchXc(){
 }
 async function loadLive(){
   const xp = fetchXc(); fetchClosures().then(c => { if (c){ CL = c; render(); } }); fetchDecisions().then(d => { if (d){ DEC = d; drawAnalysis(); } });
+  if (!OUT) fetchJson("outlook.json").then(o => { OUT = o || false; render(); });
+  if (!HIST) fetchJson("history.json").then(h => { HIST = h || false; render(); });
   try{ LIVE = await fetchLive(); LIVE_ERR = null; }
   catch(e){ if (!LIVE) LIVE_ERR = e.message || "network error"; }
   const x = await xp; if (x) XC = x;
@@ -1144,6 +1308,7 @@ if (M.meta.synthetic){ const b = document.createElement("span"); b.className = "
 const dq = Object.entries(M.meta.quality || {}).map(([k, v]) => `${k}: ${Object.entries(v).filter(([, n]) => n).map(([a, n]) => `${fmtN(n)} ${a.replace(/_/g, " ")}`).join(", ") || "clean"}`).join(" · ");
 $("foot").innerHTML = `<b>How it works.</b> For every station and each hour from 12:00 to 23:00, logistic models learn P(7 AM API &gt; 100 / &gt; 150), P(API &gt; 180 during school hours tomorrow) and P(tomorrow's mean &gt; 150) from today's 8 AM, noon, 3-hour trend and latest readings, yesterday's mean, the over-150 streak and season, plus a state effect. Closure risk = P(&gt;180) + remaining × [streak ≥ 2] × P(mean &gt; 150), mirroring KPM's triggers (API &gt; 180, or &gt; 150 for three days). The live view recomputes every station whenever a new hourly DOE report lands (the page re-checks every 5 minutes). Readings stamped after the current Malaysia hour, non-numeric flags and values outside 1–500 are discarded before use. The best announcement time minimises backtested wrong-call cost plus the lateness penalty you set. Schools: government primary + secondary schools, students and teachers by state from data.gov.my (OpenDOSM catalogue); every DOE station carries its state, so impact is counted state by state. ${dq ? "<br>Data quality at build — " + dq + "." : ""} Stations with short history (Sabah, Sarawak, Kelantan and Labuan have DOE data only from Sep 2023) carry wider uncertainty. Decision support only: confirm with the official APIMS reading and MetMalaysia forecast. Built ${M.meta.built}.`;
 buildControls();
+$("hvTime").onclick = () => { S.hv = "timeline"; drawHistory(); }; $("hvYear").onclick = () => { S.hv = "yearly"; drawHistory(); };
 $("tabs").addEventListener("click", e => { const b = e.target.closest("button[data-t]"); if (b) setTab(b.dataset.t, true); });
 $("tabs").addEventListener("keydown", e => { if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return; const i = TABS.indexOf(S.tab), n = TABS[(i + (e.key === "ArrowRight" ? 1 : TABS.length - 1)) % TABS.length]; setTab(n, true); $("tab-" + n).focus(); e.preventDefault(); });
 addEventListener("resize", stickyOffset); stickyOffset();

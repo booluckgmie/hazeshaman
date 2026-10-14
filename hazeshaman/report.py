@@ -351,6 +351,53 @@ That is defensible but not the optimum the cost model suggests; the model would 
 {_table(["Date", "State", "Area", "Peak", "Evening before", "Verdict", "Source checked"], its)}
 {foot}""")
 
+
+    # ------------------------------------------------------------------ 07 outlook
+    ol = json.load(open("docs/outlook.json", encoding="utf-8")); sk = ol["skill"]
+    orows = []
+    for k in ol["horizons"]:
+        s_ = sk[str(k)]; y1, y2 = s_.get("y150", {}), s_.get("y180", {})
+        orows.append([f"+{k}", _n(s_["n"]), f"{s_['rmse']:.3f}", f"{s_['rmse_persistence']:.3f}", f"{s_['rmse_climatology']:.3f}", _pct(s_["skill_vs_persistence"]), _pct(s_["skill_vs_climatology"]),
+                      _pct(s_["coverage80"]), _pct(y1.get("bss")) if y1 else "–", _pct(y2.get("bss")) if y2 else "–"])
+    _write("07-seven-day-outlook.md", f"""# 7. The seven-day outlook and the history chart
+
+The Forecast tab shows two things the one-day model cannot: **what the next seven days of daily average API look like** for the selected station, and **everything on record** for it (a timeline, and a year-on-year overlay).
+
+## What is forecast
+For each station and each horizon **k = 1 ... 7 days** after the last complete day *t*:
+
+* the **daily mean API** (median and 50% / 80% ranges),
+* the chance the daily mean is **above 100** and **above 150**,
+* the chance the **highest reading between 06:00 and 14:00 is above 180** (KPM's closure line).
+
+Inputs: ln daily mean on *t*, *t-1* and *t-2*, the mean of *t-3 ... t-6*, ln of the school-hours peak on *t*, how many of the last three days averaged above 150, season (sin/cos of day of year) and a state effect shared by the state's stations.
+**No weather forecast is used**, so skill falls with the horizon.
+
+## How it is built (`python -m hazeshaman.outlook`)
+1. **Level:** a ridge regression on ln daily mean for each horizon, trained on days before {ol['test_from']}.
+2. **Ranges and odds:** a plain ridge under-predicts hazy days and is noisier when it is hazy, so the residuals are tabulated by the *predicted level* (eight bins, 19 quantiles each, interpolated between bins). The median, the ranges and the chance of exceeding 100 or 150 all come from this one table, so they can never contradict each other on the chart.
+3. **Closure-level odds:** an isotonic (monotone) mapping from the predicted level to the chance that the school-hours peak exceeds 180, so a lower projected level never shows higher odds.
+4. **Tested on days the model never saw** (from {ol['test_from']}), against two baselines: *persistence* (tomorrow = today) and a *climatology* (the usual level for that state and month).
+
+## Skill by horizon (hold-out)
+{_table(["Day", "Station-days", "Error (ln units)", "Persistence", "Climatology", "Better than persistence", "Better than climatology", "80% range held", "Skill: mean > 150", "Skill: peak > 180"], orows)}
+
+* Error is RMSE of ln daily mean; "better than" is the reduction in squared error. Skill for the exceedance chances is Brier skill against the base rate.
+* The **level** keeps real skill all week (about {_pct(sk['1']['skill_vs_climatology'])} better than the monthly norm at day +1, {_pct(sk['7']['skill_vs_climatology'])} at day +7).
+* The **closure-level odds** are only dependable for the first day or two; by day +5 to +7 the skill is close to the base rate. The dashboard labels each day *solid*, *fair* or *low* confidence from the level skill and says so in words.
+* The 80% ranges hold the outcome {_pct(min(s_['coverage80'] for s_ in sk.values()))}-{_pct(max(s_['coverage80'] for s_ in sk.values()))} of the time in the test, a little less than 80% (the test period includes the hazy 2026 season, which the earlier years did not prepare it for). Treat them as slightly optimistic.
+
+## What it cannot do
+* It does not know about **weather or fires**: a wind shift or a new hotspot cluster changes the week and the model cannot see it. Use the CAMS-based second source and MetMalaysia for that.
+* Skill is measured across all stations and days, most of them clear. Haze episodes are few, so the numbers for hazy days are noisier than the headline.
+* Days with fewer than 18 hourly readings have no mean; stations with a gap in the last week get no projection.
+
+## The history chart
+`docs/history.json` holds every area's daily mean and school-hours peak since 2017 as integers (about 1 MB, compressed in transit). The archive covers the peninsula from 2017-07 and Sabah, Sarawak, Kelantan and Labuan from 2023-09; Nov 2024 to Jun 2025 is missing for everyone.
+The newest days come from the live feed in your browser; a daily job folds finished days into the file (`python -m hazeshaman.histfile update`).
+*Timeline* shows 30 days, 90 days, one year or everything (weekly averages beyond about 16 months) with the school closures on record for that state marked; *Compare years* overlays each year on the same calendar with a 7-day smoothing, the current year highlighted.
+{foot}""")
+
     # ------------------------------------------------------------------ index
     _write("README.md", f"""# Hazeshaman analysis notes
 
@@ -364,6 +411,7 @@ Written notes behind the dashboard's **Analysis** tab. Numbers are generated fro
 | [4. Second source: Open-Meteo cross-check](04-openmeteo-crosscheck.md) | Can a single DOE feed be trusted, especially for Sabah and Sarawak? Which reports look doubtful? |
 | [5. Schools, students and teachers impacted](05-school-impact.md) | How is impact counted, and how many schools sit behind each state? |
 | [6. Were the closure decisions the best ones?](06-closure-decisions.md) | How did recorded closures compare with the readings, and with the model? |
+| [7. The seven-day outlook and the history chart](07-seven-day-outlook.md) | What does the next week look like for a station, how far ahead can it be trusted, and what is on record? |
 
 ## Headlines
 * Brier skill versus the base rate: **{_pct(m['backtest'][str(ah[0])]['metrics']['close']['bss'])} at {_hl(ah[0])} to {_pct(m['backtest'][str(ah[-1])]['metrics']['close']['bss'])} at {_hl(ah[-1])}**; defaults put the cheapest announcement at **{_hl(cost_matrix(m)[(8, 5)][1])}**.
