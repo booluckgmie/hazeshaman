@@ -10,11 +10,12 @@ Written notes behind the dashboard's **Analysis** tab. Numbers are generated fro
 | [4. Second source: Open-Meteo cross-check](04-openmeteo-crosscheck.md) | Can a single DOE feed be trusted, especially for Sabah and Sarawak? Which reports look doubtful? |
 | [5. Schools, students and teachers impacted](05-school-impact.md) | How is impact counted, and how many schools sit behind each state? |
 | [6. Were the closure decisions the best ones?](06-closure-decisions.md) | How did recorded closures compare with the readings, and with the model? |
+| [7. The seven-day outlook and the history chart](07-seven-day-outlook.md) | What does the next week look like for a station, how far ahead can it be trusted, and what is on record? |
 
 ## Headlines
 * Brier skill versus the base rate: **66% at 3 PM to 72% at 9 PM**; defaults put the cheapest announcement at **3 PM**.
 * Sarawak and Sabah DOE data agree with an independent model about as well as the peninsula (median correlation 0.87 and 0.78 against 0.76); 8 stations are grade C.
-* 32 of 43 recorded closure state-days met the KPM trigger on the day or the evening before; closures trailed the trigger by 1-2 school days in five states at the start of the Oct 2026 episode.
+* 32 of 45 recorded closure state-days met the KPM trigger on the day or the evening before; closures trailed the trigger by 1-2 school days in five states at the start of the Oct 2026 episode.
 
 ## Regenerate
 ```

@@ -37,7 +37,7 @@ The exceptions are the grade C stations: IPD Serian, JOHAN SETIA, Kimanis, Kota 
 | WP Labuan | 1 | 0.78 | 10.8 | 100.0% | 1 / 0 / 0 |
 | WP Putrajaya | 1 | 0.62 | 16.6 | 100.0% | 0 / 1 / 0 |
 
-## Flagged reports (last 120 h to 2026-10-14 07:00)
+## Flagged reports (last 120 h to 2026-10-14 10:00)
 | Station | State | Type | Severity | From | To | Hours | Detail |
 |---|---|---|---|---|---|---|---|
 | Petaling Jaya | Selangor | Possible under-reporting | warn | 2026-10-13 14:00 | 2026-10-13 17:00 | 4 | DOE 85 vs ≈149 |
@@ -52,7 +52,7 @@ The exceptions are the grade C stations: IPD Serian, JOHAN SETIA, Kimanis, Kota 
 | Temerloh | Pahang | Possible under-reporting | critical | 2026-10-11 02:00 | 2026-10-11 08:00 | 7 | DOE 72 vs ≈158 |
 | Seri Manjung | Perak | Repeated / stuck value | warn | 2026-10-09 14:00 | 2026-10-10 04:00 | 15 | DOE 158 vs ≈142 |
 | Seberang Jaya | Pulau Pinang | Unconfirmed high reading | warn | 2026-10-09 17:00 | 2026-10-09 21:00 | 5 | DOE 149 vs ≈71 |
-| Seberang Jaya | Pulau Pinang | Unconfirmed high reading | critical | 2026-10-09 09:00 | 2026-10-09 15:00 | 7 | DOE 152 vs ≈74 |
+| Seberang Jaya | Pulau Pinang | Unconfirmed high reading | critical | 2026-10-09 11:00 | 2026-10-09 15:00 | 5 | DOE 152 vs ≈74 |
 
 Summary: 12 stations flagged, 7 critical; by type {'high': 6, 'low': 5, 'frozen': 2, 'spike': 0, 'stale': 0}.
 

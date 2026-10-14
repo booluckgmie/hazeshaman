@@ -239,3 +239,22 @@ def test_analysis_notes_are_generated_from_the_artefacts(tmp_path, monkeypatch):
         txt = (tmp_path / f).read_text(encoding="utf-8")
         import re
         assert len(txt) > 300 and not re.search(r"\bnan\b", txt.lower()) and "None" not in txt, f
+
+
+def test_outlook_tables_are_coherent_and_files_match():
+    import json
+    import numpy as np
+    from hazeshaman import outlook, histfile
+    rng = np.random.default_rng(1)
+    pred = rng.normal(4.3, 0.5, 6000); resid = rng.normal(0, 0.2, 6000) + 0.1 * (pred > 4.6)
+    tab = outlook.resid_table(pred, resid)
+    p150 = outlook.prob_over(np.array([4.2, 4.6, 5.0, 5.4]), 150.0, tab)
+    assert np.all(np.diff(p150) >= -1e-9) and 0 <= p150.min() and p150.max() <= 1               # higher predicted level -> higher odds
+    assert outlook.prob_over(np.array([5.0]), 100.0, tab)[0] >= outlook.prob_over(np.array([5.0]), 150.0, tab)[0]
+    o = json.load(open("docs/outlook.json")); h = json.load(open("docs/history.json")); m = json.loads(open("docs/model.js").read().split("=", 1)[1].rstrip().rstrip(";"))
+    assert o["horizons"] == list(range(1, 8)) and set(o["models"]) == {str(k) for k in range(1, 8)}
+    assert o["skill"]["1"]["skill_vs_climatology"] > o["skill"]["7"]["skill_vs_climatology"] > 0         # skill decays with the horizon but stays positive
+    assert set(h["areas"]) == {a["key"] for a in m["areas"]} and all(len(v["m"].split(",")) == h["n"] for v in h["areas"].values())
+    x, y = o["models"]["3"]["clf"]["y180"]["x"], o["models"]["3"]["clf"]["y180"]["y"]
+    assert all(b >= a - 1e-9 for a, b in zip(y, y[1:]))                                              # peak > 180 odds are monotone in the level
+    assert histfile._dec(histfile._enc(np.array([1.4, np.nan, 99.6]))).tolist()[0] == 1.0

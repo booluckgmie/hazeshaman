@@ -27,11 +27,16 @@ jobs:
       - name: Cross-check against Open-Meteo (independent source) and flag doubtful reports
         continue-on-error: true            # a flaky second source must never block the DOE feed
         run: python -m hazeshaman.crosscheck update
+      - name: Fold the finished days into the history file the dashboard plots (once a day, 01:xx Malaysia time)
+        continue-on-error: true
+        run: |
+          if [ "$(TZ=Asia/Kuala_Lumpur date +%H)" = "01" ]; then python -m hazeshaman.histfile update; else echo "not the daily slot"; fi
       - name: Commit if changed
         run: |
           git config user.name "hazeshaman-bot"
           git config user.email "actions@users.noreply.github.com"
           git add docs/live.json data/history
+          [ -f docs/history.json ] && git add docs/history.json || true
           [ -f docs/xcheck.json ] && git add docs/xcheck.json || true     # absent if the cross-check step could not run
           if git diff --cached --quiet; then echo "no change"; exit 0; fi
           git commit -m "chore(live): APIMS hourly buffer $(date -u +%Y-%m-%dT%H:%MZ)"

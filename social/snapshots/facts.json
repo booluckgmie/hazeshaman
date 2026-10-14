@@ -1,0 +1,24 @@
+{
+ "modelHit": 11,
+ "closHit": 6,
+ "days": 14,
+ "evenings": 96,
+ "sar": 0.871,
+ "sab": 0.786,
+ "pen": 0.757,
+ "grades": {
+  "A": 28,
+  "B": 32,
+  "C": 8
+ },
+ "flagged": 12,
+ "critical": 7,
+ "stations": 68,
+ "skillLo": 66,
+ "skillHi": 72,
+ "justified": 32,
+ "evaluated": 43,
+ "late": 5,
+ "schools": 10238,
+ "students": 4818596
+}

@@ -69,6 +69,15 @@
       ]
     },
     {
+      "source": "/(history|outlook).json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=1800, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
       "source": "/howto/(.*)",
       "headers": [
         {
