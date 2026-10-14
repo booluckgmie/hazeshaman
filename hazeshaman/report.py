@@ -361,7 +361,7 @@ That is defensible but not the optimum the cost model suggests; the model would 
                       _pct(s_["coverage80"]), _pct(y1.get("bss")) if y1 else "–", _pct(y2.get("bss")) if y2 else "–"])
     _write("07-seven-day-outlook.md", f"""# 7. The seven-day outlook and the history chart
 
-The Forecast tab shows two things the one-day model cannot: **what the next seven days of daily average API look like** for the selected station, and **everything on record** for it (a timeline, and a year-on-year overlay).
+The 7-day outlook tab shows two things the one-day model cannot: **what the next seven days of daily average API look like** for the selected station, and **everything on record** for it (a timeline, and a year-on-year overlay).
 
 ## What is forecast
 For each station and each horizon **k = 1 ... 7 days** after the last complete day *t*:

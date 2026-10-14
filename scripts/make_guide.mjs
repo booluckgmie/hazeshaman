@@ -88,7 +88,7 @@ await compose('01-tour.png', 'Step 1 · Orientation', 'The dashboard in one scre
   '<b>State tiles</b> – highest API per state, coloured by band. Click one to open that state.',
   '<b>Live data / What-if</b> – Live follows the newest report; What-if lets you type your own readings.',
   '<b>State filter</b> – the whole page follows it: “Malaysia” (all states) or one state. On a phone, use the round button at the bottom-right.',
-  '<b>Tabs</b> – one topic per tab: Overview · Forecast · Schools · Announce time · Data check · Analysis. The haze view stays above as a one-line strip.',
+  '<b>Tabs</b> – one topic per tab: Overview · Forecast · 7-day outlook · Schools · Announce time · Data check · Analysis. The haze view stays above as a one-line strip.',
   '<b>National outlook</b> – tomorrow morning: stations at closure risk and the schools, students and teachers behind them.'], stamp);
 await clearAnn();
 await page.evaluate(() => { document.querySelector('header').style.visibility = 'hidden'; });   // keep later crops clean

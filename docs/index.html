@@ -80,6 +80,8 @@ h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text
 .mrows{display:grid;gap:12px}.mrow{display:grid;grid-template-columns:200px 1fr;gap:14px;padding:14px 16px;border:1px solid var(--edge);border-radius:16px;background:var(--card)}
 .mrow h3{margin:0;font-size:15px}.mrow h3 span{display:block;font-weight:500;font-size:12px;color:var(--ink2);margin-top:3px}.mrow p{margin:0;font-size:14px;color:var(--ink2)}.mrow p b{color:var(--ink)}.mrow a{color:inherit;font-weight:650}
 @media (max-width:760px){.mrow{grid-template-columns:1fr}}
+.jump{display:flex;gap:14px 20px;align-items:center;justify-content:space-between;flex-wrap:wrap}.jump p{margin:4px 0 0;color:var(--ink2);font-size:14px;max-width:60ch}.jump b{font-size:17px}
+.jump .btn{padding:11px 20px;border-radius:14px;border:0;background:var(--grad);color:#1a1318;font:inherit;font-weight:750;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.18)}
 .acards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
 .acard{display:flex;flex-direction:column;gap:6px;padding:16px;border-radius:16px;border:1px solid var(--edge);background:var(--card)}
 .acard .k{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);font-weight:700}
@@ -274,6 +276,7 @@ footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
   <nav class="tabs" id="tabs" role="tablist" aria-label="Sections">
     <button role="tab" data-t="overview" id="tab-overview" aria-controls="tabbody">Overview</button>
     <button role="tab" data-t="forecast" id="tab-forecast" aria-controls="tabbody">Forecast</button>
+    <button role="tab" data-t="outlook" id="tab-outlook" aria-controls="tabbody">7-day outlook</button>
     <button role="tab" data-t="schools" id="tab-schools" aria-controls="tabbody">Schools</button>
     <button role="tab" data-t="timing" id="tab-timing" aria-controls="tabbody">Announce time</button>
     <button role="tab" data-t="check" id="tab-check" aria-controls="tabbody">Data check<i class="tbadge" id="tbCheck" hidden></i></button>
@@ -389,7 +392,9 @@ footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
         <div class="legend" id="stackLeg"></div>
       </section>
 
-      <section class="glass" id="outPanel" data-tab="forecast">
+      <section class="glass jump" data-tab="forecast"><div><b>What about the rest of the week?</b><p>A 7-day projection with ranges, everything on record for this station (timeline and year-on-year) and which model produces what.</p></div><button class="btn" id="goOutlook" type="button">7-day outlook →</button></section>
+
+      <section class="glass" id="outPanel" data-tab="outlook">
         <h2>Next 7 days · <span id="outName"></span> <small>statistical outlook for the daily average API</small></h2>
         <svg class="chart" id="outChart" viewBox="0 0 720 300" role="img" aria-label="Daily average API: the last 14 days and a 7-day projection with ranges"></svg>
         <div class="legend" id="outLeg"></div>
@@ -397,7 +402,7 @@ footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
         <div class="note" id="outNote"></div>
       </section>
 
-      <section class="glass" id="histPanel" data-tab="forecast">
+      <section class="glass" id="histPanel" data-tab="outlook">
         <h2>All data available · <span id="histName"></span> <small id="histSub"></small></h2>
         <div class="hctl"><div class="seg" role="group" aria-label="View"><button id="hvTime" aria-pressed="true">Timeline</button><button id="hvYear" aria-pressed="false">Compare years</button></div>
           <div class="pills" id="hRange" role="group" aria-label="Range"></div></div>
@@ -406,7 +411,7 @@ footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
         <div class="note" id="histNote"></div>
       </section>
 
-      <section class="glass" id="modelPanel" data-tab="forecast">
+      <section class="glass" id="modelPanel" data-tab="outlook">
         <h2>Which model is used here? <small>everything runs in your browser from the files below</small></h2>
         <div class="mrows" id="modelRows"></div>
       </section>
@@ -642,7 +647,7 @@ function resolveArea(){
   if (best) return best.a.key;
   const list = areasOf(S.state); return (list.find(a => a.key === "WP Kuala Lumpur|Cheras") || list[0]).key;
 }
-const TABS = ["overview", "forecast", "schools", "timing", "check", "analysis"];
+const TABS = ["overview", "forecast", "outlook", "schools", "timing", "check", "analysis"];
 S.tab = "overview";
 function syncHash(){
   const h = [S.state ? encodeURIComponent(S.state) : "", S.tab !== "overview" ? S.tab : ""].filter((x, i) => i === 0 ? true : x).join("/").replace(/\/$/, "");
@@ -1308,6 +1313,7 @@ if (M.meta.synthetic){ const b = document.createElement("span"); b.className = "
 const dq = Object.entries(M.meta.quality || {}).map(([k, v]) => `${k}: ${Object.entries(v).filter(([, n]) => n).map(([a, n]) => `${fmtN(n)} ${a.replace(/_/g, " ")}`).join(", ") || "clean"}`).join(" · ");
 $("foot").innerHTML = `<b>How it works.</b> For every station and each hour from 12:00 to 23:00, logistic models learn P(7 AM API &gt; 100 / &gt; 150), P(API &gt; 180 during school hours tomorrow) and P(tomorrow's mean &gt; 150) from today's 8 AM, noon, 3-hour trend and latest readings, yesterday's mean, the over-150 streak and season, plus a state effect. Closure risk = P(&gt;180) + remaining × [streak ≥ 2] × P(mean &gt; 150), mirroring KPM's triggers (API &gt; 180, or &gt; 150 for three days). The live view recomputes every station whenever a new hourly DOE report lands (the page re-checks every 5 minutes). Readings stamped after the current Malaysia hour, non-numeric flags and values outside 1–500 are discarded before use. The best announcement time minimises backtested wrong-call cost plus the lateness penalty you set. Schools: government primary + secondary schools, students and teachers by state from data.gov.my (OpenDOSM catalogue); every DOE station carries its state, so impact is counted state by state. ${dq ? "<br>Data quality at build — " + dq + "." : ""} Stations with short history (Sabah, Sarawak, Kelantan and Labuan have DOE data only from Sep 2023) carry wider uncertainty. Decision support only: confirm with the official APIMS reading and MetMalaysia forecast. Built ${M.meta.built}.`;
 buildControls();
+$("goOutlook").onclick = () => setTab("outlook", true);
 $("hvTime").onclick = () => { S.hv = "timeline"; drawHistory(); }; $("hvYear").onclick = () => { S.hv = "yearly"; drawHistory(); };
 $("tabs").addEventListener("click", e => { const b = e.target.closest("button[data-t]"); if (b) setTab(b.dataset.t, true); });
 $("tabs").addEventListener("keydown", e => { if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return; const i = TABS.indexOf(S.tab), n = TABS[(i + (e.key === "ArrowRight" ? 1 : TABS.length - 1)) % TABS.length]; setTab(n, true); $("tab-" + n).focus(); e.preventDefault(); });
