@@ -199,3 +199,31 @@ def test_update_writes_flags_and_series(tmp_path):
     fl = [f for f in d["flags"] if f["type"] == "high"]
     assert fl and fl[0]["severity"] == "critical" and d["summary"]["critical"] == 1
     assert json.loads((tmp_path / "x.json").read_text())["end"] == live["end"]
+
+
+def test_closures_csv_is_valid_and_exports(tmp_path):
+    from hazeshaman import closures
+    rows = closures.load("data/closures.csv")
+    assert len(rows) > 30
+    assert all(r["source_url"].startswith("https://") for r in rows)
+    assert {r["verified"] for r in rows} <= {"read", "summary"}
+    out = tmp_path / "c.json"
+    assert closures.export("data/closures.csv", str(out)) == len(rows)
+    import json
+    d = json.loads(out.read_text())
+    assert d["n"] == len(rows) and d["first"] <= d["last"]
+
+
+def test_decision_classifier_and_station_match():
+    import pandas as pd
+    from hazeshaman import decisions as dc
+    s = dict(has_data=True, peak=190.0, eve_peak=120.0, streak_known=False)
+    assert dc.classify(s, 180) == "met on the day only"
+    assert dc.classify(dict(s, peak=100.0, eve_peak=185.0), 180) == "met the evening before only"
+    assert dc.classify(dict(s, peak=100.0, eve_peak=100.0, streak_known=True), 180) == "met the evening before only"
+    assert dc.classify(dict(s, peak=160.0, eve_peak=100.0), 180) == "below trigger (150-180)"
+    assert dc.classify(dict(s, peak=90.0, eve_peak=100.0), 180) == "far below trigger (<150)"
+    assert dc.classify(dict(s, has_data=False), 180) == "no data"
+    df = pd.DataFrame({"state": ["Sarawak"] * 3, "area": ["Sarawak|Kuching", "Sarawak|Sri Aman", "Sarawak|Miri"]})
+    assert dc.match_areas(df, "Sarawak", "Serian, Sri Aman")[0] == ["Sarawak|Sri Aman"]
+    assert len(dc.match_areas(df, "Sarawak", "All schools")[0]) == 3

@@ -151,6 +151,13 @@ body.sheet-open{overflow:hidden}
 .frow:hover{background:var(--glass2)}
 .frow .ti{font-weight:700}.frow .sub2{grid-column:2;color:var(--ink2);font-size:12.5px}.frow .when{font-size:12px;color:var(--ink2);text-align:right;white-space:nowrap}
 .frow .live{display:inline-block;margin-left:6px;padding:0 6px;border-radius:99px;font-size:10.5px;font-weight:800;letter-spacing:.06em;background:var(--c);color:#1a1318}
+.crow{display:grid;grid-template-columns:104px 1fr auto;gap:12px;align-items:start;padding:10px 12px;border-radius:12px;border:1px solid var(--edge);border-left:4px solid var(--c,var(--warn));background:var(--card)}
+.crow .d{font-weight:700;font-variant-numeric:tabular-nums}.crow .d small{display:block;font-weight:500;color:var(--ink2);font-size:11px}
+.crow .ti{font-weight:600}.crow .sub2{font-size:13px;color:var(--ink2)}
+.crow .tg{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}.crow .tag{font-size:11px;padding:2px 8px;border-radius:99px;border:1px solid var(--edge);white-space:nowrap}
+.crow .tag.p{color:var(--ok);border-color:var(--ok)}.crow .tag.w{color:var(--warn);border-color:var(--warn)}
+.crow a{color:inherit}
+@media (max-width:640px){.crow{grid-template-columns:1fr}.crow .tg{justify-content:flex-start}}
 .xcs{display:grid;grid-template-columns:1.7fr 1fr;gap:16px;align-items:start}
 @media (max-width:900px){.xcs{grid-template-columns:1fr}}
 .xfacts{display:grid;gap:8px}
@@ -321,6 +328,13 @@ footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
         <h2>Independent check · <span id="xcsName"></span> <small>DOE vs Open-Meteo, last 72 h</small></h2>
         <div class="xcs"><div><svg class="chart" id="xcChart" viewBox="0 0 520 230"></svg><div class="legend" id="xcLeg"></div></div><div class="xfacts" id="xcFacts"></div></div>
         <div class="note" id="xcsNote"></div>
+      </section>
+
+      <section class="glass" id="closPanel">
+        <h2>School closures on record · <span id="closScope">Malaysia</span> <small>dates schools closed or switched to PdPR, from news and official announcements</small></h2>
+        <div class="hero" id="closHero"></div>
+        <div class="flist" id="closList"></div>
+        <div class="note" id="closNote"></div>
       </section>
 
       <section class="glass" id="schPanel"><h2>Schools impacted · <span id="schTitle"></span></h2><div class="sch" id="sch"></div><div class="note" id="schNote"></div></section>
@@ -696,8 +710,17 @@ function render(){
   $("kpis").innerHTML = K.map(k => `<div class="kpi"><span>${k[0]}</span><b>${ok ? pct(k[1]) : "–"}</b><em>${k[2]}</em></div>`).join("");
 
   // schools impacted: STATE level, shown once a state is chosen
-  $("schPanel").style.display = S.state ? "" : "none";
-  if (S.state){
+  $("schPanel").style.display = "";
+  if (!S.state){            // nothing selected: sum every state, metric by metric
+    const t = scopeTotals(), have = live && t.have > 0;
+    $("schTitle").textContent = "Malaysia";
+    $("sch").innerHTML = [[`Schools in Malaysia`, fmtN(t.schools), `govt primary + secondary · all ${M.states.length} states${t.ipta ? ` · +${t.ipta} public universities` : ""}`],
+        ["Students and teachers", fmtN(t.students), `${fmtN(t.teachers)} teachers · ${t.teachers ? (t.students / t.teachers).toFixed(1) : "–"} pupils per teacher`],
+        ["If schools close", fmtN(t.schools), `schools · ${fmtN(t.students)} students · ${fmtN(t.teachers)} teachers affected (every state)`],
+        ["Likely affected tomorrow", have ? fmtN(t.expS) : "–", have ? `sum over states of closure chance × schools · ${fmtN(t.expStu)} students · ${fmtN(t.expTea)} teachers` : "waiting for readings"]]
+      .map(k => `<div class="kpi"><span>${k[0]}</span><b>${k[1]}</b><em>${k[2]}</em></div>`).join("");
+    $("schNote").textContent = `National totals: every figure is the sum of the 16 states. "Likely affected tomorrow" adds up, state by state, that state's highest-risk station chance × its schools. Pick a state to see it alone.`;
+  } else {
     const c = sch(S.state), ps = live && ST[S.state].maxP >= 0 ? ST[S.state].maxP : P.close, who = live && ST[S.state].maxA ? ST[S.state].maxA : area.name;
     $("schTitle").textContent = S.state;
     $("sch").innerHTML = [[`Schools in ${S.state}`, fmtN(c.schools), `govt primary + secondary${c.ipta ? ` · +${c.ipta} public universit${c.ipta > 1 ? "ies" : "y"}` : ""}`],
@@ -713,7 +736,7 @@ function render(){
   $("stack").innerHTML = ok ? ["best","base","worst"].map(k => `<i style="width:${P[k] * 100}%;background:${SCN[k].c}"></i>`).join("") : "";
   $("stackLeg").innerHTML = ok ? ["best","base","worst"].map(k => `<span><i style="background:${SCN[k].c}"></i>${SCN[k].name.split(" ·")[0]} ${pct(P[k])}</span>`).join("") : "";
 
-  const tot = scopeTotals(); drawSky(tot); drawOverview(tot); drawXcPanel(); drawXcStation(P, thr, ok); drawTrend(P, f, ok); drawTiming(T); drawTable(T); drawClim(area); drawSpark(f);
+  const tot = scopeTotals(); drawSky(tot); drawOverview(tot); drawXcPanel(); drawClosures(); drawXcStation(P, thr, ok); drawTrend(P, f, ok); drawTiming(T); drawTable(T); drawClim(area); drawSpark(f);
   $("timingNote").textContent = T.bestH ? `★ ${hl(T.bestH)} minimises total expected cost at your preferences (missed closure = ${S.cfn}× needless closure; each hour later = ${S.lam}% of baseline). Click a bar to explore that hour in What-if.` : "No closure events in the hold-out period; timing cannot be ranked.";
   $("trendNote").textContent = ok ? `Dashed fan = model's 10–90% range for tomorrow's 7 AM reading (median ${Math.round(P.q[1])}).` : "";
 }
@@ -978,6 +1001,45 @@ async function fetchLive(){
   }
   throw err;
 }
+const MON_D = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], fmtD = d => `${+d.slice(8, 10)} ${MON_D[+d.slice(5, 7) - 1]} ${d.slice(0, 4)}`;
+let CL = null;
+async function fetchClosures(){
+  try{ const r = await fetch("closures.json?t=" + Math.floor(Date.now() / 36e5), {cache: "no-store"}); if (r.ok){ const j = await r.json(); if (j && j.rows) return j; } }catch(e){ /* panel stays hidden */ }
+  return null;
+}
+const escH = t => String(t).replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c]));
+function drawClosures(){
+  const panel = $("closPanel"); if (!CL){ panel.style.display = "none"; return; }
+  panel.style.display = "";
+  const scope = S.state || "Malaysia"; $("closScope").textContent = scope;
+  const rows = CL.rows.filter(r => !S.state || r.state === S.state);
+  const g = new Map();                                   // one line per date + state
+  for (const r of rows){ const k = r.date + "|" + r.state; if (!g.has(k)) g.set(k, {date: r.date, state: r.state, areas: [], pdpr: new Set(), schools: 0, students: 0, planned: true, read: false, src: new Map(), notes: new Set(), basis: r.basis}); const x = g.get(k);
+    x.areas.push(r.area); x.pdpr.add(r.pdpr); x.schools += +r.schools || 0; x.students += +r.students || 0; if (r.action === "closed") x.planned = false; if (r.verified === "read") x.read = true; x.src.set(r.source_url, r.source_title); if (r.note) x.notes.add(r.note); }
+  const single = [...g.values()].sort((a, b) => a.state.localeCompare(b.state) || a.date.localeCompare(b.date)), runs = [];
+  for (const l of single){                               // merge consecutive days of the same closure into one line
+    const prev = runs[runs.length - 1], key = [...new Set(l.areas)].join("; ");
+    if (prev && prev.state === l.state && prev.key === key && prev.planned === l.planned && (Date.parse(l.date) - Date.parse(prev.end)) / 864e5 <= 1){ prev.end = l.date; l.src.forEach((t, u) => prev.src.set(u, t)); l.pdpr.forEach(v => prev.pdpr.add(v)); l.notes.forEach(n => prev.notes.add(n)); prev.read = prev.read && l.read; prev.n++; }
+    else runs.push({...l, key, end: l.date, n: 1});
+  }
+  const lines = runs.sort((a, b) => b.end.localeCompare(a.end) || a.state.localeCompare(b.state));
+  const days = new Set(single.filter(l => !l.planned).map(l => l.date)), pd = new Set(single.filter(l => !l.planned && l.pdpr.has("yes")).map(l => l.date));
+  const states = new Set(single.filter(l => !l.planned).map(l => l.state));
+  $("closHero").innerHTML = [["Closure days on record", days.size, `${scope === "Malaysia" ? states.size + " states · " : ""}${CL.first.slice(0, 4)}–${CL.last.slice(0, 4)}`],
+      ["Days with PdPR stated", pd.size, "home-based teaching and learning mentioned for that closure"],
+      ["Latest closure on record", lines.find(l => !l.planned) ? fmtD(lines.find(l => !l.planned).end) : "–", lines.find(l => !l.planned) ? lines.find(l => !l.planned).state : "none for this scope"]]
+    .map(k => `<div class="kpi"><span>${k[0]}</span><b>${k[1]}</b><em>${k[2]}</em></div>`).join("");
+  const show = S.closAll ? lines : lines.slice(0, 10);
+  $("closList").innerHTML = show.length ? show.map(l => {
+    const areas = [...new Set(l.areas)].join("; "), pdprYes = l.pdpr.has("yes"), src = [...l.src.entries()];
+    return `<div class="crow" style="--c:${l.planned ? "var(--warn)" : "var(--bad)"}"><div class="d">${l.n > 1 ? `${+l.date.slice(8, 10)}${l.date.slice(5, 7) === l.end.slice(5, 7) ? "" : " " + MON_D[+l.date.slice(5, 7) - 1]}–${fmtD(l.end)}` : fmtD(l.date)}<small>${l.planned ? "planned" : l.n > 1 ? `${l.n} days` : l.basis === "announced" ? "announced for this day" : "closed"}</small></div>
+      <div><div class="ti">${escH(l.state)} · ${escH(areas.length > 150 ? areas.slice(0, 147) + "…" : areas)}</div><div class="sub2">${l.schools ? `${fmtN(l.schools)} schools${l.students ? ` · ${fmtN(l.students)} students` : ""} · ` : ""}${src.map(([u, t]) => `<a href="${escH(u)}" target="_blank" rel="noopener noreferrer">${escH(t)}</a>`).join(" · ")}${[...l.notes].length ? `<br>${escH([...l.notes].join(" · "))}` : ""}</div></div>
+      <div class="tg"><span class="tag ${pdprYes ? "p" : ""}">${pdprYes ? "PdPR" : "PdPR not stated"}</span><span class="tag ${l.read ? "p" : "w"}" title="${l.read ? "The source page was read" : "Taken from a news-search summary: open the link to confirm"}">${l.read ? "source read" : "verify"}</span></div></div>`; }).join("")
+      + (lines.length > 10 ? `<button class="btn" id="closMore" style="margin-top:2px">${S.closAll ? "Show fewer" : `Show all ${lines.length} entries`}</button>` : "")
+    : `<div class="crow" style="--c:var(--ok)"><span></span><div><div class="ti">No closures on record for ${escH(scope)}</div><div class="sub2">This list is not exhaustive: it only holds announcements that were found and checked.</div></div></div>`;
+  const more = $("closMore"); if (more) more.onclick = () => { S.closAll = !S.closAll; drawClosures(); };
+  $("closNote").textContent = "Not a complete history: only announcements that could be found are listed, each with its source. “Source read” = the page was opened and the dates checked; “verify” = taken from a news-search summary, so open the link before relying on it. Closure decisions are made per state or district by KPM and state education departments (rule since Oct 2026: API above 180, or above 150 for three days); this list is what was announced, not what the model predicts.";
+}
 async function fetchXc(){
   for (const u of ["api/xcheck", "xcheck.json"]){
     try{ const r = await fetch(u + "?t=" + Date.now(), {cache: "no-store"}); if (!r.ok) continue; const j = await r.json(); if (j && j.stations && j.end) return j; }catch(e){ /* try next */ }
@@ -985,7 +1047,7 @@ async function fetchXc(){
   return null;
 }
 async function loadLive(){
-  const xp = fetchXc();
+  const xp = fetchXc(); fetchClosures().then(c => { if (c){ CL = c; render(); } });
   try{ LIVE = await fetchLive(); LIVE_ERR = null; }
   catch(e){ if (!LIVE) LIVE_ERR = e.message || "network error"; }
   const x = await xp; if (x) XC = x;
