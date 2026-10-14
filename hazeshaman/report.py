@@ -412,6 +412,7 @@ Written notes behind the dashboard's **Analysis** tab. Numbers are generated fro
 | [5. Schools, students and teachers impacted](05-school-impact.md) | How is impact counted, and how many schools sit behind each state? |
 | [6. Were the closure decisions the best ones?](06-closure-decisions.md) | How did recorded closures compare with the readings, and with the model? |
 | [7. The seven-day outlook and the history chart](07-seven-day-outlook.md) | What does the next week look like for a station, how far ahead can it be trusted, and what is on record? |
+| [8. Does a lingering-haze rule explain closures the KPM trigger misses?](08-lingering-haze.md) | Do slow clearing and rebounds drive closures, and would a rule that remembers the episode have caught them? |
 
 ## Headlines
 * Brier skill versus the base rate: **{_pct(m['backtest'][str(ah[0])]['metrics']['close']['bss'])} at {_hl(ah[0])} to {_pct(m['backtest'][str(ah[-1])]['metrics']['close']['bss'])} at {_hl(ah[-1])}**; defaults put the cheapest announcement at **{_hl(cost_matrix(m)[(8, 5)][1])}**.

@@ -1,0 +1,187 @@
+{
+ "2026": {
+  "n": 80,
+  "closed": 24,
+  "scores": [
+   {
+    "rule": "kpm",
+    "flagged": 18,
+    "caught": 13,
+    "closed": 24,
+    "false": 5,
+    "precision": 0.72,
+    "recall": 0.54
+   },
+   {
+    "rule": "linger",
+    "flagged": 21,
+    "caught": 16,
+    "closed": 24,
+    "false": 5,
+    "precision": 0.76,
+    "recall": 0.67
+   },
+   {
+    "rule": "kpm_linger",
+    "flagged": 27,
+    "caught": 21,
+    "closed": 24,
+    "false": 6,
+    "precision": 0.78,
+    "recall": 0.88
+   }
+  ]
+ },
+ "2026_missed": [
+  {
+   "date": "2026-10-09",
+   "state": "Selangor",
+   "evening": 178,
+   "peak7": 191,
+   "caught_by_linger": true,
+   "rising": true
+  },
+  {
+   "date": "2026-10-12",
+   "state": "Selangor",
+   "evening": 80,
+   "peak7": 191,
+   "caught_by_linger": false,
+   "rising": false
+  },
+  {
+   "date": "2026-10-13",
+   "state": "Melaka",
+   "evening": 161,
+   "peak7": 187,
+   "caught_by_linger": true,
+   "rising": true
+  },
+  {
+   "date": "2026-10-13",
+   "state": "Negeri Sembilan",
+   "evening": 166,
+   "peak7": 189,
+   "caught_by_linger": true,
+   "rising": true
+  },
+  {
+   "date": "2026-10-13",
+   "state": "Selangor",
+   "evening": 152,
+   "peak7": 191,
+   "caught_by_linger": true,
+   "rising": true
+  },
+  {
+   "date": "2026-10-13",
+   "state": "WP Putrajaya",
+   "evening": 154,
+   "peak7": 187,
+   "caught_by_linger": true,
+   "rising": true
+  },
+  {
+   "date": "2026-10-14",
+   "state": "Melaka",
+   "evening": 164,
+   "peak7": 187,
+   "caught_by_linger": true,
+   "rising": true
+  },
+  {
+   "date": "2026-10-14",
+   "state": "Negeri Sembilan",
+   "evening": 158,
+   "peak7": 189,
+   "caught_by_linger": true,
+   "rising": false
+  },
+  {
+   "date": "2026-10-14",
+   "state": "Sabah",
+   "evening": 154,
+   "peak7": 156,
+   "caught_by_linger": false,
+   "rising": true
+  },
+  {
+   "date": "2026-10-14",
+   "state": "Sarawak",
+   "evening": 160,
+   "peak7": 172,
+   "caught_by_linger": false,
+   "rising": true
+  },
+  {
+   "date": "2026-10-14",
+   "state": "Selangor",
+   "evening": 155,
+   "peak7": 191,
+   "caught_by_linger": true,
+   "rising": true
+  }
+ ],
+ "2026_late": [
+  {
+   "rule": "kpm",
+   "flagged": 7,
+   "caught": 6,
+   "closed": 16,
+   "false": 1,
+   "precision": 0.86,
+   "recall": 0.38
+  },
+  {
+   "rule": "linger",
+   "flagged": 11,
+   "caught": 10,
+   "closed": 16,
+   "false": 1,
+   "precision": 0.91,
+   "recall": 0.62
+  },
+  {
+   "rule": "kpm_linger",
+   "flagged": 15,
+   "caught": 13,
+   "closed": 16,
+   "false": 2,
+   "precision": 0.87,
+   "recall": 0.81
+  }
+ ],
+ "2019": {
+  "n": 220,
+  "closed": 21,
+  "scores": [
+   {
+    "rule": "kpm",
+    "flagged": 26,
+    "caught": 15,
+    "closed": 21,
+    "false": 11,
+    "precision": 0.58,
+    "recall": 0.71
+   },
+   {
+    "rule": "linger",
+    "flagged": 36,
+    "caught": 17,
+    "closed": 21,
+    "false": 19,
+    "precision": 0.47,
+    "recall": 0.81
+   },
+   {
+    "rule": "kpm_linger",
+    "flagged": 37,
+    "caught": 18,
+    "closed": 21,
+    "false": 19,
+    "precision": 0.49,
+    "recall": 0.86
+   }
+  ]
+ }
+}
