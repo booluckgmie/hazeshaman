@@ -227,3 +227,15 @@ def test_decision_classifier_and_station_match():
     df = pd.DataFrame({"state": ["Sarawak"] * 3, "area": ["Sarawak|Kuching", "Sarawak|Sri Aman", "Sarawak|Miri"]})
     assert dc.match_areas(df, "Sarawak", "Serian, Sri Aman")[0] == ["Sarawak|Sri Aman"]
     assert len(dc.match_areas(df, "Sarawak", "All schools")[0]) == 3
+
+
+def test_analysis_notes_are_generated_from_the_artefacts(tmp_path, monkeypatch):
+    from hazeshaman import report
+    monkeypatch.setattr(report, "OUT", str(tmp_path))
+    files = report.build()
+    assert {"README.md", "01-data-sources-and-quality.md", "02-model-and-backtest.md", "03-announcement-timing.md",
+            "04-openmeteo-crosscheck.md", "05-school-impact.md", "06-closure-decisions.md"} <= set(files)
+    for f in files:
+        txt = (tmp_path / f).read_text(encoding="utf-8")
+        import re
+        assert len(txt) > 300 and not re.search(r"\bnan\b", txt.lower()) and "None" not in txt, f

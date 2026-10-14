@@ -59,6 +59,25 @@ h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text
   backdrop-filter:blur(22px) saturate(150%);-webkit-backdrop-filter:blur(22px) saturate(150%);border-radius:22px;padding:20px;min-width:0}
 @supports not (backdrop-filter:blur(1px)){.glass{background:var(--glass2)}}
 .grid{display:grid;grid-template-columns:minmax(280px,330px) 1fr;gap:18px;align-items:start}
+.grid.solo{grid-template-columns:1fr}
+[hidden]{display:none!important}
+.tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:6px;margin:0 0 18px;border-radius:18px;border:1px solid var(--edge);background:var(--card);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);position:sticky;top:var(--stk,8px);z-index:25;scroll-snap-type:x proximity}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:0 0 auto;scroll-snap-align:center;position:relative;border:0;background:transparent;color:var(--ink2);font:inherit;font-weight:650;padding:10px 16px;border-radius:13px;cursor:pointer;white-space:nowrap;transition:background .15s,color .15s}
+.tabs button:hover{color:var(--ink)}
+.tabs button[aria-selected="true"]{background:var(--grad);color:#1a1318;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.tabs button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+.tbadge{display:inline-grid;place-items:center;min-width:18px;height:18px;margin-left:7px;padding:0 5px;border-radius:99px;background:var(--bad);color:#fff;font:700 11px/1 inherit;font-style:normal;vertical-align:1px}
+.tabs button[aria-selected="true"] .tbadge{background:#1a1318}
+.skymini{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap;padding:11px 16px;border-radius:16px;margin:0 0 18px;border-left:5px solid var(--bc,var(--accent))}
+.skymini b{letter-spacing:.04em;color:var(--bc,var(--ink))}.skymini span{color:var(--ink2);font-size:14px}.skymini em{margin-left:auto;font-style:normal;font-size:12px;color:var(--ink3,var(--ink2))}
+.skymini .dot{width:10px;height:10px;border-radius:50%;background:var(--bc,var(--accent));box-shadow:0 0 12px var(--bc,var(--accent))}
+.acards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.acard{display:flex;flex-direction:column;gap:6px;padding:16px;border-radius:16px;border:1px solid var(--edge);background:var(--card)}
+.acard .k{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);font-weight:700}
+.acard b.big{font-size:30px;line-height:1.1;font-variant-numeric:tabular-nums}
+.acard p{margin:0;color:var(--ink2);font-size:14px}
+.acard a{margin-top:auto;font-weight:650;color:inherit}
 .stack{display:grid;gap:18px;min-width:0}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 @media (max-width:1000px){.grid,.row2{grid-template-columns:1fr}.grid>main{order:-1}}
@@ -244,7 +263,18 @@ footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
   </nav>
   <div id="xcBanner" style="margin:-6px 0 14px"></div>
 
-  <section class="glass sky" id="sky" aria-live="polite">
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Sections">
+    <button role="tab" data-t="overview" id="tab-overview" aria-controls="tabbody">Overview</button>
+    <button role="tab" data-t="forecast" id="tab-forecast" aria-controls="tabbody">Forecast</button>
+    <button role="tab" data-t="schools" id="tab-schools" aria-controls="tabbody">Schools</button>
+    <button role="tab" data-t="timing" id="tab-timing" aria-controls="tabbody">Announce time</button>
+    <button role="tab" data-t="check" id="tab-check" aria-controls="tabbody">Data check<i class="tbadge" id="tbCheck" hidden></i></button>
+    <button role="tab" data-t="analysis" id="tab-analysis" aria-controls="tabbody">Analysis</button>
+  </nav>
+
+  <section class="glass skymini" id="skyMini" data-tab="forecast schools timing check analysis" aria-live="polite"><i class="dot" style="--c:var(--bc)"></i><b id="skyMiniB"></b><span id="skyMiniT"></span><em id="skyMiniW"></em></section>
+
+  <section class="glass sky" id="sky" aria-live="polite" data-tab="overview">
     <div class="hz"></div><div class="hz b"></div><canvas id="parts"></canvas>
     <svg class="skyline" viewBox="0 0 1200 220" preserveAspectRatio="none" aria-hidden="true">
   <g><rect x="0" y="150" width="1200" height="70"/>
@@ -266,8 +296,10 @@ footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
     </div>
   </section>
 
-  <div class="grid">
-    <aside class="glass" aria-label="Controls">
+
+  <div class="grid" id="tabbody" role="tabpanel">
+    <aside class="glass" aria-label="Controls" data-tab="forecast timing">
+      <div data-tab="forecast">
       <h2>Mode</h2>
       <div class="seg" role="group" aria-label="Mode">
         <button id="modeLive" aria-pressed="true">Live data</button><button id="modeWhat" aria-pressed="false">What-if</button>
@@ -291,24 +323,27 @@ footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
       <div class="lbl">Prior consecutive days with mean &gt; 150</div>
       <div class="pills" id="streak" role="group" aria-label="Prior days above 150"></div>
       <div class="note" id="inputNote"></div>
+      </div>
 
-      <hr>
-      <h2 style="margin-top:14px">Decision preferences</h2>
+      <div data-tab="timing">
+      <h2>Decision preferences</h2>
       <div class="lbl">Wrongly staying open costs <b id="cfnV"></b> × a needless closure</div>
       <input type="range" id="cfn" min="1" max="30" aria-label="Relative cost of a missed closure">
       <div class="lbl">Cost of each hour later <b id="lamV"></b> of baseline</div>
       <input type="range" id="lam" min="0" max="20" aria-label="Cost per hour of later announcement">
+      <div class="note">Higher cost of a missed closure moves the best time earlier; a higher cost of waiting does the same. The chart and the backtest on the right follow these two sliders.</div>
+      </div>
     </aside>
 
     <main class="stack">
-      <section class="glass" id="overview">
+      <section class="glass" id="overview" data-tab="overview">
         <h2><span id="ovTitle">Malaysia</span> · outlook for tomorrow morning <small id="ovSub"></small></h2>
         <div class="hero" id="hero"></div>
         <div class="tablewrap" style="margin-top:16px"><table id="stTable"></table></div>
         <div class="note" id="ovNote"></div>
       </section>
 
-      <section class="glass" id="xcPanel">
+      <section class="glass" id="xcPanel" data-tab="check">
         <h2>Data check · <span id="xcScope">Malaysia</span> <small>is every DOE report backed by an independent source?</small></h2>
         <div class="hero" id="xcHero"></div>
         <div class="flist" id="xcList"></div>
@@ -316,52 +351,58 @@ footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
         <div class="note" id="xcNote"></div>
       </section>
 
-      <section class="glass verdict" id="verdict" aria-live="polite">
+      <section class="glass verdict" id="verdict" aria-live="polite" data-tab="forecast">
         <div class="ring"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="50" fill="none" stroke="var(--grid)" stroke-width="11"/><circle id="ringArc" cx="60" cy="60" r="50" fill="none" stroke="var(--vc)" stroke-width="11" stroke-linecap="round" stroke-dasharray="314" stroke-dashoffset="314" style="transition:stroke-dashoffset .6s cubic-bezier(.2,.8,.2,1),stroke .3s"/></svg>
           <div class="c"><b id="ringV">0%</b><span>closure risk</span></div></div>
         <div><div class="vt" id="vt"></div><div class="vh" id="vh"></div><p class="vp" id="vp"></p></div>
       </section>
 
-      <section class="kpis" id="kpis"></section>
+      <section class="kpis" id="kpis" data-tab="forecast"></section>
 
-      <section class="glass" id="xcStation">
+      <section class="glass" id="xcStation" data-tab="check">
         <h2>Independent check · <span id="xcsName"></span> <small>DOE vs Open-Meteo, last 72 h</small></h2>
         <div class="xcs"><div><svg class="chart" id="xcChart" viewBox="0 0 520 230"></svg><div class="legend" id="xcLeg"></div></div><div class="xfacts" id="xcFacts"></div></div>
         <div class="note" id="xcsNote"></div>
       </section>
 
-      <section class="glass" id="closPanel">
+      <section class="glass" id="closPanel" data-tab="schools">
         <h2>School closures on record · <span id="closScope">Malaysia</span> <small>dates schools closed or switched to PdPR, from news and official announcements</small></h2>
         <div class="hero" id="closHero"></div>
         <div class="flist" id="closList"></div>
         <div class="note" id="closNote"></div>
       </section>
 
-      <section class="glass" id="schPanel"><h2>Schools impacted · <span id="schTitle"></span></h2><div class="sch" id="sch"></div><div class="note" id="schNote"></div></section>
+      <section class="glass" id="schPanel" data-tab="schools"><h2>Schools impacted · <span id="schTitle"></span></h2><div class="sch" id="sch"></div><div class="note" id="schNote"></div></section>
 
-      <section class="glass">
+      <section class="glass" data-tab="forecast">
         <h2>Three scenarios for tomorrow morning</h2>
         <div class="scen" id="scen"></div>
         <div class="bar" id="stack" role="img" aria-label="Scenario probability split"></div>
         <div class="legend" id="stackLeg"></div>
       </section>
 
-      <div class="row2">
+      <div class="row2" data-tab="forecast">
         <section class="glass"><h2>Today's trend → tomorrow 7 AM</h2><svg class="chart" id="trend" viewBox="0 0 520 280"></svg>
           <div class="note" id="trendNote"></div></section>
-        <section class="glass"><h2>Best announcement time</h2><svg class="chart" id="timing" viewBox="0 0 520 280"></svg>
-          <div class="note" id="timingNote"></div></section>
-      </div>
-
-      <div class="row2">
-        <section class="glass"><h2>Backtest by announcement time</h2><div class="tablewrap"><div id="bt"></div></div>
-          <div class="note" id="btNote"></div></section>
         <section class="glass"><h2 id="climH">Seasonality</h2><svg class="chart" id="clim" viewBox="0 0 520 190"></svg>
           <h2 style="margin-top:14px">Last 24 hours · API by hour</h2><svg class="chart" id="spark" viewBox="0 0 520 110"></svg></section>
       </div>
+
+      <div class="row2" data-tab="timing">
+        <section class="glass"><h2>Best announcement time</h2><svg class="chart" id="timing" viewBox="0 0 520 280"></svg>
+          <div class="note" id="timingNote"></div></section>
+        <section class="glass"><h2>Backtest by announcement time</h2><div class="tablewrap"><div id="bt"></div></div>
+          <div class="note" id="btNote"></div></section>
+      </div>
+
+      <section class="glass" id="anPanel" data-tab="analysis">
+        <h2>Analysis <small>what the data and the model say, with the full written notes</small></h2>
+        <div class="acards" id="anCards"></div>
+        <div class="note" id="anNote"></div>
+      </section>
     </main>
   </div>
-  <footer id="foot"></footer>
+  <footer id="foot" data-tab="analysis"></footer>
 </div>
 <div class="tip" id="tip"></div>
 <div class="sheetbk" id="sheetBk"></div>
@@ -571,12 +612,27 @@ function resolveArea(){
   if (best) return best.a.key;
   const list = areasOf(S.state); return (list.find(a => a.key === "WP Kuala Lumpur|Cheras") || list[0]).key;
 }
+const TABS = ["overview", "forecast", "schools", "timing", "check", "analysis"];
+S.tab = "overview";
+function syncHash(){
+  const h = [S.state ? encodeURIComponent(S.state) : "", S.tab !== "overview" ? S.tab : ""].filter((x, i) => i === 0 ? true : x).join("/").replace(/\/$/, "");
+  try{ history.replaceState(null, "", h && h !== "/" ? "#" + h : location.pathname + location.search); }catch(e){}
+}
+function setTab(t, scroll){
+  S.tab = TABS.includes(t) ? t : "overview";
+  document.querySelectorAll("[data-tab]").forEach(e => { e.hidden = !e.dataset.tab.split(" ").includes(S.tab); });
+  document.querySelectorAll("#tabs button").forEach(b => { const on = b.dataset.t === S.tab; b.setAttribute("aria-selected", on); b.tabIndex = on ? 0 : -1; if (on && scroll) try{ b.scrollIntoView({block: "nearest", inline: "center"}); }catch(e){} });
+  $("tabbody").classList.toggle("solo", !(S.tab === "forecast" || S.tab === "timing"));
+  $("tabbody").setAttribute("aria-labelledby", "tab-" + S.tab);
+  syncHash();
+  if (scroll){ const top = $("tabs").getBoundingClientRect().top + scrollY - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--stk")) || 8) - 4; if (top < scrollY) scrollTo({top: Math.max(0, top)}); }
+}
+function stickyOffset(){ document.documentElement.style.setProperty("--stk", (isDesk() ? $("fbar").offsetHeight + 20 : 8) + "px"); }
 function selectState(st){
-  S.state = st || ""; S.pick = null; closeSheet();
-  try{ history.replaceState(null, "", S.state ? "#" + encodeURIComponent(S.state) : location.pathname + location.search); }catch(e){}
+  S.state = st || ""; S.pick = null; closeSheet(); syncHash();
   render();
 }
-function selectStation(key){ S.pick = key; S.state = AREA[key].state; render(); }
+function selectStation(key){ S.pick = key; S.state = AREA[key].state; syncHash(); render(); }
 function savePrefs(){ store.set("hs.prefs", JSON.stringify({cfn: S.cfn, lam: S.lam})); }
 
 /* ---- state filter: dropdown on desktop, bottom sheet opened from the round button on phones ---- */
@@ -645,7 +701,7 @@ function buildControls(){
   $("themeBtn").onclick = () => { const r = document.documentElement; const dark = (r.dataset.theme || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")) === "dark";
     r.dataset.theme = dark ? "light" : "dark"; store.set("hs.theme", r.dataset.theme); render(); };
   const th = store.get("hs.theme"); if (th) document.documentElement.dataset.theme = th;
-  const h = decodeURIComponent((location.hash || "").slice(1)); if (M.states.includes(h)) S.state = h;      // shareable link: /#Johor
+  const hp = decodeURIComponent((location.hash || "").slice(1)).split("/"); if (M.states.includes(hp[0])) S.state = hp[0]; if (TABS.includes(hp[hp.length - 1])) S.tab = hp[hp.length - 1];      // shareable link: /#Johor or /#Johor/forecast
 }
 function setMode(m){
   if (m === "live" && !LIVE) return;
@@ -736,7 +792,7 @@ function render(){
   $("stack").innerHTML = ok ? ["best","base","worst"].map(k => `<i style="width:${P[k] * 100}%;background:${SCN[k].c}"></i>`).join("") : "";
   $("stackLeg").innerHTML = ok ? ["best","base","worst"].map(k => `<span><i style="background:${SCN[k].c}"></i>${SCN[k].name.split(" ·")[0]} ${pct(P[k])}</span>`).join("") : "";
 
-  const tot = scopeTotals(); drawSky(tot); drawOverview(tot); drawXcPanel(); drawClosures(); drawXcStation(P, thr, ok); drawTrend(P, f, ok); drawTiming(T); drawTable(T); drawClim(area); drawSpark(f);
+  const tot = scopeTotals(); drawSky(tot); drawMini(); drawOverview(tot); drawXcPanel(); drawClosures(); drawAnalysis(); drawXcStation(P, thr, ok); drawTrend(P, f, ok); drawTiming(T); drawTable(T); drawClim(area); drawSpark(f);
   $("timingNote").textContent = T.bestH ? `★ ${hl(T.bestH)} minimises total expected cost at your preferences (missed closure = ${S.cfn}× needless closure; each hour later = ${S.lam}% of baseline). Click a bar to explore that hour in What-if.` : "No closure events in the hold-out period; timing cannot be ranked.";
   $("trendNote").textContent = ok ? `Dashed fan = model's 10–90% range for tomorrow's 7 AM reading (median ${Math.round(P.q[1])}).` : "";
 }
@@ -748,6 +804,10 @@ const SKY = {dark:[["#0a2233","#12384a"],["#2a281c","#3a3420"],["#3d2414","#5c3a
 const isDark = () => (document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark")) === "dark";
 let HAZE = 0;
 function latestApi(k){ const v = LIVE.areas[k]; if (!v) return null; for (let i = v.length - 1; i >= 0; i--) if (v[i] != null) return v[i]; return null; }
+function drawMini(){
+  const bc = $("sky").style.getPropertyValue("--bc"); if (bc) $("skyMini").style.setProperty("--bc", bc); else $("skyMini").style.removeProperty("--bc");
+  $("skyMiniB").textContent = $("bandName").textContent; $("skyMiniT").textContent = $("bandSub").textContent; $("skyMiniW").textContent = ($("skyEy").textContent.split(" · ")[0]) + " · " + $("skyTime").textContent;
+}
 function drawSky(tot){
   const sky = $("sky"), scope = S.state || "Malaysia";
   $("skyEy").textContent = `${scope} · haze right now`;
@@ -773,7 +833,7 @@ function drawSky(tot){
   const tiles = S.state ? rows.map(r => ({k: r.a.key, name: r.a.name, v: r.v, sel: r.a.key === S.area}))
     : M.states.map(st => ({k: st, name: st, v: ST[st].apiMax, sel: false})).filter(t => t.v != null).sort((x, y) => y.v - x.v);
   $("chips").innerHTML = tiles.map(t => `<div class="chip" data-k="${t.k}" style="--c:${band(t.v)[2]};${t.sel ? "outline:2px solid var(--accent)" : ""}" title="${band(t.v)[1]}"><b>${t.v}</b><span>${t.name}</span></div>`).join("");
-  $("chips").querySelectorAll(".chip").forEach(c => c.onclick = () => S.state ? selectStation(c.dataset.k) : selectState(c.dataset.k));
+  $("chips").querySelectorAll(".chip").forEach(c => c.onclick = () => { if (S.state){ selectStation(c.dataset.k); setTab("forecast", true); } else selectState(c.dataset.k); });
   startParticles();
 }
 /* drifting haze particles: density follows regional intensity; static when reduced motion is requested */
@@ -826,7 +886,7 @@ function drawOverview(tot){
   $("hero").innerHTML = Hk.map((k, i) => `<div class="kpi"><span>${k[0]}</span><b style="${i === 0 && tot.risk ? "color:var(--bad)" : ""}">${k[1]}</b><em>${k[2]}</em></div>`).join("");
   $("stTable").className = S.state ? "stn" : "nat";
   $("stTable").innerHTML = head + `<tbody>${body}</tbody>`;
-  $("stTable").querySelectorAll("tr.row").forEach(r => r.onclick = () => S.state ? selectStation(r.dataset.k) : selectState(r.dataset.k));
+  $("stTable").querySelectorAll("tr.row").forEach(r => r.onclick = () => { if (S.state){ selectStation(r.dataset.k); setTab("forecast", true); } else selectState(r.dataset.k); });
   $("ovNote").textContent = S.state ? "Click a station to open it below. Closure = chance that the next-day closure triggers are met at that station."
     : "Click a state to open its stations. A state's closure chance is its highest-risk station; 'Stns' = stations at risk / reporting; '# schools in area' = government primary + secondary schools in the state; 'Schools likely affected' = closure chance × those schools, summed over states.";
   $("overview").style.display = LIVE ? "" : "none";
@@ -857,6 +917,7 @@ function drawXcPanel(){
       <div class="when">${fmtT(f.start)} → ${fmtT(f.end).slice(-5)}<br>${f.hours} h${f.om != null ? ` · DOE ${f.doe} vs ≈${f.om}` : ""}</div></div>`; }).join("")
     + (all.length > 8 ? `<button class="btn" id="xcMore" style="margin-top:2px">${S.xcAll ? "Show fewer" : `Show all ${all.length} flagged reports`}</button>` : "")
     : `<div class="frow" style="--c:var(--ok);cursor:default"><span></span><div><div class="ti">No flagged reports in ${scope}</div><div class="sub2">Every station in scope is consistent with the independent source over the last 5 days.</div></div></div>`);
+  const nAct = all.filter(f => isLiveFlag(f) && f.severity === "critical").length; $("tbCheck").hidden = !nAct; $("tbCheck").textContent = nAct; $("tbCheck").title = nAct + " closure-level reading(s) not confirmed by the independent source";
   $("xcList").querySelectorAll(".frow[data-k]").forEach(r => { r.onclick = () => selectStation(r.dataset.k); r.onkeydown = e => { if (e.key === "Enter") selectStation(r.dataset.k); }; });
   const more = $("xcMore"); if (more) more.onclick = () => { S.xcAll = !S.xcAll; drawXcPanel(); };
   // alert banner: closure-level readings that are not corroborated, still active
@@ -1040,6 +1101,27 @@ function drawClosures(){
   const more = $("closMore"); if (more) more.onclick = () => { S.closAll = !S.closAll; drawClosures(); };
   $("closNote").textContent = "Not a complete history: only announcements that could be found are listed, each with its source. “Source read” = the page was opened and the dates checked; “verify” = taken from a news-search summary, so open the link before relying on it. Closure decisions are made per state or district by KPM and state education departments (rule since Oct 2026: API above 180, or above 150 for three days); this list is what was announced, not what the model predicts.";
 }
+let DEC = null;
+async function fetchDecisions(){
+  try{ const r = await fetch("decisions.json", {cache: "no-cache"}); if (r.ok){ const j = await r.json(); if (j && j.summary) return j; } }catch(e){ /* card falls back to the link */ }
+  return null;
+}
+const RPT = "https://github.com/booluckgmie/hazeshaman/blob/main/docs/analysis/";
+function drawAnalysis(){
+  if (!$("anCards")) return;
+  const bs = AH.map(H => M.backtest[H] && M.backtest[H].metrics ? M.backtest[H].metrics.close.bss : null).filter(v => v != null);
+  const T = timingCosts(), bo = M.backtest_om ? AH.map(H => M.backtest_om[H] && M.backtest_om[H].metrics ? M.backtest_om[H].metrics.close.bss : null).filter(v => v != null) : [];
+  const g = {A: 0, B: 0, C: 0}; if (XC) for (const st of Object.values(XC.stations)) if (g[st.grade] != null) g[st.grade]++;
+  const sm = DEC && DEC.summary, rows = [];
+  rows.push(["Model skill", bs.length ? `${Math.round(Math.min(...bs) * 100)}–${Math.round(Math.max(...bs) * 100)}%` : "–", `Brier skill over always predicting the base rate, 3–9 PM decision hours, on days the model never saw (from ${M.meta.test_from}). On days already above API 100 the ranking AUC is 0.93–0.96.`, "02-model-and-backtest.md", "How the model works and how it was tested"]);
+  rows.push(["Best time to announce", T.bestH != null ? hl(T.bestH) : "–", `Waiting adds skill but costs families time. With your two sliders the cheapest hour is ${T.bestH != null ? hl(T.bestH) : "–"}; an 8 PM re-check keeps most of the late gain. Change the sliders in the Announce time tab.`, "03-announcement-timing.md", "Scenarios, trade-off and protocol"]);
+  rows.push(["Second source (Open-Meteo)", XC ? `${g.A} · ${g.B} · ${g.C}` : "–", `Stations graded A · B · C by how well DOE agrees with an independent air-quality model. ${XC && XC.summary ? XC.summary.flagged + " stations flagged in the last 5 days." : ""} ${bo.length ? "Used alone, Open-Meteo reaches " + Math.round(Math.min(...bo) * 100) + "–" + Math.round(Math.max(...bo) * 100) + "% skill, so it is a check, not a replacement." : ""}`, "04-openmeteo-crosscheck.md", "Method, flags, grades, Sabah and Sarawak"]);
+  rows.push(["Closure decisions so far", sm && sm.evaluated ? `${Math.round(sm.justified / sm.evaluated * 100)}%` : "–", sm ? `of ${sm.evaluated} recorded closure state-days met the trigger on the day or the evening before. Several states qualified 1–2 school days before they closed; the model replay called more of the qualifying days than the recorded closures did.` : "Recorded closures compared with the DOE readings they were made against.", "06-closure-decisions.md", "Were the decisions the best ones?"]);
+  rows.push(["Schools in scope", fmtN(Object.values(SCH).reduce((n, c) => n + c.schools, 0)), `government schools, ${fmtN(Object.values(SCH).reduce((n, c) => n + c.students, 0))} students and ${fmtN(Object.values(SCH).reduce((n, c) => n + c.teachers, 0))} teachers, attached at state level from OpenDOSM / data.gov.my.`, "05-school-impact.md", "How impact is counted"]);
+  rows.push(["Data and limits", `${fmtN(M.meta.n_days)} days`, `of DOE history behind the model (${M.meta.start} → ${M.meta.end}), with a permanent gap Nov 2024–Jun 2025 and East Malaysia only from Sep 2023. Bad readings are removed before use.`, "01-data-sources-and-quality.md", "Sources, cleaning and known gaps"]);
+  $("anCards").innerHTML = rows.map(r => `<div class="acard"><span class="k">${r[0]}</span><b class="big">${r[1]}</b><p>${r[2]}</p><a href="${RPT}${r[3]}" target="_blank" rel="noopener noreferrer">${r[4]} →</a></div>`).join("");
+  $("anNote").innerHTML = `Full written notes are in <a href="${RPT}README.md" target="_blank" rel="noopener noreferrer">docs/analysis</a> in the repository. Numbers on these cards come from the same files the dashboard runs on, so they update when the model is rebuilt.`;
+}
 async function fetchXc(){
   for (const u of ["api/xcheck", "xcheck.json"]){
     try{ const r = await fetch(u + "?t=" + Date.now(), {cache: "no-store"}); if (!r.ok) continue; const j = await r.json(); if (j && j.stations && j.end) return j; }catch(e){ /* try next */ }
@@ -1047,7 +1129,7 @@ async function fetchXc(){
   return null;
 }
 async function loadLive(){
-  const xp = fetchXc(); fetchClosures().then(c => { if (c){ CL = c; render(); } });
+  const xp = fetchXc(); fetchClosures().then(c => { if (c){ CL = c; render(); } }); fetchDecisions().then(d => { if (d){ DEC = d; drawAnalysis(); } });
   try{ LIVE = await fetchLive(); LIVE_ERR = null; }
   catch(e){ if (!LIVE) LIVE_ERR = e.message || "network error"; }
   const x = await xp; if (x) XC = x;
@@ -1062,7 +1144,10 @@ if (M.meta.synthetic){ const b = document.createElement("span"); b.className = "
 const dq = Object.entries(M.meta.quality || {}).map(([k, v]) => `${k}: ${Object.entries(v).filter(([, n]) => n).map(([a, n]) => `${fmtN(n)} ${a.replace(/_/g, " ")}`).join(", ") || "clean"}`).join(" · ");
 $("foot").innerHTML = `<b>How it works.</b> For every station and each hour from 12:00 to 23:00, logistic models learn P(7 AM API &gt; 100 / &gt; 150), P(API &gt; 180 during school hours tomorrow) and P(tomorrow's mean &gt; 150) from today's 8 AM, noon, 3-hour trend and latest readings, yesterday's mean, the over-150 streak and season, plus a state effect. Closure risk = P(&gt;180) + remaining × [streak ≥ 2] × P(mean &gt; 150), mirroring KPM's triggers (API &gt; 180, or &gt; 150 for three days). The live view recomputes every station whenever a new hourly DOE report lands (the page re-checks every 5 minutes). Readings stamped after the current Malaysia hour, non-numeric flags and values outside 1–500 are discarded before use. The best announcement time minimises backtested wrong-call cost plus the lateness penalty you set. Schools: government primary + secondary schools, students and teachers by state from data.gov.my (OpenDOSM catalogue); every DOE station carries its state, so impact is counted state by state. ${dq ? "<br>Data quality at build — " + dq + "." : ""} Stations with short history (Sabah, Sarawak, Kelantan and Labuan have DOE data only from Sep 2023) carry wider uncertainty. Decision support only: confirm with the official APIMS reading and MetMalaysia forecast. Built ${M.meta.built}.`;
 buildControls();
-render();
+$("tabs").addEventListener("click", e => { const b = e.target.closest("button[data-t]"); if (b) setTab(b.dataset.t, true); });
+$("tabs").addEventListener("keydown", e => { if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return; const i = TABS.indexOf(S.tab), n = TABS[(i + (e.key === "ArrowRight" ? 1 : TABS.length - 1)) % TABS.length]; setTab(n, true); $("tab-" + n).focus(); e.preventDefault(); });
+addEventListener("resize", stickyOffset); stickyOffset();
+render(); setTab(S.tab);
 loadLive().then(() => { if (LIVE){ S.mode = "live"; render(); } });
 setInterval(loadLive, 5 * 60 * 1000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) loadLive(); });
