@@ -3,7 +3,7 @@
 ## The record
 `data/closures.csv` lists dates and areas where schools closed or switched to home-based learning (PdPR), from news and education-department announcements, one row per date and area
 (`date, state, area, action, pdpr, schools, students, basis, verified, source_title, source_url, note`). `python -m hazeshaman.closures` validates it and writes `docs/closures.json` for the dashboard.
-It holds 61 rows; `verified = read` means the source page was opened and checked, `summary` means the row came from a news-search summary and should be opened before it is relied on.
+It holds 63 rows; `verified = read` means the source page was opened and checked, `summary` means the row came from a news-search summary and should be opened before it is relied on.
 It is **not a complete history** (closure days on record by year: 2015: 1, 2019: 5, 2026: 12) and is extended daily from the 2026 announcements.
 
 ## Method (`python -m hazeshaman.decisions`)
@@ -11,7 +11,7 @@ Trigger used: KPM rule from 9 Oct 2026 (any reading above **180**, or above **15
 "The evening before" uses 17:00-19:00 readings, when next-day decisions are usually announced. Stations are matched to the closed districts by name where possible, otherwise the whole state is used.
 
 ## 1. Did closures follow the readings?
-43 closure state-days had DOE data (2015 and Sarawak 2019 are outside the archive; 14 Oct 2026 was unfinished). **32 of 43 (74%) met the trigger on the day or the evening before.**
+45 closure state-days had DOE data (2015 and Sarawak 2019 are outside the archive; 14 Oct 2026 was unfinished). **32 of 45 (71%) met the trigger on the day or the evening before.**
 
 | Verdict | State-days |
 |---|---|
@@ -19,8 +19,8 @@ Trigger used: KPM rule from 9 Oct 2026 (any reading above **180**, or above **15
 | met the evening before only | 13 |
 | met on the day only | 10 |
 | met (day and evening before) | 9 |
-| below trigger (150-180) | 7 |
-| far below trigger (<150) | 4 |
+| below trigger (150-180) | 8 |
+| far below trigger (<150) | 5 |
 
 ## 2. Timing in the Oct 2026 episode
 First day with a qualifying reading versus the first recorded closure (school days late):
@@ -55,19 +55,21 @@ Closed although the strict trigger was not met (precaution, persistence or parti
 | Date | State | Peak (school hours) | Evening before |
 |---|---|---|---|
 | 2026-10-13 | Melaka | 161.0 | 161.0 |
+| 2026-10-13 | Negeri Sembilan | 155.0 | 166.0 |
 | 2026-10-09 | Pahang | 170.0 | 178.0 |
 | 2026-10-12 | Selangor | 151.0 | 80.0 |
 | 2026-10-13 | Selangor | 126.0 | 153.0 |
 | 2026-10-12 | WP Kuala Lumpur | 129.0 | 132.0 |
+| 2026-10-13 | WP Putrajaya | 146.0 | 155.0 |
 
-With the looser reading of the three-day rule (daily peak above 150 instead of daily mean) the counts are 8 qualifying-but-open and 2 closed-without-trigger.
+With the looser reading of the three-day rule (daily peak above 150 instead of daily mean) the counts are 8 qualifying-but-open and 4 closed-without-trigger.
 
 ## 4. The dashboard's model replayed
 At 18:00 on each evening 6-13 Oct 2026 (96 state-evenings), at the default 8:1 cost ratio (trigger 0.20), against whether the trigger was actually met the next day (state level):
 
 | Decision maker | Trigger days called | Trigger days missed | Calls without a trigger | Recall | Precision |
 |---|---|---|---|---|---|
-| Recorded closures | 6 | 8 | 9 | 43% | 40% |
+| Recorded closures | 6 | 8 | 11 | 43% | 35% |
 | Model | 11 | 3 | 12 | 79% | 48% |
 
 ## Verdict
@@ -103,8 +105,10 @@ That is defensible but not the optimum the cost model suggests; the model would 
 | 2026-10-12 | WP Kuala Lumpur | Bangsar/Pudu | 129.0 | 132.0 | far below trigger (<150) | read |
 | 2026-10-13 | Johor | All schools | 181.0 | 177.0 | met on the day only | read |
 | 2026-10-13 | Melaka | All MOE institutions | 161.0 | 161.0 | below trigger (150-180) | read |
+| 2026-10-13 | Negeri Sembilan | All schools | 155.0 | 166.0 | below trigger (150-180) | read |
 | 2026-10-13 | Pahang | Rompin, Kuantan | 162.0 | 161.0 | met the evening before only | read |
 | 2026-10-13 | Selangor | Hulu Langat, Petaling Perdana, Kuala Langat, Sep | 126.0 | 153.0 | far below trigger (<150) | read |
+| 2026-10-13 | WP Putrajaya | All schools | 146.0 | 155.0 | far below trigger (<150) | read |
 | 2026-10-14 | Johor | All schools | – | – | no data | read |
 | 2026-10-14 | Melaka | All schools | – | – | no data | read |
 | 2026-10-14 | Negeri Sembilan | All schools | – | – | no data | read |

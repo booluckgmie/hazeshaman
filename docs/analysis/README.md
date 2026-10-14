@@ -14,7 +14,7 @@ Written notes behind the dashboard's **Analysis** tab. Numbers are generated fro
 ## Headlines
 * Brier skill versus the base rate: **66% at 3 PM to 72% at 9 PM**; defaults put the cheapest announcement at **3 PM**.
 * Sarawak and Sabah DOE data agree with an independent model about as well as the peninsula (median correlation 0.87 and 0.78 against 0.76); 8 stations are grade C.
-* 32 of 43 recorded closure state-days met the KPM trigger on the day or the evening before; closures trailed the trigger by 1-2 school days in five states at the start of the Oct 2026 episode.
+* 32 of 45 recorded closure state-days met the KPM trigger on the day or the evening before; closures trailed the trigger by 1-2 school days in five states at the start of the Oct 2026 episode.
 
 ## Regenerate
 ```
