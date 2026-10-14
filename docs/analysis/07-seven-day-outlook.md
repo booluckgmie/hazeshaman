@@ -34,13 +34,6 @@ Inputs: ln daily mean on *t*, *t-1* and *t-2*, the mean of *t-3 ... t-6*, ln of 
 * The **closure-level odds** are only dependable for the first day or two; by day +5 to +7 the skill is close to the base rate. The dashboard labels each day *solid*, *fair* or *low* confidence from the level skill and says so in words.
 * The 80% ranges hold the outcome 70%-75% of the time in the test, a little less than 80% (the test period includes the hazy 2026 season, which the earlier years did not prepare it for). Treat them as slightly optimistic.
 
-## Rule check on each projected day
-Each day card lists the **two days before** (observed for the first days, projected after that) and a tag that applies KPM's criteria, *peak above 180 in school hours, or the third straight day above 150*, in the same form as the one-day model:
-
-`chance of closure = P(peak > 180) + (1 - P(peak > 180)) x P(the two earlier days above 150) x P(this day's mean above 150)`
-
-The tag is **Close / PdPR** at or above the dashboard's cost-optimal trigger, **Watch** at half of it, otherwise **Open**. For projected days the two earlier days are treated as independent, so the streak term can understate a long haze run; for the first days, where the two earlier days are observed, it is exact.
-
 ## What it cannot do
 * It does not know about **weather or fires**: a wind shift or a new hotspot cluster changes the week and the model cannot see it. Use the CAMS-based second source and MetMalaysia for that.
 * Skill is measured across all stations and days, most of them clear. Haze episodes are few, so the numbers for hazy days are noisier than the headline.

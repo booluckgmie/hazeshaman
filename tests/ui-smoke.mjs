@@ -65,8 +65,6 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); 
 { const p = await b.newPage({ viewport: { width: 1300, height: 1000 } }); const errs = []; p.on('pageerror', e => errs.push(String(e)));
   await p.goto(`${BASE}/#Johor/outlook`); await p.reload(); await p.waitForSelector('#bandName:not(:empty)', { state: 'attached' }); await p.waitForTimeout(3500);
   ok((await p.evaluate(() => document.querySelectorAll('#outDays .od').length)) === 7, 'outlook: seven projected days');
-  ok(await p.evaluate(() => [...document.querySelectorAll('#outDays .od')].every(d => /2 days before/.test(d.textContent) && /(Close \/ PdPR|Watch|Open)/.test(d.querySelector('.rl')?.textContent || ''))), 'outlook: each day lists the two days before and a rule-check tag');
-  ok(await p.evaluate(() => { const f = document.querySelector('#outDays .od .pv'); return !!f && f.querySelectorAll('.act').length === 2; }), 'outlook: the first projected day uses observed readings for the two days before');
   ok((await p.evaluate(() => document.querySelectorAll('#outChart rect').length)) >= 10 && (await p.evaluate(() => document.querySelectorAll('#outChart path').length)) >= 3, 'outlook chart: observed bars and projection bands drawn');
   ok(await p.evaluate(() => [...document.querySelectorAll('#outDays .od')].every(d => /\d+%|<0\.1%/.test(d.textContent) && /confidence/.test(d.textContent))), 'outlook: each day shows odds and a confidence label');
   ok(await p.evaluate(() => { const m = [...document.querySelectorAll('#outDays .od b')].map(b => +b.textContent); return m.length === 7 && m.every(v => v > 5 && v < 500); }), 'outlook: projected levels are plausible');
