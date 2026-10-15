@@ -31,6 +31,7 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); 
   const th = await p.evaluate(() => [...document.querySelectorAll('#stTable th')].map(t => t.textContent)); ok(th.includes('# schools in area') && !th.includes('Exp. schools'), 'Malaysia table has "# schools in area": ' + th.join('|'));
   await p.click('#tab-schools'); await p.waitForTimeout(200);
   ok((await p.evaluate(() => getComputedStyle(document.getElementById('schPanel')).display)) !== 'none' && (await p.textContent('#sch')).includes('10,238'), 'Schools tab shows national totals for Malaysia');
+  ok(await p.evaluate(() => [...document.querySelectorAll('#stTable tr.row')].every(r => !(r.textContent.includes('Close / PdPR') && r.textContent.includes('not cleared')))), 'not-cleared chip never sits next to a Close / PdPR status');
   ok(errs.length === 0, 'no page errors ' + errs.join()); await p.close(); }
 // 3) phone: round button, sheet survives resize noise, closes on pick
 { const c = await b.newContext({ ...devices['iPhone 13'] }); const p = await c.newPage(); await p.goto(`${BASE}/`); await p.waitForSelector('#bandName:not(:empty)', { state: 'attached' }); await p.waitForTimeout(1500);

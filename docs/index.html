@@ -609,6 +609,24 @@ function computeRisk(T){
   for (const a of M.areas){ const f = LF[a.key]; if (!f || !f.ok) continue;
     const P = predict(Object.assign({}, S, f), a.state), thr = triggerFor(T, f.H); RISK[a.key] = {P, thr, c: classify(P, thr)}; }
 }
+/* "episode not cleared" (hazeshaman/lingering.py, analysis note 8): API still >= 150 at the evening announcement AND a school-hours reading >= 180 in the last 7 days.
+   Before 18:00 the latest two readings stand in for the 17-18h evening level. Context flag only: it was tuned on one episode (see note 8). */
+function lingerOf(key){
+  const v = LIVE && LIVE.areas[key]; if (!v) return null;
+  const N = LIVE.hours, end = Date.parse(LIVE.end + ":00Z"), at = i => end - (N - 1 - i) * 36e5, hr = i => new Date(at(i)).getUTCHours(), dy = i => Math.floor(at(i) / 864e5);
+  let last = -1; for (let i = N - 1; i >= 0; i--) if (v[i] != null){ last = i; break; }
+  if (last < 0) return null;
+  const d0 = dy(last), xs = [];
+  if (hr(last) >= 18){ for (let i = 0; i < N; i++) if (dy(i) === d0 && (hr(i) === 17 || hr(i) === 18) && v[i] != null) xs.push(v[i]); }
+  else for (let i = last; i >= 0 && xs.length < 2; i--) if (v[i] != null) xs.push(v[i]);
+  const lvl = xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null;
+  let pk = -1; for (let i = 0; i < N; i++){ const h = hr(i); if (h >= 6 && h <= 14 && v[i] != null && v[i] > pk) pk = v[i]; }
+  const sr = seriesOf(key); if (sr){ const di = d0 - Math.floor(sr.t0 / 864e5); for (const k of [5, 6]){ const x = sr.p[di - k]; if (x > pk) pk = x; } }
+  return {lvl, pk, on: lvl != null && lvl >= 150 && pk >= 180};
+}
+function lingerChip(lg, why){
+  return lg && lg.on ? `<span class="fchip" style="--c:var(--warn)" title="Episode not cleared: API about ${Math.round(lg.lvl)} at the evening announcement and a school-hours reading of ${Math.round(lg.pk)} in the last 7 days. Closures in Oct 2026 often followed this pattern even when the KPM trigger was not met.${why ? " " + why : ""}">↻ not cleared</span>` : "";
+}
 function stateSummary(){
   ST = {};
   for (const st of M.states){
@@ -623,6 +641,8 @@ function stateSummary(){
     }
     s.c = s.maxP < 0 ? "none" : s.risk ? "close" : s.watch ? "watch" : "ok";
     s.flags = flagsFor(st, true);
+    const lgs = rows.map(x => lingerOf(x.a.key)).filter(Boolean);
+    s.lg = lgs.length ? {on: lgs.some(x => x.lvl >= 150) && lgs.some(x => x.pk >= 180), lvl: Math.max(...lgs.map(x => x.lvl ?? 0)), pk: Math.max(...lgs.map(x => x.pk))} : null;
     ST[st] = s;
   }
 }
@@ -791,6 +811,8 @@ function render(){
   else v = {c:"var(--ok)", t:"Recommendation", h:"Open as normal", p:`Closure risk ${pct(P.close)}; 7 AM API expected around ${Math.round(P.q[1])} (80% range ${Math.round(P.q[0])}–${Math.round(P.q[2])}).`};
   if (ok && area.days < 365) v.p += ` ⚠ Only ${area.days} days of history for this station – wider uncertainty than the headline suggests.`;
   if (ok && P.extrap) v.p += " ⚠ Inputs are outside the range seen in training – indicative only.";
+  const lgv = ok && live ? lingerOf(S.area) : null;
+  if (lgv && lgv.on && P.close < thr) v.p += ` ↻ Episode not cleared: API is still about ${Math.round(lgv.lvl)} and reached ${Math.round(lgv.pk)} in school hours within the last 7 days. Authorities kept closing in this pattern in Oct 2026 even when the KPM trigger was not met (analysis note 8, tuned on one episode), so treat the open recommendation with extra caution.`;
   const act = flagsFor("", true).filter(f => f.key === S.area);
   if (ok && act.length) v.p += ` ⚠ Data check: ${act[0].msg}.`;
   $("verdict").style.setProperty("--vc", v.c); $("vt").textContent = `${area.name} · ${area.state} · ${v.t}`; $("vh").textContent = v.h; $("vp").textContent = v.p;
@@ -903,7 +925,7 @@ function drawOverview(tot){
     head = `<thead><tr><th>State</th><th>Status</th><th>Top station</th><th>Closure</th><th>7AM&gt;150</th><th>Stns</th><th># schools in area</th></tr></thead>`;
     body = Object.values(ST).sort((x, y) => y.maxP - x.maxP || x.st.localeCompare(y.st)).map(b => {
       const nd = b.maxP < 0, [col, lab] = STAT[b.c];
-      return `<tr class="row" data-k="${b.st}"><td>${b.st}</td><td><span class="tag" style="--c:${col}">${lab}</span>${flagChip(b.flags)}</td><td>${b.maxA || "–"}</td>
+      return `<tr class="row" data-k="${b.st}"><td>${b.st}</td><td><span class="tag" style="--c:${col}">${lab}</span>${b.c !== "close" ? lingerChip(b.lg) : ""}${flagChip(b.flags)}</td><td>${b.maxA || "–"}</td>
         <td>${nd ? "–" : pct(b.maxP)}<span class="mini" style="--c:${col}"><i style="width:${Math.max(0, b.maxP) * 100}%"></i></span></td><td>${nd ? "–" : pct(b.p150)}</td>
         <td>${nd ? "–" : b.risk + " / " + (b.n - b.nd)}</td><td>${fmtN(sch(b.st).schools)}</td></tr>`; }).join("");
   } else {
@@ -914,7 +936,7 @@ function drawOverview(tot){
     head = `<thead><tr><th>Station</th><th>Status</th><th>API now</th><th>Closure</th><th>7AM&gt;150</th><th>Data check</th></tr></thead>`;
     body = ST[S.state].rows.slice().sort((x, y) => (y.r ? y.r.P.close : -1) - (x.r ? x.r.P.close : -1)).map(x => {
       const cl = x.r ? x.r.c : "none", [col, lab] = STAT[cl];
-      return `<tr class="row ${x.a.key === S.area ? "sel" : ""}" data-k="${x.a.key}"><td>${x.a.name}</td><td><span class="tag" style="--c:${col}">${lab}</span></td>
+      return `<tr class="row ${x.a.key === S.area ? "sel" : ""}" data-k="${x.a.key}"><td>${x.a.name}</td><td><span class="tag" style="--c:${col}">${lab}</span>${cl !== "close" ? lingerChip(lingerOf(x.a.key)) : ""}</td>
         <td>${x.v ?? "–"}</td><td>${x.r ? pct(x.r.P.close) : "–"}<span class="mini" style="--c:${col}"><i style="width:${x.r ? x.r.P.close * 100 : 0}%"></i></span></td><td>${x.r ? pct(x.r.P.y150) : "–"}</td>
         <td>${gradeTag(x.a.key)}${flagChip(flagsFor(S.state, true).filter(f => f.key === x.a.key))}</td></tr>`; }).join("");
   }
@@ -922,8 +944,8 @@ function drawOverview(tot){
   $("stTable").className = S.state ? "stn" : "nat";
   $("stTable").innerHTML = head + `<tbody>${body}</tbody>`;
   $("stTable").querySelectorAll("tr.row").forEach(r => r.onclick = () => { if (S.state){ selectStation(r.dataset.k); setTab("forecast", true); } else selectState(r.dataset.k); });
-  $("ovNote").textContent = S.state ? "Click a station to open it below. Closure = chance that the next-day closure triggers are met at that station."
-    : "Click a state to open its stations. A state's closure chance is its highest-risk station; 'Stns' = stations at risk / reporting; '# schools in area' = government primary + secondary schools in the state; 'Schools likely affected' = closure chance × those schools, summed over states.";
+  $("ovNote").textContent = (S.state ? "↻ not cleared = API still 150+ at the evening announcement after a 180+ reading in the last 7 days (shown when the model does not already say close). " : "↻ not cleared = a station still at API 150+ after a 180+ reading in the last 7 days (shown when the model does not already say close). ") + (S.state ? "Click a station to open it below. Closure = chance that the next-day closure triggers are met at that station."
+    : "Click a state to open its stations. A state's closure chance is its highest-risk station; 'Stns' = stations at risk / reporting; '# schools in area' = government primary + secondary schools in the state; 'Schools likely affected' = closure chance × those schools, summed over states.");
   $("overview").style.display = LIVE ? "" : "none";
 }
 
