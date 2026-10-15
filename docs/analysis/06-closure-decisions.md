@@ -11,16 +11,16 @@ Trigger used: KPM rule from 9 Oct 2026 (any reading above **180**, or above **15
 "The evening before" uses 17:00-19:00 readings, when next-day decisions are usually announced. Stations are matched to the closed districts by name where possible, otherwise the whole state is used.
 
 ## 1. Did closures follow the readings?
-45 closure state-days had DOE data (2015 and Sarawak 2019 are outside the archive; 14 Oct 2026 was unfinished). **32 of 45 (71%) met the trigger on the day or the evening before.**
+52 closure state-days had DOE data (2015 and Sarawak 2019 are outside the archive; 14 Oct 2026 was unfinished). **34 of 52 (65%) met the trigger on the day or the evening before.**
 
 | Verdict | State-days |
 |---|---|
-| no data | 16 |
-| met the evening before only | 13 |
-| met on the day only | 10 |
+| met the evening before only | 14 |
+| below trigger (150-180) | 12 |
+| met on the day only | 11 |
+| no data | 9 |
 | met (day and evening before) | 9 |
-| below trigger (150-180) | 8 |
-| far below trigger (<150) | 5 |
+| far below trigger (<150) | 6 |
 
 ## 2. Timing in the Oct 2026 episode
 First day with a qualifying reading versus the first recorded closure (school days late):
@@ -43,10 +43,14 @@ Qualifying but no closure on record:
 
 | Date | State | Peak (school hours) | Evening before |
 |---|---|---|---|
+| 2026-10-15 | Johor | 188.0 | 184.0 |
+| 2026-10-15 | Melaka | 186.0 | 177.0 |
 | 2026-10-08 | Negeri Sembilan | 186.0 | 184.0 |
+| 2026-10-15 | Negeri Sembilan | 191.0 | 181.0 |
 | 2026-10-12 | Pahang | 162.0 | 158.0 |
 | 2026-10-09 | Perak | 183.0 | 160.0 |
 | 2026-10-08 | Selangor | 179.0 | 188.0 |
+| 2026-10-15 | Selangor | 194.0 | 183.0 |
 | 2026-10-08 | WP Kuala Lumpur | 175.0 | 186.0 |
 | 2026-10-08 | WP Putrajaya | 174.0 | 182.0 |
 
@@ -55,22 +59,27 @@ Closed although the strict trigger was not met (precaution, persistence or parti
 | Date | State | Peak (school hours) | Evening before |
 |---|---|---|---|
 | 2026-10-13 | Melaka | 161.0 | 161.0 |
+| 2026-10-14 | Melaka | 174.0 | 166.0 |
 | 2026-10-13 | Negeri Sembilan | 155.0 | 166.0 |
+| 2026-10-14 | Negeri Sembilan | 176.0 | 160.0 |
 | 2026-10-09 | Pahang | 170.0 | 178.0 |
+| 2026-10-14 | Sabah | 92.0 | 154.0 |
+| 2026-10-14 | Sarawak | 153.0 | 160.0 |
 | 2026-10-12 | Selangor | 151.0 | 80.0 |
 | 2026-10-13 | Selangor | 126.0 | 153.0 |
+| 2026-10-14 | Selangor | 177.0 | 158.0 |
 | 2026-10-12 | WP Kuala Lumpur | 129.0 | 132.0 |
 | 2026-10-13 | WP Putrajaya | 146.0 | 155.0 |
 
-With the looser reading of the three-day rule (daily peak above 150 instead of daily mean) the counts are 8 qualifying-but-open and 4 closed-without-trigger.
+With the looser reading of the three-day rule (daily peak above 150 instead of daily mean) the counts are 14 qualifying-but-open and 8 closed-without-trigger.
 
 ## 4. The dashboard's model replayed
 At 18:00 on each evening 6-13 Oct 2026 (96 state-evenings), at the default 8:1 cost ratio (trigger 0.20), against whether the trigger was actually met the next day (state level):
 
 | Decision maker | Trigger days called | Trigger days missed | Calls without a trigger | Recall | Precision |
 |---|---|---|---|---|---|
-| Recorded closures | 6 | 8 | 11 | 43% | 35% |
-| Model | 11 | 3 | 12 | 79% | 48% |
+| Recorded closures | 7 | 12 | 17 | 37% | 29% |
+| Model | 16 | 3 | 16 | 84% | 50% |
 
 ## Verdict
 Decisions were **mostly consistent with the rule**, and tended to trail it by one to two school days at the start of an episode before becoming more cautious (closing at 150-180 on persistence).
@@ -109,13 +118,13 @@ That is defensible but not the optimum the cost model suggests; the model would 
 | 2026-10-13 | Pahang | Rompin, Kuantan | 162.0 | 161.0 | met the evening before only | read |
 | 2026-10-13 | Selangor | Hulu Langat, Petaling Perdana, Kuala Langat, Sep | 126.0 | 153.0 | far below trigger (<150) | read |
 | 2026-10-13 | WP Putrajaya | All schools | 146.0 | 155.0 | far below trigger (<150) | read |
-| 2026-10-14 | Johor | All schools | – | – | no data | read |
-| 2026-10-14 | Melaka | All schools | – | – | no data | read |
-| 2026-10-14 | Negeri Sembilan | All schools | – | – | no data | read |
-| 2026-10-14 | Pahang | Kuantan, Pekan, Rompin | – | – | no data | read |
-| 2026-10-14 | Sabah | Tawau | – | – | no data | read |
-| 2026-10-14 | Sarawak | Serian, Sri Aman, Lubok Antu | – | – | no data | read |
-| 2026-10-14 | Selangor | Hulu Langat, Sepang | – | – | no data | read |
+| 2026-10-14 | Johor | All schools | 180.0 | 176.0 | met on the day only | read |
+| 2026-10-14 | Melaka | All schools | 174.0 | 166.0 | below trigger (150-180) | read |
+| 2026-10-14 | Negeri Sembilan | All schools | 176.0 | 160.0 | below trigger (150-180) | read |
+| 2026-10-14 | Pahang | Kuantan, Pekan, Rompin | 157.0 | 158.0 | met the evening before only | read |
+| 2026-10-14 | Sabah | Tawau | 92.0 | 154.0 | far below trigger (<150) | read |
+| 2026-10-14 | Sarawak | Serian, Sri Aman, Lubok Antu | 153.0 | 160.0 | below trigger (150-180) | read |
+| 2026-10-14 | Selangor | Hulu Langat, Sepang | 177.0 | 158.0 | below trigger (150-180) | read |
 
 ---
-_Generated by `python -m hazeshaman.report` on 2026-10-14 from the model built 2026-10-13 (data to 2026-10-13). Decision support only: confirm with the official APIMS reading, MetMalaysia and KPM._
+_Generated by `python -m hazeshaman.report` on 2026-10-15 from the model built 2026-10-15 (data to 2026-10-15). Decision support only: confirm with the official APIMS reading, MetMalaysia and KPM._
