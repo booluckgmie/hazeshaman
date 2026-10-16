@@ -8,7 +8,7 @@ import { extname, join, normalize } from 'node:path';
 const require = createRequire(import.meta.url);
 const root = new URL('..', import.meta.url).pathname;
 const cfg = JSON.parse(readFileSync(join(root, 'vercel.json'), 'utf8'));
-const handlers = { '/api/live': require('../api/live.js'), '/api/xcheck': require('../api/xcheck.js') };
+const handlers = { '/api/live': require('../api/live.js'), '/api/xcheck': require('../api/xcheck.js'), '/api/analytics': require('../api/analytics.js') };
 const port = Number(process.argv[2] || process.env.PORT || 3000);
 const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml', '.css': 'text/css', '.md': 'text/plain' };
 
