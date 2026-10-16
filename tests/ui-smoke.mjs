@@ -10,7 +10,7 @@ const b = await chromium.launch({ executablePath: process.env.CHROMIUM_PATH || u
 let fails = 0; const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); if (!c) fails++; };
 // 1) guide page
 { const p = await b.newPage({ viewport: { width: 1200, height: 900 } }); const bad = [];
-  p.on('response', r => r.status() >= 400 && bad.push(r.status() + ' ' + r.url()));
+  p.on('response', r => r.status() >= 400 && !r.url().includes('/_vercel/') && bad.push(r.status() + ' ' + r.url()));   // /_vercel/insights only exists on Vercel
   await p.goto(`${BASE}/guide`); await p.evaluate(() => document.querySelectorAll('img').forEach(i => i.loading = 'eager')); await p.waitForTimeout(1500);
   ok(await p.evaluate(() => [...document.images].length === 9 && [...document.images].every(i => i.complete && i.naturalWidth > 0)), 'guide: 9 images load'); ok(bad.length === 0, 'guide: no 4xx ' + bad.join()); await p.close(); }
 // 2) filter behaviour (desktop): keyboard, deep link, scoping
@@ -96,5 +96,17 @@ let fails = 0; const ok = (c, m) => { console.log((c ? 'PASS ' : 'FAIL ') + m); 
   const facts = await p.textContent('#xcFacts'); ok(/Closure chance · DOE feed/.test(facts) && /Open-Meteo only/.test(facts), 'second-opinion closure chances shown');
   ok(await p.evaluate(() => [...document.querySelectorAll('#stTable td .gr')].length > 0), 'station table shows reliability grades');
   const cmp = await p.textContent('#xcCmp'); ok(/Open-Meteo alone/.test(cmp), 'independent-source skill comparison shown');
+  ok(errs.length === 0, 'no page errors ' + errs.join()); await p.close(); }
+// 9) site usage panel (Analysis tab): setup note when not connected, numbers (escaped) when connected
+{ const p = await b.newPage({ viewport: { width: 1200, height: 900 } }); const errs = []; p.on('pageerror', e => errs.push(String(e)));
+  await p.goto(`${BASE}/#/analysis`); await p.waitForSelector('#bandName:not(:empty)', { state: 'attached' }); await p.click('#tab-analysis'); await p.waitForTimeout(1200);
+  ok(await p.isVisible('#usagePanel') && /VERCEL_ANALYTICS_TOKEN/.test(await p.textContent('#usageNote')), 'usage panel explains setup when analytics is not connected');
+  ok(await p.evaluate(() => !!document.querySelector('script[src="/_vercel/insights/script.js"]')), 'page loads the Vercel Web Analytics script');
+  const fake = { connected: true, days: 30, since: '2026-09-16', until: '2026-10-16', daily: [{ key: '2026-10-14', views: 10, visitors: 4 }, { key: '2026-10-15', views: 25, visitors: 9 }],
+    pages: [{ key: '/', views: 30, visitors: 10 }, { key: '/<img src=x onerror=window.__xss=1>', views: 5, visitors: 2 }], countries: [{ key: 'MY', views: 33, visitors: 11 }], devices: [{ key: 'mobile', views: 30, visitors: 9 }], referrers: [{ key: '', views: 20, visitors: 7 }], browsers: [], totals: { views: 35, visitors: 13 } };
+  await p.route('**/api/analytics', r => r.fulfill({ contentType: 'application/json', body: JSON.stringify(fake) })); await p.reload(); await p.waitForSelector('#bandName:not(:empty)', { state: 'attached' }); await p.click('#tab-analysis'); await p.waitForTimeout(1200);
+  const cards = await p.textContent('#usageCards'); ok(/35/.test(cards) && /Visitors/.test(cards) && /MY/.test(await p.textContent('#usageLists')), 'usage cards show views and visitors; country list shows MY');
+  ok((await p.evaluate(() => document.querySelectorAll('#usageChart rect').length)) === 2, 'usage chart draws one bar per day');
+  ok(/direct/.test(await p.textContent('#usageLists')) && !(await p.evaluate(() => window.__xss)), 'referrers labelled and page paths are escaped (no injected markup)');
   ok(errs.length === 0, 'no page errors ' + errs.join()); await p.close(); }
 await b.close(); console.log(fails ? `${fails} FAILED` : 'ALL PASSED'); process.exit(fails ? 1 : 0);

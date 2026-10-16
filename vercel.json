@@ -13,6 +13,9 @@
     "api/xcheck.js": {
       "maxDuration": 10,
       "includeFiles": "docs/xcheck.json"
+    },
+    "api/analytics.js": {
+      "maxDuration": 15
     }
   },
   "headers": [

@@ -88,6 +88,7 @@ h1 span{background:var(--grad);-webkit-background-clip:text;background-clip:text
 .acard b.big{font-size:30px;line-height:1.1;font-variant-numeric:tabular-nums}
 .acard p{margin:0;color:var(--ink2);font-size:14px}
 .acard a{margin-top:auto;font-weight:650;color:inherit}
+.mini2{width:100%;border-collapse:collapse;font-size:14px}.mini2 td{padding:4px 0;border-bottom:1px solid var(--grid);word-break:break-all}.mini2 td+td{text-align:right;font-variant-numeric:tabular-nums;padding-left:12px;white-space:nowrap}
 .stack{display:grid;gap:18px;min-width:0}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
 @media (max-width:1000px){.grid,.row2{grid-template-columns:1fr}.grid>main{order:-1}}
@@ -434,6 +435,14 @@ footer{margin-top:26px;color:var(--ink3);font-size:12px;line-height:1.6}
         <h2>Analysis <small>what the data and the model say, with the full written notes</small></h2>
         <div class="acards" id="anCards"></div>
         <div class="note" id="anNote"></div>
+      </section>
+
+      <section class="glass" id="usagePanel" data-tab="analysis">
+        <h2>Site usage <small id="usageSub">anonymous page-view counts from Vercel Web Analytics</small></h2>
+        <div class="acards" id="usageCards"></div>
+        <svg class="chart" id="usageChart" viewBox="0 0 520 140" role="img" aria-label="Page views per day" hidden></svg>
+        <div class="acards" id="usageLists"></div>
+        <div class="note" id="usageNote"></div>
       </section>
     </main>
   </div>
@@ -1159,6 +1168,33 @@ function drawClosures(){
   $("closNote").textContent = "Not a complete history: only announcements that could be found are listed, each with its source. “Source read” = the page was opened and the dates checked; “verify” = taken from a news-search summary, so open the link before relying on it. Closure decisions are made per state or district by KPM and state education departments (rule since Oct 2026: API above 180, or above 150 for three days); this list is what was announced, not what the model predicts.";
 }
 let DEC = null;
+/* ------------------------------ site usage (Vercel Web Analytics via /api/analytics) ------------------------------ */
+let USE = null;
+async function fetchUsage(){
+  try{ const r = await fetch("/api/analytics", {cache: "no-cache"}); if (r.ok) return await r.json(); }catch(e){ /* panel explains */ }
+  return {connected: false, reason: "unreachable"};
+}
+function drawUsage(){
+  if (!$("usageCards")) return;
+  const u = USE, note = $("usageNote");
+  if (!u || !u.connected){
+    const why = {no_token: "The usage endpoint has no access token yet.", no_project: "The usage endpoint does not know which project to read.", api_error: "Vercel did not return analytics just now.", unreachable: "The usage endpoint is not reachable here (it only runs on Vercel, or via npm run dev)."}[u ? u.reason : "unreachable"] || "";
+    $("usageCards").innerHTML = ""; $("usageLists").innerHTML = ""; $("usageChart").hidden = true;
+    note.innerHTML = `${escH(why)} To show numbers here: turn on <b>Web Analytics</b> for the project (Vercel dashboard, Analytics tab, Enable), then add an environment variable <code>VERCEL_ANALYTICS_TOKEN</code> (a Vercel access token that can read the project) and redeploy. Only aggregates are shown; nothing about individual visitors.`;
+    return;
+  }
+  const d = u.daily.slice().sort((a, b) => a.key < b.key ? -1 : 1), last7 = d.slice(-7), sum = (a, k) => a.reduce((n, r) => n + r[k], 0);
+  $("usageCards").innerHTML = [["Page views", fmtN(u.totals.views), `last ${u.days} days (${escH(u.since)} to ${escH(u.until)}); ${fmtN(sum(last7, "views"))} in the last 7 days`],
+    ["Visitors", fmtN(u.totals.visitors), `unique devices per day, added up over ${u.days} days, so a returning visitor counts once per day`]]
+    .map(r => `<div class="acard"><span class="k">${r[0]}</span><b class="big">${r[1]}</b><p>${r[2]}</p></div>`).join("");
+  const W = 520, H = 140, pad = 24, mx = Math.max(1, ...d.map(r => r.views)), bw = Math.max(2, (W - pad * 2) / Math.max(d.length, 1) - 2);
+  $("usageChart").hidden = !d.length;
+  $("usageChart").innerHTML = d.map((r, i) => { const h = Math.max(1, (H - pad * 2) * r.views / mx), x = pad + i * ((W - pad * 2) / d.length); return `<rect x="${x.toFixed(1)}" y="${(H - pad - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="var(--bc)"><title>${escH(r.key)}: ${fmtN(r.views)} views</title></rect>`; }).join("")
+    + `<text x="${pad}" y="${H - 6}" font-size="11" fill="var(--ink3)">${escH(d.length ? d[0].key : "")}</text><text x="${W - pad}" y="${H - 6}" font-size="11" text-anchor="end" fill="var(--ink3)">${escH(d.length ? d[d.length - 1].key : "")}</text><text x="${pad}" y="12" font-size="11" fill="var(--ink3)">peak ${fmtN(mx)} views a day</text>`;
+  const list = (title, rows, f) => `<div class="acard"><span class="k">${title}</span>${rows.length ? `<table class="mini2">${rows.slice(0, 6).map(r => `<tr><td>${escH(f ? f(r.key) : r.key)}</td><td>${fmtN(r.views)}</td></tr>`).join("")}</table>` : "<p>no data yet</p>"}</div>`;
+  $("usageLists").innerHTML = list("Top pages", u.pages) + list("Countries", u.countries) + list("Devices", u.devices) + list("Where visitors came from", u.referrers, k => k === "" ? "direct" : k);
+  note.textContent = "Counts come from Vercel Web Analytics: cookie-free, no personal data, and bots are filtered by Vercel. Production traffic only; refreshed about every 5 minutes.";
+}
 async function fetchDecisions(){
   try{ const r = await fetch("decisions.json", {cache: "no-cache"}); if (r.ok){ const j = await r.json(); if (j && j.summary) return j; } }catch(e){ /* card falls back to the link */ }
   return null;
@@ -1318,7 +1354,7 @@ async function fetchXc(){
   return null;
 }
 async function loadLive(){
-  const xp = fetchXc(); fetchClosures().then(c => { if (c){ CL = c; render(); } }); fetchDecisions().then(d => { if (d){ DEC = d; drawAnalysis(); } });
+  const xp = fetchXc(); fetchClosures().then(c => { if (c){ CL = c; render(); } }); fetchDecisions().then(d => { if (d){ DEC = d; drawAnalysis(); } }); fetchUsage().then(u => { USE = u; drawUsage(); });
   if (!OUT) fetchJson("outlook.json").then(o => { OUT = o || false; render(); });
   if (!HIST) fetchJson("history.json").then(h => { HIST = h || false; render(); });
   try{ LIVE = await fetchLive(); LIVE_ERR = null; }
@@ -1345,5 +1381,7 @@ loadLive().then(() => { if (LIVE){ S.mode = "live"; render(); } });
 setInterval(loadLive, 5 * 60 * 1000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) loadLive(); });
 </script>
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
