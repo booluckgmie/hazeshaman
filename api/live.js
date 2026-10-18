@@ -26,7 +26,7 @@ async function getJson(url, ms) {
 function baseUrl() {
   if (process.env.LIVE_BASE_URL) return process.env.LIVE_BASE_URL;
   const o = process.env.VERCEL_GIT_REPO_OWNER, s = process.env.VERCEL_GIT_REPO_SLUG;
-  const b = process.env.LIVE_BASE_BRANCH || 'main';
+  const b = process.env.LIVE_BASE_BRANCH || 'HEAD';
   return o && s ? `https://raw.githubusercontent.com/${o}/${s}/${b}/docs/live.json` : null;
 }
 

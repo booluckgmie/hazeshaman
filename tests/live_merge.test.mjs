@@ -89,3 +89,20 @@ test('xcheck handler: serves the cross-check document with cache headers, 404 wh
     assert.equal(r2.status, 200); assert.equal(r2.headers['x-xcheck-source'], 'github');
   } finally { globalThis.fetch = realFetch; delete process.env.XCHECK_BASE_URL; }
 });
+
+test('data files are read from the default branch (HEAD), where the hourly bot commits, unless overridden', async () => {
+  const realFetch = globalThis.fetch, seen = [], saved = { ...process.env };
+  try {
+    delete process.env.LIVE_BASE_BRANCH; delete process.env.LIVE_BASE_URL; delete process.env.XCHECK_BASE_URL;
+    process.env.VERCEL_GIT_REPO_OWNER = 'o'; process.env.VERCEL_GIT_REPO_SLUG = 'r';
+    globalThis.fetch = async (u) => { seen.push(String(u)); throw new Error('offline'); };
+    const res = () => ({ headers: {}, setHeader() {}, end() {}, statusCode: 0 });
+    await require('../api/xcheck.js')({ method: 'GET' }, res());
+    await handler({ method: 'GET' }, res());
+    assert.ok(seen.includes('https://raw.githubusercontent.com/o/r/HEAD/docs/xcheck.json'), seen.join());
+    assert.ok(seen.includes('https://raw.githubusercontent.com/o/r/HEAD/docs/live.json'), seen.join());
+    process.env.LIVE_BASE_BRANCH = 'main'; seen.length = 0;
+    await require('../api/xcheck.js')({ method: 'GET' }, res());
+    assert.ok(seen.includes('https://raw.githubusercontent.com/o/r/main/docs/xcheck.json'), seen.join());
+  } finally { globalThis.fetch = realFetch; process.env = saved; }
+});
