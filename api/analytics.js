@@ -4,19 +4,24 @@
  * Vercel only serves these numbers to an authenticated caller, so the browser never sees the token: set VERCEL_ANALYTICS_TOKEN
  * (a Vercel access token that can read this project) in the project's environment variables. Without it the endpoint answers
  * { connected: false, reason } and the dashboard shows setup steps instead of numbers. Only aggregates are returned, no visitor-level data.
- * Optional: VERCEL_ANALYTICS_PROJECT_ID (default: VERCEL_PROJECT_ID), VERCEL_ANALYTICS_TEAM_ID (default: the project's team), ANALYTICS_DAYS (default 30, max 90).
+ * Optional: VERCEL_ANALYTICS_PROJECT_ID / VERCEL_ANALYTICS_TEAM_ID (default: this project and its team), ANALYTICS_DAYS (default 30, max 90).
  */
 const API = 'https://api.vercel.com/v1/query/web-analytics/visits/aggregate';
+// ids of this project and its team (identifiers, not secrets); the env vars below override them
+const DEFAULT_PROJECT = 'prj_3IYzrIuxkKHT97uOLJmkBJtHYZ3m', DEFAULT_TEAM = 'team_YWXoh9J5uvtJSnOIlBq2H8Rl';
 const DIMS = [['pages', 'requestPath'], ['countries', 'country'], ['devices', 'deviceType'], ['referrers', 'referrerHostname'], ['browsers', 'browserName']];
 
-/** tolerant row reader: Vercel returns {key, total, devices}-style rows; accept a few spellings so a small API change does not blank the panel */
+/** Row reader. Vercel returns rows like {requestPath|country|...: value, visitors, pageviews} and, for a time breakdown, {timestamp, visitors, pageviews}
+ *  (checked against live responses); older/other spellings ({key,total,devices}) are accepted too. An empty value is kept: it is the "direct" referrer. */
 function readRows(json, dim) {
   const rows = Array.isArray(json) ? json : (json && (json.data || json.rows || json.results)) || [];
-  return rows.map(r => ({
-    key: String(r.key ?? r[dim] ?? r.name ?? r.label ?? ''),
-    views: Number(r.total ?? r.count ?? r.pageviews ?? r.views ?? r.visits ?? 0) || 0,
-    visitors: Number(r.devices ?? r.visitors ?? r.uniques ?? 0) || 0,
-  })).filter(r => r.key !== '');
+  const out = [];
+  for (const r of rows) {
+    const raw = r.key ?? r[dim] ?? (r.timestamp != null ? String(r.timestamp).slice(0, 10) : undefined) ?? r.name ?? r.label;
+    if (raw === undefined || raw === null) continue;
+    out.push({ key: String(raw), views: Number(r.pageviews ?? r.total ?? r.count ?? r.views ?? r.visits ?? 0) || 0, visitors: Number(r.visitors ?? r.devices ?? r.uniques ?? 0) || 0 });
+  }
+  return out;
 }
 async function query(by, o) {
   const u = new URL(API);
@@ -40,10 +45,10 @@ function send(res, code, body, cache) {
 }
 module.exports = async function handler(req, res, deps) {
   if (req.method && req.method !== 'GET' && req.method !== 'HEAD') { res.statusCode = 405; res.setHeader('Allow', 'GET, HEAD'); return res.end(); }
-  const env = process.env, token = env.VERCEL_ANALYTICS_TOKEN, projectId = env.VERCEL_ANALYTICS_PROJECT_ID || env.VERCEL_PROJECT_ID;
-  if (!token || !projectId) return send(res, 200, { connected: false, reason: !token ? 'no_token' : 'no_project' }, 'public, max-age=0, s-maxage=60');
+  const env = process.env, token = env.VERCEL_ANALYTICS_TOKEN, projectId = env.VERCEL_ANALYTICS_PROJECT_ID || env.VERCEL_PROJECT_ID || DEFAULT_PROJECT;
+  if (!token) return send(res, 200, { connected: false, reason: 'no_token' }, 'public, max-age=0, s-maxage=60');
   const days = Math.min(90, Math.max(7, parseInt(env.ANALYTICS_DAYS, 10) || 30)), now = (deps && deps.now) || Date.now();
-  const o = { token, projectId, teamId: env.VERCEL_ANALYTICS_TEAM_ID || env.VERCEL_TEAM_ID, until: now, since: now - days * 864e5 };
+  const o = { token, projectId, teamId: env.VERCEL_ANALYTICS_TEAM_ID || DEFAULT_TEAM, until: now, since: now - days * 864e5 };
   const run = (deps && deps.query) || query;
   try {
     const [daily, ...rest] = await Promise.all([run(['day'], o), ...DIMS.map(([, d]) => run([d], o))]);

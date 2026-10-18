@@ -260,7 +260,7 @@ Other inputs: `--raw data/raw` (your own hourly CSVs, `data/raw/README.md`), `--
 ### Site usage (Vercel Web Analytics)
 
 `docs/index.html` and `docs/guide.html` load `/_vercel/insights/script.js` (cookie-free page views; same-origin, so the CSP is unchanged). The Analysis tab has a **Site usage** panel fed by `api/analytics.js`, which reads aggregates from the Vercel API with a server-side token.
-To switch it on for a project: (1) Vercel dashboard, project, **Analytics**, Enable (or `vercel project web-analytics enable <name>`); (2) add the environment variable `VERCEL_ANALYTICS_TOKEN` (an access token that can read the project) and redeploy. Optional: `VERCEL_ANALYTICS_PROJECT_ID`, `VERCEL_ANALYTICS_TEAM_ID`, `ANALYTICS_DAYS` (7-90, default 30). Without the token the panel shows these steps instead of numbers.
+To switch it on for a project: (1) Vercel dashboard, project, **Analytics**, Enable (or `vercel project web-analytics enable <name>`); (2) add the environment variable `VERCEL_ANALYTICS_TOKEN` (an access token that can read the project, created under the team) and redeploy. Optional: `VERCEL_ANALYTICS_PROJECT_ID`, `VERCEL_ANALYTICS_TEAM_ID` (default to this project and its team), `ANALYTICS_DAYS` (7-90, default 30). Without the token the panel shows these steps instead of numbers.
 
 ### Deploy to Vercel
 

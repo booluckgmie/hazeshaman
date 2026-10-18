@@ -18,7 +18,7 @@ test('no token -> connected:false, no outbound call', async () => {
 });
 test('rows are normalised and totals summed', async () => {
   const q = async by => ({ data: by[0] === 'day' ? [{ key: '2026-10-14', total: 10, devices: 4 }, { key: '2026-10-15', total: 5, devices: 3 }] : [{ key: '/', total: 9, devices: 6 }] });
-  const r = await call({ VERCEL_ANALYTICS_TOKEN: 't', VERCEL_PROJECT_ID: 'prj_x' }, { query: q, now: Date.parse('2026-10-16T00:00:00Z') });
+  const r = await call({ VERCEL_ANALYTICS_TOKEN: 't' }, { query: q, now: Date.parse('2026-10-16T00:00:00Z') });
   assert.equal(r.json.connected, true); assert.deepEqual(r.json.totals, { views: 15, visitors: 7 });
   assert.equal(r.json.pages[0].key, '/'); assert.equal(r.json.pages[0].views, 9); assert.equal(r.json.since, '2026-09-16');
 });
@@ -27,7 +27,12 @@ test('API failure degrades to connected:false and never leaks the token', async 
   assert.equal(r.json.connected, false); assert.equal(r.json.reason, 'api_error'); assert.ok(!JSON.stringify(r.json).includes('secret-token'));
 });
 test('only GET/HEAD', async () => { const r = await call({}, {}, 'POST'); assert.equal(r.code, 405); });
-test('readRows tolerates alternative field names and drops empty keys', () => {
+test('readRows reads the real Vercel shape (dimension value or timestamp, pageviews, visitors) and keeps the empty referrer', () => {
+  assert.deepEqual(readRows({ data: [{ timestamp: '2026-10-16T00:00:00.000Z', visitors: 47, pageviews: 64 }] }, 'day'), [{ key: '2026-10-16', views: 64, visitors: 47 }]);
+  assert.deepEqual(readRows({ data: [{ requestPath: '/', visitors: 65, pageviews: 87 }] }, 'requestPath'), [{ key: '/', views: 87, visitors: 65 }]);
+  assert.deepEqual(readRows({ data: [{ referrerHostname: '', visitors: 63, pageviews: 87 }] }, 'referrerHostname'), [{ key: '', views: 87, visitors: 63 }]);
+});
+test('readRows still accepts {key,total,devices} and skips rows with no label', () => {
   assert.deepEqual(readRows([{ country: 'MY', count: 3, visitors: 2 }, { total: 4 }], 'country'), [{ key: 'MY', views: 3, visitors: 2 }]);
   assert.deepEqual(readRows({ data: [] }, 'x'), []);
 });
