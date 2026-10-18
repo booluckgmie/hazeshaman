@@ -260,7 +260,7 @@ Other inputs: `--raw data/raw` (your own hourly CSVs, `data/raw/README.md`), `--
 ### Site usage (Vercel Web Analytics)
 
 `docs/index.html` and `docs/guide.html` load `/_vercel/insights/script.js` (cookie-free page views; same-origin, so the CSP is unchanged). The Analysis tab has a **Site usage** panel fed by `api/analytics.js`, which reads aggregates from the Vercel API with a server-side token.
-To switch it on for a project: (1) Vercel dashboard, project, **Analytics**, Enable (or `vercel project web-analytics enable <name>`); (2) add the environment variable `VERCEL_ANALYTICS_TOKEN` (an access token that can read the project) and redeploy. Optional: `VERCEL_ANALYTICS_PROJECT_ID`, `VERCEL_ANALYTICS_TEAM_ID`, `ANALYTICS_DAYS` (7-90, default 30). Without the token the panel shows these steps instead of numbers.
+To switch it on for a project: (1) Vercel dashboard, project, **Analytics**, Enable (or `vercel project web-analytics enable <name>`); (2) add the environment variable `VERCEL_ANALYTICS_TOKEN` (an access token that can read the project, created under the team) and redeploy. Optional: `VERCEL_ANALYTICS_PROJECT_ID`, `VERCEL_ANALYTICS_TEAM_ID` (default to this project and its team), `ANALYTICS_DAYS` (7-90, default 30). Without the token the panel shows these steps instead of numbers.
 
 ### Deploy to Vercel
 
@@ -275,8 +275,8 @@ The repo is Vercel-ready: no build step; `vercel.json` publishes `docs/` and dep
 4. Set `og:image` to an absolute URL (`https://<your-domain>/howto/social-card.png`) in `docs/index.html` for rich link previews.
 
 How the pieces fit: `.github/workflows/live.yml` (hourly, `:50`) appends to `data/history/` and commits `docs/live.json`;
-`/api/live` reads that file from `raw.githubusercontent.com/<owner>/<repo>/main/docs/live.json` (override with `LIVE_BASE_URL`
-/ `LIVE_BASE_BRANCH`), overlays the live DOE response, and edge-caches for 5 minutes. The hourly data commits also trigger a Vercel build (an `ignoreCommand` made every deployment fail, so none is set; the
+`/api/live` (and `/api/xcheck`) read those files from `raw.githubusercontent.com/<owner>/<repo>/HEAD/docs/...`, i.e. the repository's **default branch**, because that is where the workflow commits (override with `LIVE_BASE_URL`
+/ `LIVE_BASE_BRANCH`; pointing it at a branch the bot does not write to leaves the chart data frozen at that branch's last merge), overlays the live DOE response, and edge-caches for 5 minutes. The hourly data commits also trigger a Vercel build (an `ignoreCommand` made every deployment fail, so none is set; the
 APIs read the data from GitHub, so the pages stay fresh regardless). Security headers incl. a strict CSP are in `vercel.json`.
 Local check of the whole stack: `npm run dev` (serves `docs/`, runs `api/live.js`, applies the `vercel.json` headers).
 

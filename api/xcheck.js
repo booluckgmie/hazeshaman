@@ -18,7 +18,7 @@ async function getJson(url, ms) {
 }
 function baseUrl() {
   if (process.env.XCHECK_BASE_URL) return process.env.XCHECK_BASE_URL;
-  const o = process.env.VERCEL_GIT_REPO_OWNER, s = process.env.VERCEL_GIT_REPO_SLUG, b = process.env.LIVE_BASE_BRANCH || 'main';
+  const o = process.env.VERCEL_GIT_REPO_OWNER, s = process.env.VERCEL_GIT_REPO_SLUG, b = process.env.LIVE_BASE_BRANCH || 'HEAD';
   return o && s ? `https://raw.githubusercontent.com/${o}/${s}/${b}/docs/xcheck.json` : null;
 }
 module.exports = async function handler(req, res) {
